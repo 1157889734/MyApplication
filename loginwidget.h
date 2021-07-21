@@ -1,0 +1,33 @@
+#ifndef LOGINWIDGET_H
+#define LOGINWIDGET_H
+
+#include <QWidget>
+
+namespace Ui {
+class loginWidget;
+}
+
+typedef enum _E_DEVTYPE
+{
+    E_CVMSTYPE = 1,     //车厢监控设备
+    E_PVMSTYPE = 2      //受电弓监控设备
+} E_DEVTYPE;
+
+class loginWidget : public QWidget
+{
+    Q_OBJECT
+
+public:
+    explicit loginWidget(QWidget *parent = nullptr);
+    ~loginWidget();
+
+public slots:
+    void okButtonSlot();
+    void showPageSlot(int iType);  //显示当前页面的响应槽函数，这里iType代表接收到的参数，表示页面类型，1-车厢监控页面，2-受电弓监控页面
+    void canselSlot();
+
+private:
+    Ui::loginWidget *ui;
+};
+
+#endif // LOGINWIDGET_H
