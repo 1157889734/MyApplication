@@ -44,6 +44,9 @@ pvmsMenuWidget::pvmsMenuWidget(QWidget *parent) :
     connect(ui->devUpdateMenuPushButton, SIGNAL(clicked()), this, SLOT(menuButtonClick()));		  //连接设备更新菜单按钮的按键信号和响应函数
 
     connect(m_pvmsMonitorPage, SIGNAL(alarmPushButoonClickSignal()), this, SLOT(alarmPageShowSlot()));
+    connect(m_recordPlayPage, SIGNAL(alarmPushButoonClickSignal()), this, SLOT(alarmPageShowSlot()));
+    connect(m_devManagePage, SIGNAL(alarmPushButoonClickSignal()), this, SLOT(alarmPageShowSlot()));
+    connect(m_devUpdatePage, SIGNAL(alarmPushButoonClickSignal()), this, SLOT(alarmPageShowSlot()));
 
 
     ui->pvmsMonitorMenuPushButton->setChecked(true);

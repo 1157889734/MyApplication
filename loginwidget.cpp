@@ -28,7 +28,7 @@ loginWidget::~loginWidget()
 }
 void loginWidget::okButtonSlot()
 {
-    if (ui->Passwd_Edit->text() == "12345")
+//    if (ui->Passwd_Edit->text() == "12345")
     {
         emit gotoPvmsMenuPageSignal();
     }

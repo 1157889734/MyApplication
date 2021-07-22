@@ -2,7 +2,7 @@
 #define DEVMANAGEWIDGET_H
 
 #include <QWidget>
-
+#include <QTimer>
 namespace Ui {
 class devManageWidget;
 }
@@ -15,8 +15,17 @@ public:
     explicit devManageWidget(QWidget *parent = 0);
     ~devManageWidget();
 
+public slots:
+    void alarmPushButoonClickSlot();
+
+
+signals:
+    void alarmPushButoonClickSignal();
+
 private:
     Ui::devManageWidget *ui;
+    QTimer *m_alarmHappenTimer;
+
 };
 
 #endif // DEVMANAGEWIDGET_H

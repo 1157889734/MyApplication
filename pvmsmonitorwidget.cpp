@@ -132,6 +132,8 @@ pvmsMonitorWidget::pvmsMonitorWidget(QWidget *parent) :
     connect(ui->cameraSwitchPushButton,  SIGNAL(clicked(bool)), this, SLOT(cameraSwitchSlot()));  //摄像头开关按钮按键信号连接响应槽函数
     connect(ui->fillLightSwitchPushButton,  SIGNAL(clicked(bool)), this, SLOT(fillLightSwitchSlot()));  //补光灯开关按钮按键信号连接响应槽函数
 
+    //参数初始化
+    m_alarmHappenTimer = NULL;
 
 
 
