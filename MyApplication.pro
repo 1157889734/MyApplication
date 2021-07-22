@@ -26,12 +26,28 @@ SOURCES += \
         main.cpp \
     MyApplication.cpp \
     choicelogindevwidget.cpp \
-    loginwidget.cpp
+    loginwidget.cpp \
+    pvmsmenuwidget.cpp \
+    pvmsmonitorwidget.cpp \
+    recordplaywidget.cpp \
+    inteanalywidget.cpp \
+    devmanagewidget.cpp \
+    devupdatewidget.cpp \
+#    pmsgcli.c
+    alarmwidget.cpp
 
 HEADERS += \
     MyApplication.h \
     choicelogindevwidget.h \
-    loginwidget.h
+    loginwidget.h \
+    pvmsmenuwidget.h \
+    pvmsmonitorwidget.h \
+    recordplaywidget.h \
+    inteanalywidget.h \
+    devmanagewidget.h \
+    devupdatewidget.h \
+#    pmsgcli.h
+    alarmwidget.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -43,4 +59,11 @@ RESOURCES += \
 
 FORMS += \
     choicelogindevwidget.ui \
-    loginwidget.ui
+    loginwidget.ui \
+    pvmsmenuwidget.ui \
+    pvmsmonitorwidget.ui \
+    recordplaywidget.ui \
+    inteanalywidget.ui \
+    devmanagewidget.ui \
+    devupdatewidget.ui \
+    alarmwidget.ui

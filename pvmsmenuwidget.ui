@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>pvmsMenuWidget</class>
+ <widget class="QWidget" name="pvmsMenuWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1024</width>
+    <height>768</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QPushButton" name="devManageMenuPushButton">
+   <property name="geometry">
+    <rect>
+     <x>615</x>
+     <y>40</y>
+     <width>204</width>
+     <height>71</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>18</pointsize>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QPushButton
+{background-color: rgb(49, 150, 220);color: rgb(255, 255, 255);}
+
+QPushButton:hover
+{background-color: rgb(38, 131, 245);color: rgb(255, 255, 255);}
+
+QPushButton:pressed
+{background-color: rgb(35, 86, 138);color: rgb(255, 255, 255);}
+
+QPushButton:checked
+{background-color: rgb(35, 86, 138);color: rgb(255, 255, 255);}</string>
+   </property>
+   <property name="text">
+    <string>设备管理</string>
+   </property>
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="flat">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="recordPlayMenuPushButton">
+   <property name="geometry">
+    <rect>
+     <x>205</x>
+     <y>40</y>
+     <width>204</width>
+     <height>71</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>18</pointsize>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QPushButton
+{background-color: rgb(49, 150, 220);color: rgb(255, 255, 255);}
+
+QPushButton:hover
+{background-color: rgb(38, 131, 245);color: rgb(255, 255, 255);}
+
+QPushButton:pressed
+{background-color: rgb(35, 86, 138);color: rgb(255, 255, 255);}
+
+QPushButton:checked
+{background-color: rgb(35, 86, 138);color: rgb(255, 255, 255);}</string>
+   </property>
+   <property name="text">
+    <string>录像回放</string>
+   </property>
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="flat">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pvmsMonitorMenuPushButton">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>40</y>
+     <width>204</width>
+     <height>71</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Ubuntu</family>
+     <pointsize>18</pointsize>
+    </font>
+   </property>
+   <property name="autoFillBackground">
+    <bool>false</bool>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QPushButton
+{background-color: rgb(49, 150, 220);color: rgb(255, 255, 255);}
+
+QPushButton:hover
+{background-color: rgb(38, 131, 245);color: rgb(255, 255, 255);}
+
+QPushButton:pressed
+{background-color: rgb(35, 86, 138);color: rgb(255, 255, 255);}
+
+QPushButton:checked
+{background-color: rgb(35, 86, 138);color: rgb(255, 255, 255);}</string>
+   </property>
+   <property name="text">
+    <string>受电弓监控</string>
+   </property>
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="flat">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="devUpdateMenuPushButton">
+   <property name="geometry">
+    <rect>
+     <x>820</x>
+     <y>40</y>
+     <width>204</width>
+     <height>71</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>18</pointsize>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QPushButton
+{background-color: rgb(49, 150, 220);color: rgb(255, 255, 255);}
+
+QPushButton:hover
+{background-color: rgb(38, 131, 245);color: rgb(255, 255, 255);}
+
+QPushButton:pressed
+{background-color: rgb(35, 86, 138);color: rgb(255, 255, 255);}
+
+QPushButton:checked
+{background-color: rgb(35, 86, 138);color: rgb(255, 255, 255);}</string>
+   </property>
+   <property name="text">
+    <string>维护更新</string>
+   </property>
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="flat">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="inteAnalyMenuPushButton">
+   <property name="geometry">
+    <rect>
+     <x>410</x>
+     <y>40</y>
+     <width>204</width>
+     <height>71</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>18</pointsize>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QPushButton
+{background-color: rgb(49, 150, 220);color: rgb(255, 255, 255);}
+
+QPushButton:hover
+{background-color: rgb(38, 131, 245);color: rgb(255, 255, 255);}
+
+QPushButton:pressed
+{background-color: rgb(35, 86, 138);color: rgb(255, 255, 255);}
+
+QPushButton:checked
+{background-color: rgb(35, 86, 138);color: rgb(255, 255, 255);}</string>
+   </property>
+   <property name="text">
+    <string>智能分析</string>
+   </property>
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="flat">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1021</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>宋体</family>
+     <pointsize>19</pointsize>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-image: url(:/res/MainDlgHead.png);
+color: rgb(255, 255, 255);</string>
+   </property>
+   <property name="text">
+    <string> 受电弓视频监控系统</string>
+   </property>
+   <property name="pixmap">
+    <pixmap resource="res.qrc">:/res/MainDlgHead.png</pixmap>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="loginOutPushButton">
+   <property name="geometry">
+    <rect>
+     <x>940</x>
+     <y>0</y>
+     <width>71</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>18</pointsize>
+    </font>
+   </property>
+   <property name="autoFillBackground">
+    <bool>false</bool>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">color: rgb(255, 255, 255);
+background-image: url(:/res/zxanniubk.png);
+</string>
+   </property>
+   <property name="text">
+    <string>注 销</string>
+   </property>
+   <property name="autoDefault">
+    <bool>false</bool>
+   </property>
+   <property name="default">
+    <bool>false</bool>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+  </widget>
+ </widget>
+ <resources>
+  <include location="res.qrc"/>
+ </resources>
+ <connections/>
+</ui>
