@@ -240,6 +240,8 @@ void pvmsMonitorWidget::manualSwitchEndSlot()
 
 void pvmsMonitorWidget::presetSetCtrlSlot()
 {
+
+
     if (0 == m_iPresetPasswdOkFlag)
     {
         if (NULL == m_presetPasswdConfirmPage)

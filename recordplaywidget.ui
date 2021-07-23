@@ -556,22 +556,6 @@ border-style: solid;</string>
     <string>查询</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="startTimeSetPushButton">
-   <property name="geometry">
-    <rect>
-     <x>280</x>
-     <y>52</y>
-     <width>21</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">border-image: url(:/res/time_set.png);</string>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-  </widget>
   <widget class="QLabel" name="label_2">
    <property name="geometry">
     <rect>
@@ -824,22 +808,6 @@ QPushButton:pressed
     <string>00</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="stopTimeSetPushButton">
-   <property name="geometry">
-    <rect>
-     <x>280</x>
-     <y>92</y>
-     <width>21</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">border-image: url(:/res/time_set.png);</string>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-  </widget>
   <widget class="QLabel" name="label_9">
    <property name="geometry">
     <rect>
@@ -948,31 +916,6 @@ QPushButton:pressed
     <string> 起始时间</string>
    </property>
   </widget>
-  <widget class="QLabel" name="startTimeLabel">
-   <property name="geometry">
-    <rect>
-     <x>80</x>
-     <y>50</y>
-     <width>181</width>
-     <height>27</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>12</pointsize>
-    </font>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">color: rgb(0, 0, 0);
-background-color: rgb(255, 255, 255);
-border-color: rgb(0, 0, 0);
-border-width: 1px;
-border-style: solid;</string>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-  </widget>
   <widget class="QComboBox" name="carSeletionComboBox">
    <property name="geometry">
     <rect>
@@ -1012,31 +955,6 @@ border-style: solid;</string>
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QLabel" name="endTimeLabel">
-   <property name="geometry">
-    <rect>
-     <x>80</x>
-     <y>90</y>
-     <width>181</width>
-     <height>27</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>12</pointsize>
-    </font>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">color: rgb(0, 0, 0);
-background-color: rgb(255, 255, 255);
-border-color: rgb(0, 0, 0);
-border-width: 1px;
-border-style: solid;</string>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-  </widget>
   <widget class="QPushButton" name="plusStepPushButton">
    <property name="geometry">
     <rect>
@@ -1069,6 +987,104 @@ QPushButton:pressed
     <bool>true</bool>
    </property>
   </widget>
+  <widget class="QDateEdit" name="StartdateEdit">
+   <property name="geometry">
+    <rect>
+     <x>90</x>
+     <y>50</y>
+     <width>111</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="keyboardTracking">
+    <bool>false</bool>
+   </property>
+   <property name="displayFormat">
+    <string>yyyy-MM-dd</string>
+   </property>
+   <property name="date">
+    <date>
+     <year>2000</year>
+     <month>2</month>
+     <day>2</day>
+    </date>
+   </property>
+  </widget>
+  <widget class="QTimeEdit" name="StarttimeEdit">
+   <property name="geometry">
+    <rect>
+     <x>260</x>
+     <y>50</y>
+     <width>51</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="displayFormat">
+    <string>h时</string>
+   </property>
+  </widget>
+  <widget class="QDateEdit" name="EnddateEdit">
+   <property name="geometry">
+    <rect>
+     <x>90</x>
+     <y>90</y>
+     <width>111</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="keyboardTracking">
+    <bool>false</bool>
+   </property>
+   <property name="displayFormat">
+    <string>yyyy-MM-dd</string>
+   </property>
+   <property name="date">
+    <date>
+     <year>2000</year>
+     <month>2</month>
+     <day>2</day>
+    </date>
+   </property>
+  </widget>
+  <widget class="QTimeEdit" name="EndtimeEdit">
+   <property name="geometry">
+    <rect>
+     <x>260</x>
+     <y>90</y>
+     <width>51</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="displayFormat">
+    <string>h时</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>215</x>
+     <y>55</y>
+     <width>41</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>时间</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_14">
+   <property name="geometry">
+    <rect>
+     <x>215</x>
+     <y>92</y>
+     <width>41</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>时间</string>
+   </property>
+  </widget>
   <zorder>label_5</zorder>
   <zorder>line_5</zorder>
   <zorder>label_13</zorder>
@@ -1088,18 +1104,14 @@ QPushButton:pressed
   <zorder>label_4</zorder>
   <zorder>fastForwardPushButton</zorder>
   <zorder>rangeSecLabel</zorder>
-  <zorder>stopTimeSetPushButton</zorder>
   <zorder>label_9</zorder>
   <zorder>label_10</zorder>
   <zorder>slowForwardPushButton</zorder>
   <zorder>label_3</zorder>
-  <zorder>startTimeLabel</zorder>
   <zorder>carSeletionComboBox</zorder>
   <zorder>playSpeedLineEdit</zorder>
-  <zorder>endTimeLabel</zorder>
   <zorder>plusStepPushButton</zorder>
   <zorder>line_4</zorder>
-  <zorder>startTimeSetPushButton</zorder>
   <zorder>cameraSelectionComboBox</zorder>
   <zorder>recordFileTableWidget</zorder>
   <zorder>line_6</zorder>
@@ -1110,6 +1122,12 @@ QPushButton:pressed
   <zorder>playSecLabel</zorder>
   <zorder>label_18</zorder>
   <zorder>label_12</zorder>
+  <zorder>StartdateEdit</zorder>
+  <zorder>StarttimeEdit</zorder>
+  <zorder>EnddateEdit</zorder>
+  <zorder>EndtimeEdit</zorder>
+  <zorder>label</zorder>
+  <zorder>label_14</zorder>
  </widget>
  <resources/>
  <connections/>

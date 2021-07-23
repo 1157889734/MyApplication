@@ -48,6 +48,9 @@
       <pointsize>18</pointsize>
      </font>
     </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(32, 74, 135);</string>
+    </property>
     <property name="text">
      <string>车厢监控</string>
     </property>
@@ -67,7 +70,7 @@
      </font>
     </property>
     <property name="styleSheet">
-     <string notr="true"/>
+     <string notr="true">background-color: rgb(32, 74, 135);</string>
     </property>
     <property name="text">
      <string>受电弓监控</string>

@@ -41,7 +41,8 @@ SOURCES += \
     gb2312_utf8.c \
     log.c \
     pmsgcli.c \
-    presetpasswdconfirm.cpp
+    presetpasswdconfirm.cpp \
+    myslider.cpp
 
 HEADERS += \
     MyApplication.h \
@@ -63,7 +64,8 @@ HEADERS += \
     state.h \
 #    timeset.h \
     types.h \
-    presetpasswdconfirm.h
+    presetpasswdconfirm.h \
+    myslider.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
