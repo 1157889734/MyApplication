@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui widgets
+QT       += core gui widgets virtualkeyboard
 
 TARGET = MyApplication
 TEMPLATE = app
@@ -34,7 +34,14 @@ SOURCES += \
     devmanagewidget.cpp \
     devupdatewidget.cpp \
 #    pmsgcli.c
-    alarmwidget.cpp
+    alarmwidget.cpp \
+    fileConfig.cpp \
+    state.cpp \
+#    timeset.cpp \
+    gb2312_utf8.c \
+    log.c \
+    pmsgcli.c \
+    presetpasswdconfirm.cpp
 
 HEADERS += \
     MyApplication.h \
@@ -47,7 +54,16 @@ HEADERS += \
     devmanagewidget.h \
     devupdatewidget.h \
 #    pmsgcli.h
-    alarmwidget.h
+    alarmwidget.h \
+#    debug.h \
+    fileConfig.h \
+    gb2312_utf8.h \
+    log.h \
+    pmsgcli.h \
+    state.h \
+#    timeset.h \
+    types.h \
+    presetpasswdconfirm.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -66,4 +82,5 @@ FORMS += \
     inteanalywidget.ui \
     devmanagewidget.ui \
     devupdatewidget.ui \
-    alarmwidget.ui
+    alarmwidget.ui \
+    presetpasswdconfirm.ui

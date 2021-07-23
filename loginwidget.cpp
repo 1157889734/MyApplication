@@ -1,5 +1,6 @@
 #include "loginwidget.h"
 #include "ui_loginwidget.h"
+#include <QMessageBox>
 
 loginWidget::loginWidget(QWidget *parent) :
     QWidget(parent),
@@ -32,6 +33,13 @@ void loginWidget::okButtonSlot()
     {
         emit gotoPvmsMenuPageSignal();
     }
+//    else
+//    {
+//        QMessageBox box(QMessageBox::Warning,QString::fromUtf8("错误"),QString::fromUtf8("密码错误!"));     //新建消息提示框，提示错误信息
+//        box.setStandardButtons (QMessageBox::Ok);   //设置提示框只有一个标准按钮
+//        box.setButtonText (QMessageBox::Ok,QString::fromUtf8("确 定"));     //将按钮显示改成"确 定"
+//        box.exec();
+//    }
 
 }
 void loginWidget::canselButtonSlot()

@@ -3,6 +3,7 @@
 #include "choicelogindevwidget.h"
 #include "loginwidget.h"
 #include "pvmsmenuwidget.h"
+#include <QtVirtualKeyboard>
 
 
 choiceLoginDevWidget *g_choiceLoginDevPage = NULL;    //选择登录设备页面
@@ -11,8 +12,9 @@ pvmsMenuWidget *g_pvmsMenuPage = NULL;   //受电弓监控主菜单页面
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
+    qputenv("QT_IM_MODULE", QByteArray("qtvirtualkeyboard"));
 
+    QApplication a(argc, argv);
 
     g_choiceLoginDevPage = new choiceLoginDevWidget();
     g_loginPage = new loginWidget();

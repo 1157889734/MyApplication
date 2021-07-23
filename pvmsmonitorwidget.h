@@ -6,6 +6,8 @@
 #include <QLabel>
 #include <QTimer>
 #include <QButtonGroup>
+#include "presetpasswdconfirm.h"
+
 
 
 namespace Ui {
@@ -24,6 +26,12 @@ public:
 
     int m_iSelectPresetNo;   //保存选中的预置点编号
     int m_iAlarmNotCtrlFlag;   //有报警信息未处理标志
+    time_t tPollingOparateTime;  //轮询操作时间
+    int m_iPollingFlag;   //轮询标识
+    int m_iCameraSwitchState;//
+    int m_iPresetPasswdOkFlag;
+
+
 signals:
     void alarmPushButoonClickSignal();
 
@@ -39,12 +47,17 @@ public slots:
     void temporarySaveBeginSlot();
     void cameraSwitchSlot();
     void fillLightSwitchSlot();
+    void manualSwitchEndSlot();
+    void closePresetPasswdPageSlot();   //关闭预置点密码确认界面槽函数
+    void setPresetSlot();
 
 
 private:
     Ui::pvmsMonitorWidget *ui;
     QTimer *m_alarmHappenTimer;
+    QTimer *m_manualSwitchTimer;
 
+    presetPasswdConfirm *m_presetPasswdConfirmPage;    //预置点密码确认界面
 
 };
 

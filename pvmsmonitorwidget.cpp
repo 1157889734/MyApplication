@@ -2,9 +2,17 @@
 #include "ui_pvmsmonitorwidget.h"
 #include <pthread.h>
 #include <QDebug>
+#include <sys/sysinfo.h>
+#include <QMessageBox>
 
 static int g_iPNum = 0;
 QButtonGroup *g_buttonGroup = NULL;
+typedef enum _E_CAMERA_SWITCH_STATE    //摄像机切换状态
+{
+    NORMAL = 0,    //正常，不切换
+    LASTONE = 1,   //切换到上一个
+    NEXTONE = 2    //切换到下一个
+} E_CAMERA_SWITCH_STATE;
 
 pvmsMonitorWidget::pvmsMonitorWidget(QWidget *parent) :
     QWidget(parent),
@@ -134,6 +142,9 @@ pvmsMonitorWidget::pvmsMonitorWidget(QWidget *parent) :
 
     //参数初始化
     m_alarmHappenTimer = NULL;
+    m_iCameraSwitchState = NORMAL;   //摄像头切换状态默认为正常，表示不切换
+    m_iPresetPasswdOkFlag = 0;
+    m_presetPasswdConfirmPage = NULL;
 
 
 
@@ -160,27 +171,95 @@ void pvmsMonitorWidget::alarmPushButoonClickSlot()
 }
 void pvmsMonitorWidget::startPollingSlot()
 {
+    m_iPollingFlag = 1;
 
+    /*开始轮询按钮按下，设置开始按钮为按下时样式，暂停按钮恢复正常样式*/
+    ui->startPollingPushButton->setChecked(true);
+    ui->pausePollingPushButton->setChecked(false);
+
+    struct sysinfo s_info;
+    sysinfo(&s_info);
+    tPollingOparateTime = s_info.uptime;
 
 }
 void pvmsMonitorWidget::pausePollingSlot()
 {
+    m_iPollingFlag = 0;
 
+    /*暂停轮询按钮按下，设置暂停按钮为按下时样式，开始按钮恢复正常样式*/
+    ui->startPollingPushButton->setChecked(false);
+    ui->pausePollingPushButton->setChecked(true);
+
+    struct sysinfo s_info;
+    sysinfo(&s_info);
+    tPollingOparateTime = s_info.uptime;
 }
 void pvmsMonitorWidget::manualSwitchLastCameraSlot()
 {
+    m_iCameraSwitchState = LASTONE;
 
+    ui->pollingLastOnePushButton->setEnabled(false);
+    ui->pollingNextOnePushButton->setEnabled(false);
+    if (NULL == m_manualSwitchTimer)
+    {
+        m_manualSwitchTimer = new QTimer(this);
+    }
+    m_manualSwitchTimer->start(1*1000);
+    connect(m_manualSwitchTimer,SIGNAL(timeout()), this,SLOT(manualSwitchEndSlot()));
 
 }
 void pvmsMonitorWidget::manualSwitchNextCameraSlot()
 {
+    m_iCameraSwitchState = NEXTONE;
 
+    ui->pollingLastOnePushButton->setEnabled(false);
+    ui->pollingNextOnePushButton->setEnabled(false);
+    if (NULL == m_manualSwitchTimer)
+    {
+        m_manualSwitchTimer = new QTimer(this);
+    }
+    m_manualSwitchTimer->start(1*1000);
+    connect(m_manualSwitchTimer,SIGNAL(timeout()), this,SLOT(manualSwitchEndSlot()));
 
 }
+void pvmsMonitorWidget::manualSwitchEndSlot()
+{
+    ui->pollingLastOnePushButton->setEnabled(true);
+    ui->pollingNextOnePushButton->setEnabled(true);
+
+    if (m_manualSwitchTimer != NULL)
+    {
+        if (m_manualSwitchTimer->isActive())
+        {
+            m_manualSwitchTimer->stop();
+        }
+        delete m_manualSwitchTimer;
+        m_manualSwitchTimer = NULL;
+    }
+}
+
 void pvmsMonitorWidget::presetSetCtrlSlot()
 {
+    if (0 == m_iPresetPasswdOkFlag)
+    {
+        if (NULL == m_presetPasswdConfirmPage)
+        {
+            m_presetPasswdConfirmPage = new presetPasswdConfirm(this);  //新建一个确认密码的子窗体
+        }
+        m_presetPasswdConfirmPage->move(300, 270);
+        m_presetPasswdConfirmPage->show();
+        connect(m_presetPasswdConfirmPage, SIGNAL(sendCloseSignal()), this, SLOT(closePresetPasswdPageSlot()));  //密码验证不通过会受到close信号，closePresetPasswdPageSlot里只会关闭密码验证界面
+        connect(m_presetPasswdConfirmPage, SIGNAL(sendOkSignal()), this, SLOT(setPresetSlot()));  //密码验证正确会受到OK信号，setPresetSlot里会关闭密码验证界面，并执行预置点设置操作
 
+    }
+    else
+    {
+        QMessageBox box(QMessageBox::Information,QString::fromUtf8("注意"),QString::fromUtf8("预置点设置成功!"));
+        box.setStandardButtons (QMessageBox::Ok);
+        box.setButtonText (QMessageBox::Ok,QString::fromUtf8("确 定"));
+        box.exec();
 
+    }
 
 }
 void pvmsMonitorWidget::presetGetCtrlSlot()
@@ -203,6 +282,37 @@ void pvmsMonitorWidget::fillLightSwitchSlot()
 
 
 }
+
+void pvmsMonitorWidget::closePresetPasswdPageSlot()    //关闭预置点密码确认界面
+{
+    if(NULL==this->m_presetPasswdConfirmPage)
+    {
+        return;
+    }
+    else
+    {
+        delete this->m_presetPasswdConfirmPage;
+    }
+    this->m_presetPasswdConfirmPage=NULL;
+}
+void pvmsMonitorWidget::setPresetSlot()
+{
+
+    m_iPresetPasswdOkFlag = 1;
+
+    if(NULL==this->m_presetPasswdConfirmPage)
+    {
+        return;
+    }
+    else
+    {
+        delete this->m_presetPasswdConfirmPage;
+    }
+    this->m_presetPasswdConfirmPage=NULL;
+
+
+}
+
 
 pvmsMonitorWidget::~pvmsMonitorWidget()
 {
