@@ -188,31 +188,6 @@ border-style: solid;</string>
     <string>报警</string>
    </property>
   </widget>
-  <widget class="QLabel" name="startTimeLabel">
-   <property name="geometry">
-    <rect>
-     <x>80</x>
-     <y>50</y>
-     <width>181</width>
-     <height>27</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>12</pointsize>
-    </font>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">color: rgb(0, 0, 0);
-background-color: rgb(255, 255, 255);
-border-color: rgb(0, 0, 0);
-border-width: 1px;
-border-style: solid;</string>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-  </widget>
   <widget class="QLabel" name="label_3">
    <property name="geometry">
     <rect>
@@ -419,31 +394,6 @@ background-color: rgb(33, 131, 229); </string>
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QLabel" name="endTimeLabel">
-   <property name="geometry">
-    <rect>
-     <x>80</x>
-     <y>90</y>
-     <width>181</width>
-     <height>27</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>12</pointsize>
-    </font>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">color: rgb(0, 0, 0);
-background-color: rgb(255, 255, 255);
-border-color: rgb(0, 0, 0);
-border-width: 1px;
-border-style: solid;</string>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-  </widget>
   <widget class="Line" name="line_7">
    <property name="geometry">
     <rect>
@@ -480,22 +430,6 @@ background-color: rgb(33, 131, 229); </string>
      <string>火花放电</string>
     </property>
    </item>
-  </widget>
-  <widget class="QPushButton" name="startTimeSetPushButton_2">
-   <property name="geometry">
-    <rect>
-     <x>275</x>
-     <y>92</y>
-     <width>21</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">border-image: url(:/res/time_set.png);</string>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
   </widget>
   <widget class="QLabel" name="label_12">
    <property name="geometry">
@@ -918,6 +852,152 @@ border-style: solid;</string>
     <string>视频关联</string>
    </property>
   </widget>
+  <widget class="QDateEdit" name="EnddateEdit">
+   <property name="geometry">
+    <rect>
+     <x>90</x>
+     <y>90</y>
+     <width>111</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="keyboardTracking">
+    <bool>false</bool>
+   </property>
+   <property name="displayFormat">
+    <string>yyyy-MM-dd</string>
+   </property>
+   <property name="date">
+    <date>
+     <year>2000</year>
+     <month>2</month>
+     <day>2</day>
+    </date>
+   </property>
+  </widget>
+  <widget class="QTimeEdit" name="StarttimeEdit">
+   <property name="geometry">
+    <rect>
+     <x>260</x>
+     <y>50</y>
+     <width>51</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="displayFormat">
+    <string>h时</string>
+   </property>
+  </widget>
+  <widget class="QTimeEdit" name="EndtimeEdit">
+   <property name="geometry">
+    <rect>
+     <x>260</x>
+     <y>90</y>
+     <width>51</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="displayFormat">
+    <string>h时</string>
+   </property>
+  </widget>
+  <widget class="QDateEdit" name="StartdateEdit">
+   <property name="geometry">
+    <rect>
+     <x>90</x>
+     <y>50</y>
+     <width>111</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="keyboardTracking">
+    <bool>false</bool>
+   </property>
+   <property name="displayFormat">
+    <string>yyyy-MM-dd</string>
+   </property>
+   <property name="date">
+    <date>
+     <year>2000</year>
+     <month>2</month>
+     <day>2</day>
+    </date>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_15">
+   <property name="geometry">
+    <rect>
+     <x>215</x>
+     <y>92</y>
+     <width>41</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>时间</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>215</x>
+     <y>55</y>
+     <width>41</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>时间</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButton_34">
+   <property name="geometry">
+    <rect>
+     <x>800</x>
+     <y>630</y>
+     <width>81</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">color: rgb(33, 131, 229);
+border-color: rgb(33, 131, 229);
+border-width: 1px;
+border-style: solid;</string>
+   </property>
+   <property name="text">
+    <string>报警</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="canselPushButton">
+   <property name="geometry">
+    <rect>
+     <x>920</x>
+     <y>630</y>
+     <width>81</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">color: rgb(33, 131, 229);
+border-color: rgb(33, 131, 229);
+border-width: 1px;
+border-style: solid;</string>
+   </property>
+   <property name="text">
+    <string>注销</string>
+   </property>
+  </widget>
   <zorder>dateTimeEdit_2</zorder>
   <zorder>label_8</zorder>
   <zorder>label_9</zorder>
@@ -947,12 +1027,17 @@ border-style: solid;</string>
   <zorder>pushButton_33</zorder>
   <zorder>comboBox_4</zorder>
   <zorder>comboBox_5</zorder>
-  <zorder>startTimeLabel</zorder>
   <zorder>comboBox_3</zorder>
   <zorder>pushButton_8</zorder>
-  <zorder>endTimeLabel</zorder>
-  <zorder>startTimeSetPushButton_2</zorder>
   <zorder>recordFileTableWidget</zorder>
+  <zorder>StarttimeEdit</zorder>
+  <zorder>EndtimeEdit</zorder>
+  <zorder>StartdateEdit</zorder>
+  <zorder>EnddateEdit</zorder>
+  <zorder>label_15</zorder>
+  <zorder>label</zorder>
+  <zorder>pushButton_34</zorder>
+  <zorder>canselPushButton</zorder>
  </widget>
  <resources>
   <include location="res.qrc"/>

@@ -16,8 +16,8 @@
   <widget class="QComboBox" name="cameraSelectionComboBox">
    <property name="geometry">
     <rect>
-     <x>210</x>
-     <y>173</y>
+     <x>220</x>
+     <y>174</y>
      <width>91</width>
      <height>27</height>
     </rect>
@@ -27,6 +27,21 @@
      <pointsize>12</pointsize>
     </font>
    </property>
+   <item>
+    <property name="text">
+     <string>一号</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>二号</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>三号</string>
+    </property>
+   </item>
   </widget>
   <widget class="QLabel" name="playSecLabel">
    <property name="geometry">
@@ -143,8 +158,8 @@ QProgressBar {
   <widget class="QPushButton" name="playNextOnePushButton">
    <property name="geometry">
     <rect>
-     <x>650</x>
-     <y>624</y>
+     <x>500</x>
+     <y>620</y>
      <width>41</width>
      <height>41</height>
     </rect>
@@ -248,8 +263,8 @@ background-color: rgb(33, 131, 229); </string>
   <widget class="QPushButton" name="stopPushButton">
    <property name="geometry">
     <rect>
-     <x>450</x>
-     <y>624</y>
+     <x>560</x>
+     <y>620</y>
      <width>41</width>
      <height>41</height>
     </rect>
@@ -298,9 +313,9 @@ QPushButton:pressed
   <widget class="QLabel" name="label_7">
    <property name="geometry">
     <rect>
-     <x>156</x>
+     <x>150</x>
      <y>167</y>
-     <width>155</width>
+     <width>161</width>
      <height>41</height>
     </rect>
    </property>
@@ -319,7 +334,7 @@ QPushButton:pressed
  }</string>
    </property>
    <property name="text">
-    <string> 摄像机</string>
+    <string>   摄像机</string>
    </property>
   </widget>
   <widget class="QPushButton" name="alarmPushButton">
@@ -502,8 +517,8 @@ background-color: rgb(255, 255, 255);</string>
   <widget class="QPushButton" name="playLastOnePushButton">
    <property name="geometry">
     <rect>
-     <x>500</x>
-     <y>624</y>
+     <x>340</x>
+     <y>620</y>
      <width>41</width>
      <height>41</height>
     </rect>
@@ -637,8 +652,8 @@ border-style: solid;</string>
   <widget class="QPushButton" name="minusStepPushButton">
    <property name="geometry">
     <rect>
-     <x>700</x>
-     <y>624</y>
+     <x>690</x>
+     <y>620</y>
      <width>41</width>
      <height>41</height>
     </rect>
@@ -669,8 +684,8 @@ QPushButton:pressed
   <widget class="QPushButton" name="playPushButton">
    <property name="geometry">
     <rect>
-     <x>400</x>
-     <y>624</y>
+     <x>440</x>
+     <y>620</y>
      <width>41</width>
      <height>41</height>
     </rect>
@@ -761,8 +776,8 @@ QPushButton:pressed
   <widget class="QPushButton" name="fastForwardPushButton">
    <property name="geometry">
     <rect>
-     <x>600</x>
-     <y>624</y>
+     <x>630</x>
+     <y>620</y>
      <width>41</width>
      <height>41</height>
     </rect>
@@ -860,8 +875,8 @@ QPushButton:pressed
   <widget class="QPushButton" name="slowForwardPushButton">
    <property name="geometry">
     <rect>
-     <x>550</x>
-     <y>624</y>
+     <x>390</x>
+     <y>620</y>
      <width>41</width>
      <height>41</height>
     </rect>
@@ -930,6 +945,31 @@ QPushButton:pressed
      <pointsize>12</pointsize>
     </font>
    </property>
+   <item>
+    <property name="text">
+     <string>一号车厢</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>二号车厢</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>三号车厢</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>四号车厢</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string/>
+    </property>
+   </item>
   </widget>
   <widget class="QLineEdit" name="playSpeedLineEdit">
    <property name="geometry">
@@ -959,7 +999,7 @@ QPushButton:pressed
    <property name="geometry">
     <rect>
      <x>750</x>
-     <y>624</y>
+     <y>620</y>
      <width>41</width>
      <height>41</height>
     </rect>
@@ -1085,6 +1125,38 @@ QPushButton:pressed
     <string>时间</string>
    </property>
   </widget>
+  <widget class="QPushButton" name="canselPushButton">
+   <property name="geometry">
+    <rect>
+     <x>930</x>
+     <y>630</y>
+     <width>51</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QPushButton
+{background-color: rgb(255, 255, 255);color: rgb(86, 164, 246);border-color: rgb(86, 164, 246);border-width: 1px;border-style: solid;}
+
+QPushButton:hover{background-color: rgb(246, 246, 246);color: rgb(86, 164, 246);border-color: rgb(86, 164, 246);border-width: 1px;border-style: solid;}
+
+QPushButton:pressed{background-color: rgb(86, 164, 246);color: rgb(255, 255, 255);border-color: rgb(86, 164, 246);border-width: 1px;border-style: solid;}
+
+QPushButton:checked
+{background-color: rgb(255, 0, 0);color: rgb(86, 164, 246);border-color: rgb(86, 164, 246);border-width: 1px;border-style: solid;}</string>
+   </property>
+   <property name="text">
+    <string>注销</string>
+   </property>
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+  </widget>
   <zorder>label_5</zorder>
   <zorder>line_5</zorder>
   <zorder>label_13</zorder>
@@ -1128,6 +1200,7 @@ QPushButton:pressed
   <zorder>EndtimeEdit</zorder>
   <zorder>label</zorder>
   <zorder>label_14</zorder>
+  <zorder>canselPushButton</zorder>
  </widget>
  <resources/>
  <connections/>

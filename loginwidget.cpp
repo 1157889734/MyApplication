@@ -1,6 +1,7 @@
 #include "loginwidget.h"
 #include "ui_loginwidget.h"
 #include <QMessageBox>
+#include <QDebug>
 
 loginWidget::loginWidget(QWidget *parent) :
     QWidget(parent),
@@ -50,6 +51,7 @@ void loginWidget::canselButtonSlot()
 }
 void loginWidget::showPageSlot(int iType)
 {
+    qDebug()<<"000000000000000";
     this->show();
 }
 void loginWidget::canselSlot()

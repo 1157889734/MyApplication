@@ -1,5 +1,6 @@
 #include "pvmsmenuwidget.h"
 #include "ui_pvmsmenuwidget.h"
+#include <QDebug>
 
 #define PVMSPAGETYPE  2    //此页面类型，2表示受电弓监控页面
 
@@ -42,6 +43,12 @@ pvmsMenuWidget::pvmsMenuWidget(QWidget *parent) :
     connect(ui->inteAnalyMenuPushButton, SIGNAL(clicked()), this, SLOT(menuButtonClick()));		  //连接智能分析菜单按钮的按键信号和响应函数
     connect(ui->devManageMenuPushButton, SIGNAL(clicked()), this, SLOT(menuButtonClick()));		  //连接设备管理菜单按钮的按键信号和响应函数
     connect(ui->devUpdateMenuPushButton, SIGNAL(clicked()), this, SLOT(menuButtonClick()));		  //连接设备更新菜单按钮的按键信号和响应函数
+
+    connect(m_pvmsMonitorPage,SIGNAL(registOutSignal(int)),this,SLOT(registOutButtonClick()));
+    connect(m_recordPlayPage,SIGNAL(registOutSignal(int)),this,SLOT(registOutButtonClick()));
+    connect(m_inteAnalyPage,SIGNAL(registOutSignal(int)),this,SLOT(registOutButtonClick()));
+
+
 
     connect(m_pvmsMonitorPage, SIGNAL(alarmPushButoonClickSignal()), this, SLOT(alarmPageShowSlot()));
     connect(m_recordPlayPage, SIGNAL(alarmPushButoonClickSignal()), this, SLOT(alarmPageShowSlot()));
@@ -111,7 +118,6 @@ void pvmsMenuWidget::closeAlarmWidget()
 void pvmsMenuWidget::registOutButtonClick()
 {
 
-    m_pvmsMonitorPage->m_iPresetPasswdOkFlag = 0;
     this->hide();
     emit registOutSignal(PVMSPAGETYPE);    //触发注销信号，带上当前设备类型
 }
