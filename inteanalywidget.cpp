@@ -12,7 +12,14 @@ inteAnalyWidget::inteAnalyWidget(QWidget *parent) :
 
     connect(ui->canselPushButton, SIGNAL(clicked()), this, SLOT(registOutButtonClick()));
 
+    ui->StartdateEdit->setCalendarPopup(true);
+    ui->EnddateEdit->setCalendarPopup(true);
 
+    ui->EnddateEdit->setDateTime(QDateTime::currentDateTime());
+    ui->EndtimeEdit->setDateTime(QDateTime::currentDateTime());
+
+    ui->StartdateEdit->setDateTime(QDateTime::currentDateTime());
+    ui->StarttimeEdit->setDateTime(QDateTime::currentDateTime());
 }
 
 inteAnalyWidget::~inteAnalyWidget()

@@ -17,6 +17,9 @@ public:
 
 public slots:
     void alarmPushButoonClickSlot();
+    void alarmHappenSlot();
+    void alarmHappenCtrlSlot();
+    void alarmClearSlot();
 
 
 signals:

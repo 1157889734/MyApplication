@@ -8,6 +8,8 @@
 #include "state.h"
 #include "log.h"
 #include <QDebug>
+#include "qplayer.h"
+
 int g_iDateEditNo = 0;      //要显示时间的不同控件的编号
 static int g_iRNum = 0;
 #define PVMSPAGETYPE  2    //此页面类型，2表示受电弓监控页面
@@ -73,11 +75,51 @@ recordPlayWidget::recordPlayWidget(QWidget *parent) :
     ui->playSpeedLineEdit->setFocusPolicy(Qt::NoFocus);
 
     /*新建一个播放窗体*/
+#if 1
     m_playWin = new QWidget(this);
     m_playWin->setGeometry(320, 7, 698, 580);
     m_playWin->show();
     m_playWin->setStyleSheet("QWidget{background-color: rgb(0, 0, 0);}");
+#endif
 
+#if 0
+    list = new QMediaPlaylist;
+    list->addMedia(QUrl("/userdata/11.mp4"));
+    QUrl url("rtsp://admin:admin123@168.168.102.20");
+
+    player = new QMediaPlayer();
+//    player->setPlaylist(list);
+    player->setMedia(url);
+
+    videoViewer = new QVideoWidget(m_playWin);
+    videoViewer->setGeometry(0, 7, 698, 580);
+    player->setVideoOutput(videoViewer);
+
+    player->play();
+#endif
+
+
+
+#if 0
+    vidoplayer = new QPlayer(m_playWin);
+//    vidoplayer->setGeometry(320, 7, 698, 580);
+
+    QFile file("/userdata/11.mp4");
+//    QUrl url("rtsp://admin:admin123@168.168.102.20");
+    QUrl url("rtsp://admin:cx123456@168.168.102.71");
+
+    if(url.isValid()){
+        qDebug() << "opening" << url;
+        vidoplayer->load(url);
+        player.play();}
+    else if(file.exists()){
+                qDebug() << "opening" << file.fileName();
+                vidoplayer->load(QUrl::fromLocalFile(file.fileName()));
+                vidoplayer->play();
+            }
+
+    vidoplayer->show();
+#endif
 
 //    Mouseflag = true;
     ui->StartdateEdit->setCalendarPopup(true);
@@ -92,13 +134,15 @@ recordPlayWidget::recordPlayWidget(QWidget *parent) :
     /*创建时间设置子窗体，默认隐藏*/
 //    timeSetWidget = new timeSet(this);
 //    timeSetWidget->hide();
+
+//    QDateTime time = QDateTime::currentDateTime();
+//    snprintf(timestr, sizeof(timestr), "%4d-%02d-%02d %02d:%02d:%02d", time.date().year(), time.date().month(), time.date().day(), time.time().hour(), time.time().minute(), time.time().second());
+//    string = QString(QLatin1String(timestr)) ;
+    ui->EnddateEdit->setDateTime(QDateTime::currentDateTime());
+    ui->EndtimeEdit->setDateTime(QDateTime::currentDateTime());
+
+//    ui->EnddateEdit->setText(string);		 //结束时间控件初始显示当前系统时间
 #if 0
-
-    QDateTime time = QDateTime::currentDateTime();
-    snprintf(timestr, sizeof(timestr), "%4d-%02d-%02d %02d:%02d:%02d", time.date().year(), time.date().month(), time.date().day(), time.time().hour(), time.time().minute(), time.time().second());
-    string = QString(QLatin1String(timestr)) ;
-    ui->endTimeLabel->setText(string);		 //结束时间控件初始显示当前系统时间
-
 
     memset(&timestr, 0, sizeof(timestr));
     iYear = time.date().year();
@@ -137,7 +181,8 @@ recordPlayWidget::recordPlayWidget(QWidget *parent) :
     string = QString(QLatin1String(timestr)) ;
     ui->startTimeLabel->setText(string);     //起始时间控件初始显示当前系统时间前一天
 #endif
-
+    ui->StartdateEdit->setDateTime(QDateTime::currentDateTime());
+    ui->StarttimeEdit->setDateTime(QDateTime::currentDateTime());
 
     connect(ui->alarmPushButton, SIGNAL(clicked(bool)), this, SLOT(alarmPushButoonClickSlot()));   //报警按钮按键信号响应打开报警信息界面
     connect(ui->canselPushButton, SIGNAL(clicked()), this, SLOT(registOutButtonClick()));
@@ -252,12 +297,22 @@ void recordPlayWidget::recordDownloadSlot()
 void recordPlayWidget::recordPlayStartSlot()
 {
 
+    qDebug()<<"******player.state"<<player->state();
+
+    switch(player->state()) {
+    case QMediaPlayer::PlayingState:
+        player->pause();
+        break;
+    default:
+        player->play();
+        break;
+    }
+
+
 
 }
 void recordPlayWidget::recordPlayStopSlot()
 {
-
-
 
 }
 
@@ -321,8 +376,42 @@ void recordPlayWidget::alarmPushButoonClickSlot()
 
     g_iRNum = 0;
 }
+void recordPlayWidget::alarmHappenCtrlSlot()
+{
+    if (this->isHidden() != 1)
+    {
+        if (0 == g_iRNum%2)
+        {
+            ui->alarmPushButton->setChecked(true);
+        }
+        else
+        {
+            ui->alarmPushButton->setChecked(false);
+        }
+        g_iRNum++;
+    }
+}
+void recordPlayWidget::alarmHappenSlot()
+{
+    if (NULL == m_alarmHappenTimer)
+    {
+        m_alarmHappenTimer = new QTimer(this);
+        connect(m_alarmHappenTimer,SIGNAL(timeout()), this,SLOT(alarmHappenCtrlSlot()));
+        m_alarmHappenTimer->start(500);
+    }
+}
 
+void recordPlayWidget::alarmClearSlot()
+{
+    if (m_alarmHappenTimer != NULL)
+    {
+        delete m_alarmHappenTimer;
+        m_alarmHappenTimer = NULL;
+    }
+    ui->alarmPushButton->setChecked(false);
 
+    g_iRNum = 0;
+}
 void recordPlayWidget::openStartTimeSetWidgetSlot()    //时间设置按钮按键响应槽函数，按键显示时间设置窗体，根据按钮不同，其出现的位置也有不同
 {
 #if 0

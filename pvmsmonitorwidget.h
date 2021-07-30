@@ -89,8 +89,10 @@ class pvmsMonitorWidget : public QWidget
 public:
     explicit pvmsMonitorWidget(QWidget *parent = 0);
     ~pvmsMonitorWidget();
+    bool eventFilter(QObject *target, QEvent *event);  //事件过滤器
     QPushButton *m_presetNoPushbutton[8];
     QButtonGroup *g_buttonGroup;
+    time_t m_lastActionTime;    //界面最后一次操作时间
 
 
     QLabel *m_channelStateLabel;
@@ -112,14 +114,19 @@ public:
     int m_iPtzCtrType;   //正在进行的云台控制类型
 
 
+    QWidget *m_playWin;    //播放窗体
+    int m_iMousePosX;
+    int m_iMousePosY;
+
     T_CAMERA_INFO m_tCameraInfo[MAX_SERVER_NUM*MAX_CAMERA_OFSERVER];    //保存的所有摄像机信息
 
     PT_CMP_QUEUE m_ptQueue;
     pthread_mutex_t tMutex;
 
-
+    void startVideoPolling();
     void videoChannelCtrl();
     void getChStreamState(int iCh);
+    void closePlayWin();
 
 
 
@@ -135,6 +142,7 @@ signals:
     void hideAlarmWidgetSignal();
     void videoPollingSignal();
     void presetReturnSignal(int iCameraNO);
+
 
 
 
@@ -157,6 +165,8 @@ public slots:
     void registOutButtonClick();
     void fillLightSwitchEndSlot();
     void chLabelDisplayCtrlSlot();   //通道状态和通道号标签是否显示的处理函数
+    void alarmHappenSlot();
+    void alarmClearSlot();
 
     void videoPollingSignalCtrl();
     void setFullScreenSignalCtrl();

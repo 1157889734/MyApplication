@@ -17,6 +17,9 @@ public:
     ~devUpdateWidget();
 public slots:
     void alarmPushButoonClickSlot();
+    void alarmHappenCtrlSlot();
+    void alarmHappenSlot();
+    void alarmClearSlot();
 
 signals:
     void alarmPushButoonClickSignal();

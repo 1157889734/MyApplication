@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui widgets virtualkeyboard
+QT       += core gui widgets virtualkeyboard multimedia multimediawidgets
 
 TARGET = MyApplication
 TEMPLATE = app
@@ -42,7 +42,8 @@ SOURCES += \
     log.c \
     pmsgcli.c \
     presetpasswdconfirm.cpp \
-    myslider.cpp
+    myslider.cpp \
+    qplayer.cpp
 
 HEADERS += \
     MyApplication.h \
@@ -65,7 +66,8 @@ HEADERS += \
 #    timeset.h \
     types.h \
     presetpasswdconfirm.h \
-    myslider.h
+    myslider.h \
+    qplayer.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

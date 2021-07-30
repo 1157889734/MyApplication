@@ -28,6 +28,7 @@ pvmsMenuWidget::pvmsMenuWidget(QWidget *parent) :
     m_devManagePage->hide();
     m_devUpdatePage->hide();
     m_alarmPage = NULL;
+    m_iAlarmPageOpenFlag = 0;
 
 
     ui->pvmsMonitorMenuPushButton->setFocusPolicy(Qt::NoFocus); // 得到焦点时，不显示虚线框
@@ -91,7 +92,20 @@ void pvmsMenuWidget::alarmPageShowSlot()
         m_alarmPage = new alarmWidget(this);      //新建报警信息显示窗体
         m_alarmPage->setGeometry(195, 189, m_alarmPage->width(), m_alarmPage->height());
         m_alarmPage->show();
+//        connect(m_alarmPage, SIGNAL(SendEscape()), this, SLOT(closeAlarmWidget()));
+
         connect(m_alarmPage, SIGNAL(SendEscape()), this, SLOT(closeAlarmWidget()));
+        connect(this, SIGNAL(reflushAlarmPageSignal(int, int, int)), m_alarmPage, SLOT(reflushAlarmPageSlot(int, int, int)));
+        connect(m_alarmPage, SIGNAL(alarmHappenSignal()), this, SLOT(alarmHappenSlot()));
+        connect(m_alarmPage, SIGNAL(alarmClearSignal()), this, SLOT(alarmClearSlot()));
+        connect(m_alarmPage, SIGNAL(alarmHappenSignal()), m_pvmsMonitorPage, SLOT(alarmHappenSlot()));
+        connect(m_alarmPage, SIGNAL(alarmClearSignal()), m_pvmsMonitorPage, SLOT(alarmClearSlot()));
+        connect(m_alarmPage, SIGNAL(alarmHappenSignal()), m_recordPlayPage, SLOT(alarmHappenSlot()));
+        connect(m_alarmPage, SIGNAL(alarmClearSignal()), m_recordPlayPage, SLOT(alarmClearSlot()));
+        connect(m_alarmPage, SIGNAL(alarmHappenSignal()), m_devManagePage, SLOT(alarmHappenSlot()));
+        connect(m_alarmPage, SIGNAL(alarmClearSignal()), m_devManagePage, SLOT(alarmClearSlot()));
+        connect(m_alarmPage, SIGNAL(alarmHappenSignal()), m_devUpdatePage, SLOT(alarmHappenSlot()));
+        connect(m_alarmPage, SIGNAL(alarmClearSignal()), m_devUpdatePage, SLOT(alarmClearSlot()));
 
     }
     else
@@ -109,7 +123,41 @@ void pvmsMenuWidget::showPageSlot()
     m_inteAnalyPage->hide();
     m_devManagePage->hide();
     m_devUpdatePage->hide();
+
+    m_pvmsMonitorPage->startVideoPolling();   //启动视频轮询
+
+    if (NULL == m_alarmPage)
+    {
+        m_alarmPage = new alarmWidget(this);
+        m_alarmPage->setGeometry(195, 189, m_alarmPage->width(), m_alarmPage->height());
+        m_alarmPage->hide();
+
+        connect(m_alarmPage, SIGNAL(SendEscape()), this, SLOT(closeAlarmWidget()));
+        connect(this, SIGNAL(reflushAlarmPageSignal(int, int, int)), m_alarmPage, SLOT(reflushAlarmPageSlot(int, int, int)));
+        connect(m_alarmPage, SIGNAL(alarmHappenSignal()), this, SLOT(alarmHappenSlot()));
+        connect(m_alarmPage, SIGNAL(alarmClearSignal()), this, SLOT(alarmClearSlot()));
+        connect(m_alarmPage, SIGNAL(alarmHappenSignal()), m_pvmsMonitorPage, SLOT(alarmHappenSlot()));
+        connect(m_alarmPage, SIGNAL(alarmClearSignal()), m_pvmsMonitorPage, SLOT(alarmClearSlot()));
+        connect(m_alarmPage, SIGNAL(alarmHappenSignal()), m_recordPlayPage, SLOT(alarmHappenSlot()));
+        connect(m_alarmPage, SIGNAL(alarmClearSignal()), m_recordPlayPage, SLOT(alarmClearSlot()));
+        connect(m_alarmPage, SIGNAL(alarmHappenSignal()), m_devManagePage, SLOT(alarmHappenSlot()));
+        connect(m_alarmPage, SIGNAL(alarmClearSignal()), m_devManagePage, SLOT(alarmClearSlot()));
+        connect(m_alarmPage, SIGNAL(alarmHappenSignal()), m_devUpdatePage, SLOT(alarmHappenSlot()));
+        connect(m_alarmPage, SIGNAL(alarmClearSignal()), m_devUpdatePage, SLOT(alarmClearSlot()));
+    }
+
 }
+void pvmsMenuWidget::alarmHappenSlot()     //报警触发，触发报警信号通知上一层的MyApplication界面
+{
+    emit alarmHappenSignal();
+}
+
+void pvmsMenuWidget::alarmClearSlot()  //报警清除，触发报警清除信号通知上一层的MyApplication界面
+{
+    emit alarmClearSignal();
+}
+
+
 void pvmsMenuWidget::closeAlarmWidget()
 {
     m_iAlarmPageOpenFlag = 0;
@@ -136,6 +184,8 @@ void pvmsMenuWidget::menuButtonClick()
         m_devManagePage->hide();
         m_devUpdatePage->hide();
         m_pvmsMonitorPage->show();
+        m_pvmsMonitorPage->m_playWin->show();
+
 
         ui->pvmsMonitorMenuPushButton->setChecked(true);
         ui->recordPlayMenuPushButton->setChecked(false);
@@ -147,6 +197,7 @@ void pvmsMenuWidget::menuButtonClick()
     else if (Sender->objectName() == "recordPlayMenuPushButton")     //录像回放按钮被按，则切换到录像回放页面
     {
         m_pvmsMonitorPage->hide();
+        m_pvmsMonitorPage->m_playWin->hide();
         m_inteAnalyPage->hide();
         m_devManagePage->hide();
         m_devUpdatePage->hide();
@@ -164,6 +215,7 @@ void pvmsMenuWidget::menuButtonClick()
     else if (Sender->objectName() == "inteAnalyMenuPushButton")      //智能分析按钮被按，则切换到智能分析页面
     {
         m_pvmsMonitorPage->hide();
+        m_pvmsMonitorPage->m_playWin->hide();
         m_recordPlayPage->hide();
         m_devManagePage->hide();
         m_devUpdatePage->hide();
@@ -180,6 +232,7 @@ void pvmsMenuWidget::menuButtonClick()
     else if (Sender->objectName() == "devManageMenuPushButton")      //设备管理按钮被按，则切换到设备管理页面
     {
         m_pvmsMonitorPage->hide();
+        m_pvmsMonitorPage->m_playWin->hide();
         m_recordPlayPage->hide();
         m_inteAnalyPage->hide();
         m_devUpdatePage->hide();
@@ -195,6 +248,7 @@ void pvmsMenuWidget::menuButtonClick()
     else if (Sender->objectName() == "devUpdateMenuPushButton")     //设备更新按钮被按，则切换到设备更新页面
     {
         m_pvmsMonitorPage->hide();
+        m_pvmsMonitorPage->m_playWin->hide();
         m_recordPlayPage->hide();
         m_inteAnalyPage->hide();
         m_devManagePage->hide();

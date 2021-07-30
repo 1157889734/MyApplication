@@ -32,3 +32,41 @@ void devManageWidget::alarmPushButoonClickSlot()
 
     g_iDNum = 0;
 }
+void devManageWidget::alarmHappenSlot()
+{
+    if (NULL == m_alarmHappenTimer)
+    {
+        m_alarmHappenTimer = new QTimer(this);
+        connect(m_alarmHappenTimer,SIGNAL(timeout()), this,SLOT(alarmHappenCtrlSlot()));
+        m_alarmHappenTimer->start(500);
+    }
+}
+
+void devManageWidget::alarmHappenCtrlSlot()
+{
+    if (this->isHidden() != 1)
+    {
+        if (0 == g_iDNum%2)
+        {
+            ui->alarmPushButton->setChecked(true);
+        }
+        else
+        {
+            ui->alarmPushButton->setChecked(false);
+        }
+        g_iDNum++;
+    }
+}
+
+void devManageWidget::alarmClearSlot()
+{
+    if (m_alarmHappenTimer != NULL)
+    {
+        delete m_alarmHappenTimer;
+        m_alarmHappenTimer = NULL;
+    }
+    ui->alarmPushButton->setChecked(false);
+
+    g_iDNum = 0;
+}
+

@@ -10,7 +10,10 @@
 #include "pvmsmonitorwidget.h"
 #include "pmsgcli.h"
 #include "state.h"
-
+#include <QVideoWidget>
+#include <QMediaPlaylist>
+#include <QMediaPlayer>
+#include "qplayer.h"
 
 
 #define MAX_RECORD_SEACH_NUM 10000
@@ -39,6 +42,9 @@ protected:
 
 public slots:
     void alarmPushButoonClickSlot();
+    void alarmHappenCtrlSlot();
+    void alarmHappenSlot();
+    void alarmClearSlot();
     void openStartTimeSetWidgetSlot();
     void openStopTimeSetWidgetSlot();
     void timeSetRecvMsg(QString year, QString month, QString day, QString hour, QString min, QString sec);
@@ -67,6 +73,11 @@ private:
     char m_acFilePath[MAX_RECORD_SEACH_NUM][MAX_RECFILE_PATH_LEN];   //记录查询到的录像文件路径全名
     PMSG_HANDLE m_Phandle[MAX_SERVER_NUM];    //服务器PMSG通信句柄
 
+    QMediaPlayer *player;
+    QMediaPlaylist *list;
+    QVideoWidget *videoViewer;
+
+    QPlayer *vidoplayer;
 
 };
 
