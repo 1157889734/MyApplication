@@ -84,42 +84,36 @@ recordPlayWidget::recordPlayWidget(QWidget *parent) :
 
 #if 0
     list = new QMediaPlaylist;
-    list->addMedia(QUrl("/userdata/11.mp4"));
+    list->addMedia(QUrl("/oem/SampleVideo_1280x720_5mb.mp4"));
     QUrl url("rtsp://admin:admin123@168.168.102.20");
 
     player = new QMediaPlayer();
-//    player->setPlaylist(list);
-    player->setMedia(url);
+    player->setPlaylist(list);
+//    player->setMedia(url);
 
     videoViewer = new QVideoWidget(m_playWin);
     videoViewer->setGeometry(0, 7, 698, 580);
     player->setVideoOutput(videoViewer);
 
     player->play();
+
+
 #endif
 
-
-
-#if 0
-    vidoplayer = new QPlayer(m_playWin);
+//    vidoplayer = new QPlayer(this);
 //    vidoplayer->setGeometry(320, 7, 698, 580);
+//    vidoplayer->setStyleSheet("QWidget{background-color: rgb(0, 0, 0);}");
+//    QUrl url("rtsp://admin:cx123456@168.168.102.71");
 
-    QFile file("/userdata/11.mp4");
-//    QUrl url("rtsp://admin:admin123@168.168.102.20");
-    QUrl url("rtsp://admin:cx123456@168.168.102.71");
+//    if(url.isValid())
+//    {
+//        qDebug() << "opening" << url;
+//        vidoplayer->load(url);
+//        vidoplayer->play();
+//    }
+//    vidoplayer->show();
 
-    if(url.isValid()){
-        qDebug() << "opening" << url;
-        vidoplayer->load(url);
-        player.play();}
-    else if(file.exists()){
-                qDebug() << "opening" << file.fileName();
-                vidoplayer->load(QUrl::fromLocalFile(file.fileName()));
-                vidoplayer->play();
-            }
 
-    vidoplayer->show();
-#endif
 
 //    Mouseflag = true;
     ui->StartdateEdit->setCalendarPopup(true);
@@ -203,7 +197,7 @@ recordPlayWidget::~recordPlayWidget()
 
 void recordPlayWidget::recordQuerySlot()
 {
-
+#if 0
     int iRet = 0, row = 0, iServerIdex = 0, iCameraIdex = 0, i = 0;
     int year = 0, mon = 0, day = 0, hour = 0, min = 0, sec = 0;
     short yr = 0;
@@ -285,7 +279,7 @@ void recordPlayWidget::recordQuerySlot()
         m_recorQueryTimer->start(500);
         connect(m_recorQueryTimer,SIGNAL(timeout()), this,SLOT(recordQueryEndSlot()));
     }
-
+#endif
 
 }
 void recordPlayWidget::recordDownloadSlot()
@@ -296,7 +290,7 @@ void recordPlayWidget::recordDownloadSlot()
 }
 void recordPlayWidget::recordPlayStartSlot()
 {
-
+#if 0
     qDebug()<<"******player.state"<<player->state();
 
     switch(player->state()) {
@@ -308,7 +302,7 @@ void recordPlayWidget::recordPlayStartSlot()
         break;
     }
 
-
+#endif
 
 }
 void recordPlayWidget::recordPlayStopSlot()
@@ -334,10 +328,10 @@ void recordPlayWidget::carNoChangeSlot()   //车厢号切换信号响应槽函�
 
     memset(&tTrainConfigInfo, 0, sizeof(T_TRAIN_CONFIG));
     STATE_GetCurrentTrainConfigInfo(&tTrainConfigInfo);
-
-    ui->cameraSelectionComboBox->setCurrentIndex(-1);
+#if 0  //不知道为什么要清除
+    ui->camerasSelectionComboBox->setCurrentIndex(-1);
     ui->cameraSelectionComboBox->clear();
-
+#endif
     for (i = 0; i < tTrainConfigInfo.tNvrServerInfo[idex].iPvmsCameraNum; i++)        //根据不同车厢位置的NVR服务器的摄像机数量个数跟新摄像机选择下拉框
     {
         item = "";
@@ -346,6 +340,9 @@ void recordPlayWidget::carNoChangeSlot()   //车厢号切换信号响应槽函�
         ui->cameraSelectionComboBox->addItem(item);
     }
     qDebug()<<"----"<<ui->cameraSelectionComboBox->currentText();
+
+
+
 }
 
 void recordPlayWidget:: mousePressEvent(QMouseEvent *event)

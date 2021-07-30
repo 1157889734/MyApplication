@@ -36,9 +36,9 @@ pvmsMenuWidget::pvmsMenuWidget(QWidget *parent) :
     ui->inteAnalyMenuPushButton->setFocusPolicy(Qt::NoFocus);
     ui->devManageMenuPushButton->setFocusPolicy(Qt::NoFocus);
     ui->devUpdateMenuPushButton->setFocusPolicy(Qt::NoFocus);
-    ui->loginOutPushButton->setFocusPolicy(Qt::NoFocus);
+//    ui->loginOutPushButton->setFocusPolicy(Qt::NoFocus);
 
-    connect(ui->loginOutPushButton, SIGNAL(clicked()), this, SLOT(registOutButtonClick()));
+//    connect(ui->loginOutPushButton, SIGNAL(clicked()), this, SLOT(registOutButtonClick()));
     connect(ui->pvmsMonitorMenuPushButton, SIGNAL(clicked()), this, SLOT(menuButtonClick()));     //连接受电弓监控菜单按钮的按键信号和响应函数
     connect(ui->recordPlayMenuPushButton, SIGNAL(clicked()), this, SLOT(menuButtonClick()));	  //连接录像回放菜单按钮的按键信号和响应函数
     connect(ui->inteAnalyMenuPushButton, SIGNAL(clicked()), this, SLOT(menuButtonClick()));		  //连接智能分析菜单按钮的按键信号和响应函数
@@ -124,7 +124,7 @@ void pvmsMenuWidget::showPageSlot()
     m_devManagePage->hide();
     m_devUpdatePage->hide();
 
-    m_pvmsMonitorPage->startVideoPolling();   //启动视频轮询
+//    m_pvmsMonitorPage->startVideoPolling();   //启动视频轮询
 
     if (NULL == m_alarmPage)
     {
@@ -184,7 +184,7 @@ void pvmsMenuWidget::menuButtonClick()
         m_devManagePage->hide();
         m_devUpdatePage->hide();
         m_pvmsMonitorPage->show();
-        m_pvmsMonitorPage->m_playWin->show();
+//        m_pvmsMonitorPage->m_playWin->show();
 
 
         ui->pvmsMonitorMenuPushButton->setChecked(true);
@@ -197,7 +197,7 @@ void pvmsMenuWidget::menuButtonClick()
     else if (Sender->objectName() == "recordPlayMenuPushButton")     //录像回放按钮被按，则切换到录像回放页面
     {
         m_pvmsMonitorPage->hide();
-        m_pvmsMonitorPage->m_playWin->hide();
+//        m_pvmsMonitorPage->m_playWin->hide();
         m_inteAnalyPage->hide();
         m_devManagePage->hide();
         m_devUpdatePage->hide();
@@ -215,7 +215,7 @@ void pvmsMenuWidget::menuButtonClick()
     else if (Sender->objectName() == "inteAnalyMenuPushButton")      //智能分析按钮被按，则切换到智能分析页面
     {
         m_pvmsMonitorPage->hide();
-        m_pvmsMonitorPage->m_playWin->hide();
+//        m_pvmsMonitorPage->m_playWin->hide();
         m_recordPlayPage->hide();
         m_devManagePage->hide();
         m_devUpdatePage->hide();
@@ -232,7 +232,7 @@ void pvmsMenuWidget::menuButtonClick()
     else if (Sender->objectName() == "devManageMenuPushButton")      //设备管理按钮被按，则切换到设备管理页面
     {
         m_pvmsMonitorPage->hide();
-        m_pvmsMonitorPage->m_playWin->hide();
+//        m_pvmsMonitorPage->m_playWin->hide();
         m_recordPlayPage->hide();
         m_inteAnalyPage->hide();
         m_devUpdatePage->hide();
@@ -248,7 +248,7 @@ void pvmsMenuWidget::menuButtonClick()
     else if (Sender->objectName() == "devUpdateMenuPushButton")     //设备更新按钮被按，则切换到设备更新页面
     {
         m_pvmsMonitorPage->hide();
-        m_pvmsMonitorPage->m_playWin->hide();
+//        m_pvmsMonitorPage->m_playWin->hide();
         m_recordPlayPage->hide();
         m_inteAnalyPage->hide();
         m_devManagePage->hide();

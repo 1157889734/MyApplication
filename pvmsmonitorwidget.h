@@ -89,7 +89,7 @@ class pvmsMonitorWidget : public QWidget
 public:
     explicit pvmsMonitorWidget(QWidget *parent = 0);
     ~pvmsMonitorWidget();
-    bool eventFilter(QObject *target, QEvent *event);  //事件过滤器
+//    bool eventFilter(QObject *target, QEvent *event);  //事件过滤器
     QPushButton *m_presetNoPushbutton[8];
     QButtonGroup *g_buttonGroup;
     time_t m_lastActionTime;    //界面最后一次操作时间

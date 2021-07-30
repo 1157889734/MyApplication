@@ -138,11 +138,10 @@ pvmsMonitorWidget::pvmsMonitorWidget(QWidget *parent) :
     ui(new Ui::pvmsMonitorWidget)
 {
     ui->setupUi(this);
-    this->setWindowFlags(Qt::FramelessWindowHint);
+//    this->setWindowFlags(Qt::FramelessWindowHint);
     pthread_mutexattr_t	mutexattr;
     int i = 0;
-
-    /*将界面所有控件加入event事件过滤器进行监听，并设置鼠标移动能捕捉到，以便进行全屏检测*/
+//    /*将界面所有控件加入event事件过滤器进行监听，并设置鼠标移动能捕捉到，以便进行全屏检测*/
     ui->label_3->installEventFilter(this);  //加入事件过滤器
     ui->label_3->setMouseTracking(true);   //设置鼠标移动能捕捉到
     ui->label_4->installEventFilter(this);
@@ -268,7 +267,7 @@ pvmsMonitorWidget::pvmsMonitorWidget(QWidget *parent) :
     connect(this, SIGNAL(setFullScreenSignal()), this, SLOT(setFullScreenSignalCtrl()));
     connect(this, SIGNAL(presetReturnSignal(int)), this, SLOT(presetReturnSignalCtrl(int)));
     connect(this, SIGNAL(recordPlayCtrlSignal()), this, SLOT(recordPlayCtrlSlot()));
-//    connect(this, SIGNAL(cmpOptionCtrlSignal(int, int)), this, SLOT(cmpOptionCtrlSlot(int, int)), Qt::BlockingQueuedConnection );
+    connect(this, SIGNAL(cmpOptionCtrlSignal(int, int)), this, SLOT(cmpOptionCtrlSlot(int, int)), Qt::BlockingQueuedConnection );
     connect(this, SIGNAL(chLabelDisplayCtrlSignal()), this, SLOT(chLabelDisplayCtrlSlot()));
     connect(this, SIGNAL(chStateLabelTextCtrlSignal(int)), this, SLOT(chStateLabelTextCtrlSlot(int)));
     connect(this, SIGNAL(camSwitchButtonTextCtrlSignal(int)), this, SLOT(camSwitchButtonTextCtrlSlot(int)));
@@ -284,18 +283,15 @@ pvmsMonitorWidget::pvmsMonitorWidget(QWidget *parent) :
     m_iCameraSwitchState = NORMAL;   //摄像头切换状态默认为正常，表示不切换
     m_iPresetPasswdOkFlag = 0;
     m_presetPasswdConfirmPage = NULL;
-    m_iSelectPresetNo = 1;
     m_iCameraNum = 0;
     m_iCameraPlayNo = 0;
     m_iPollingFlag = 1;   //默认轮询开启
     m_iSelectPresetNo = 1;  //预置点选中编号默认为1
-    m_presetPasswdConfirmPage = NULL;
     m_iPtzMoveType = E_STOP_MOVE;
     m_iRecordPlayFlag = 0;
     m_iFullScreenFlag = 0;
     m_iAlarmNotCtrlFlag = 0;
     m_iBlackScreenFlag = 0;
-    m_iPresetPasswdOkFlag = 0;
 
     m_playWin = NULL;
 
@@ -311,7 +307,7 @@ pvmsMonitorWidget::pvmsMonitorWidget(QWidget *parent) :
 
 void pvmsMonitorWidget::startVideoPolling()    //开启视频轮询的处理
 {
-
+#if 0
     m_iFullScreenFlag = 1;
 
     m_playWin = new QWidget(this->parentWidget());    //新建一个与目前窗体同属一个父窗体的播放子窗体，方便实现全屏
@@ -333,7 +329,7 @@ void pvmsMonitorWidget::startVideoPolling()    //开启视频轮询的处理
     m_channelNoLabel->setStyleSheet("QLabel{color:rgb(255, 255, 255);font: 24pt;background-color: rgb(0, 0, 0);}");
     m_channelNoLabel->setAttribute(Qt::WA_TranslucentBackground, true);
     m_channelNoLabel->show();
-
+#endif
 }
 
 
@@ -897,7 +893,7 @@ void pvmsMonitorWidget::videoPollingSignalCtrl()
 void pvmsMonitorWidget::setFullScreenSignalCtrl()
 {
     T_CMP_PACKET tPkt;
-
+#if 0
 //    DebugPrint(DEBUG_UI_NOMAL_PRINT, "[%s] fullScreen Ctrl!\n", __FUNCTION__);
     if ((this->isHidden() != 1)  && (m_iAlarmNotCtrlFlag != 1) && (m_iBlackScreenFlag != 1))    //当前未显示，不做全屏监视处理,有报警信息未处理也不做全屏监视处理,处于黑屏状态也不做全屏监视处理
     {
@@ -924,6 +920,8 @@ void pvmsMonitorWidget::setFullScreenSignalCtrl()
 //        QWSServer::sendKeyEvent(0x01000003, Qt::Key_Escape, Qt::NoModifier, true, false);    //发送一个模拟键盘ESC键，让全屏下messagebox自动关闭
         m_iFullScreenFlag = 1;
     }
+#endif
+
 }
 
 void pvmsMonitorWidget::presetReturnSignalCtrl(int iCameraNO)
@@ -959,6 +957,8 @@ void pvmsMonitorWidget::recordPlayCtrlSlot()
 
 void pvmsMonitorWidget::chLabelDisplayCtrlSlot()   //通道状态和通道号标签是否显示的处理函数
 {
+#if 0
+
     T_CMP_PACKET tPkt;
 
     if (1 == m_iDisplayEnable)
@@ -994,6 +994,9 @@ void pvmsMonitorWidget::chLabelDisplayCtrlSlot()   //通道状态和通道号标
         m_channelStateLabel->hide();
         m_channelNoLabel->hide();
     }
+#endif
+
+
 }
 
 void pvmsMonitorWidget::chStateLabelTextCtrlSlot(int iFlag)   //通道状态标签文本显示的处理函数，0-显示关闭，1-显示开启
@@ -1127,7 +1130,7 @@ void pvmsMonitorWidget::closePlayWin()
 void pvmsMonitorWidget::alarmHappenSlot()
 {
     T_CMP_PACKET tPkt;
-
+#if 0
     if ((1 == m_iFullScreenFlag) && (m_playWin != NULL))  //有报警发生时退出全屏
     {
         struct sysinfo s_info;
@@ -1141,6 +1144,7 @@ void pvmsMonitorWidget::alarmHappenSlot()
         tPkt.iCh = 0;
         PutNodeToCmpQueue(m_ptQueue, &tPkt);
 
+ #if 0
         if (m_channelStateLabel != NULL)
         {
             m_channelStateLabel->setGeometry(320, 385, 121, 50);
@@ -1149,6 +1153,8 @@ void pvmsMonitorWidget::alarmHappenSlot()
         {
             m_channelNoLabel->setGeometry(20, 690, 65, 50);
         }
+
+#endif
 //        if (m_presetPasswdConfirmPage != NULL)
 //        {
 //            m_presetPasswdConfirmPage->show();
@@ -1168,7 +1174,7 @@ void pvmsMonitorWidget::alarmHappenSlot()
         connect(m_alarmHappenTimer,SIGNAL(timeout()), this,SLOT(alarmHappenCtrlSlot()));
         m_alarmHappenTimer->start(500);
     }
-
+#endif
 }
 void pvmsMonitorWidget::alarmClearSlot()
 {
@@ -1186,9 +1192,10 @@ void pvmsMonitorWidget::alarmClearSlot()
 
 
 
-
+#if 0
 bool pvmsMonitorWidget::eventFilter(QObject *target, QEvent *event)    //事件过滤器，过滤处理不同控件的不同事件
 {
+
     int iRet = 0;
     T_CMP_PACKET tPkt;
     if (event->type()==QEvent::MouseButtonPress || event->type()==QEvent::MouseMove) //判断界面操作
@@ -1246,7 +1253,6 @@ bool pvmsMonitorWidget::eventFilter(QObject *target, QEvent *event)    //事件�
 //                emit showAlarmWidgetSignal();
             }
     }
-#if 1
     if (target == m_playWin)
     {
         if (event->type()==QEvent::MouseButtonDblClick && (m_iAlarmNotCtrlFlag != 1))   //双击全屏,但是如何有报警未处理也不全屏
@@ -1254,9 +1260,10 @@ bool pvmsMonitorWidget::eventFilter(QObject *target, QEvent *event)    //事件�
             if (0 == m_iFullScreenFlag)
             {
 //                DebugPrint(DEBUG_UI_OPTION_PRINT, "pvmsMonitorWidget mouse double click to full screen!\n");
+#if 0 ///////////????????????????????????????????
                 m_playWin->move(0, 0);
                 m_playWin->resize(1024, 768);
-
+#endif
 
 //                tPkt.iMsgCmd = CMP_CMD_CHG_ALL_VIDEOWIN;
 //                tPkt.iCh = 0;
@@ -1276,8 +1283,8 @@ bool pvmsMonitorWidget::eventFilter(QObject *target, QEvent *event)    //事件�
             }
         }
     }
-#endif
 }
+#endif
 
 pvmsMonitorWidget::~pvmsMonitorWidget()
 {

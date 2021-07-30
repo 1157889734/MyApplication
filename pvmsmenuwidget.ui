@@ -225,45 +225,10 @@ QPushButton:checked
 color: rgb(255, 255, 255);</string>
    </property>
    <property name="text">
-    <string> 受电弓视频监控系统</string>
+    <string/>
    </property>
    <property name="pixmap">
     <pixmap resource="res.qrc">:/res/MainDlgHead.png</pixmap>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="loginOutPushButton">
-   <property name="geometry">
-    <rect>
-     <x>940</x>
-     <y>0</y>
-     <width>71</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>18</pointsize>
-    </font>
-   </property>
-   <property name="autoFillBackground">
-    <bool>false</bool>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">color: rgb(255, 255, 255);
-background-image: url(:/res/zxanniubk.png);
-</string>
-   </property>
-   <property name="text">
-    <string>注 销</string>
-   </property>
-   <property name="autoDefault">
-    <bool>false</bool>
-   </property>
-   <property name="default">
-    <bool>false</bool>
-   </property>
-   <property name="flat">
-    <bool>true</bool>
    </property>
   </widget>
  </widget>

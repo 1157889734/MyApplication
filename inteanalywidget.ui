@@ -251,12 +251,27 @@ border-style: solid;</string>
    </property>
    <item>
     <property name="text">
-     <string>4号车厢</string>
+     <string>1车厢</string>
     </property>
    </item>
    <item>
     <property name="text">
-     <string>5号车厢</string>
+     <string>2车厢</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>3车厢</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>4车厢</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>5车厢</string>
     </property>
    </item>
   </widget>
@@ -428,6 +443,21 @@ background-color: rgb(33, 131, 229); </string>
    <item>
     <property name="text">
      <string>火花放电</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>火花频率较高</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>火花较大</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>整体结构异常</string>
     </property>
    </item>
   </widget>
