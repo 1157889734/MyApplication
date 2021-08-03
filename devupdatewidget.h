@@ -31,6 +31,8 @@ public slots:
     void configFileSelectionSlot();
     void configUpdateFileSLOT();
     void configFileImportSlot();
+    void devUpdateSlot();
+    void devRebootSlot();
     void alarmPushButoonClickSlot();
     void alarmHappenCtrlSlot();
     void alarmHappenSlot();
@@ -44,6 +46,8 @@ public slots:
 
     void setCameraImageParamSlot();
 
+    void setTrainType();
+
 
 signals:
     void alarmPushButoonClickSignal();
@@ -52,12 +56,20 @@ signals:
 private:
     Ui::devUpdateWidget *ui;
     QTimer *m_alarmHappenTimer;
-    QString m_pollingtTimeText;
-    QString m_presetReturnTimeText;
     QTimer *m_sys_timer;
     PMSG_HANDLE m_Phandle[MAX_SERVER_NUM];    //服务器PMSG通信句柄
     pvmsMonitorWidget *m_pvmsMonitorPage;
+    void getTrainConfig();     //获取车型配置信息
+    void setTrainTypeCombox();
+    void setPollingTimeRadioButton();	  //设置轮询时间单选按钮组的样式
+    void setPresetReturnTimeRadioButton();	   //设置预置点返回时间单选按钮组的样式
 
+    QString m_TrainType;
+    QString m_pollingtTimeText;
+    QString m_presetReturnTimeText;
+    QString m_brightNessText;
+    QString m_saturationText;
+    QString m_contrastText;
 //    userManage *usermanagePage;
 
 };

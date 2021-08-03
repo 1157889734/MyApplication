@@ -10,6 +10,7 @@
 #include <QDir>
 #include <QDebug>
 #include "stdio.h"
+#include "log.h"
 
 
 static int g_iVNum = 0;
@@ -67,6 +68,9 @@ devUpdateWidget::devUpdateWidget(QWidget *parent) :
 
     connect(ui->configFileImportPushButton, SIGNAL(clicked(bool)), this, SLOT(configFileImportSlot()));
 
+    connect(ui->updateBeginPushButton, SIGNAL(clicked(bool)), this, SLOT(devUpdateSlot()));
+
+    connect(ui->clientRebootPushButton, SIGNAL(clicked(bool)), this, SLOT(devRebootSlot()));
 
 
     g_buttonGroup1 = new QButtonGroup();      //轮询时间设置单选按钮组成一组，以保证改组中的单选框同时只能选一个，同时与以下其他类别的单选框之间互不影响
@@ -101,11 +105,20 @@ devUpdateWidget::devUpdateWidget(QWidget *parent) :
     ui->contrastLineEdit->setValidator(new QIntValidator(0,255,this));
 
 
+    connect(ui->trainTypeSetPushButton, SIGNAL(clicked(bool)), this, SLOT(setTrainType()));
+
+
     m_sys_timer = new QTimer(this);
     connect(m_sys_timer,SIGNAL(timeout()),this,SLOT(showSysTime()));
     m_sys_timer->start(1000);
 
 //    ui->sysDataAdjustLabel->setText();
+    m_TrainType = "";
+
+    setTrainTypeCombox();
+    getTrainConfig();//获取车型配置信息，填充页面
+    setPollingTimeRadioButton();  //设置轮询时间单选按钮组的样式
+    setPresetReturnTimeRadioButton(); //设置预置点返回时间单选按钮组的样式
 
 
 }
@@ -153,6 +166,165 @@ void devUpdateWidget::systimeSlot()
 
 }
 
+void devUpdateWidget::setTrainTypeCombox()     //读取系统配置文件，获取系统当前设置的车型，以使得车型设置下拉框显示的是当前系统车型
+{
+    T_TRAIN_TYPE_LIST tTrainTypeList;
+    int iRet = 0, i = 0;
+
+    memset(&tTrainTypeList, 0, sizeof(tTrainTypeList));
+    iRet = STATE_GetTrainTypeList(&tTrainTypeList);
+    if (iRet < 0)
+    {
+        return;
+    }
+
+    for(i = 0; i < tTrainTypeList.iTypeNum; i++)
+    {
+        ui->trainTypeSetComboBox->addItem(QString(QLatin1String(tTrainTypeList.acTrainTypeName[i])));
+    }
+}
+
+void devUpdateWidget::getTrainConfig()
+{
+    int i = 0;
+    QString item = "";
+
+    ui->carriageSelectionComboBox->setCurrentIndex(-1);
+    ui->carriageSelectionComboBox->clear();
+
+    char acTrainType[16] = {0};
+    T_TRAIN_CONFIG tTrainConfigInfo;
+    memset(&tTrainConfigInfo, 0, sizeof(T_TRAIN_CONFIG));
+    STATE_GetCurrentTrainConfigInfo(&tTrainConfigInfo);
+    STATE_GetCurrentTrainType(acTrainType, sizeof(acTrainType));
+
+    for (i = 0; i < tTrainConfigInfo.iNvrServerCount; i++)
+    {
+        item = "";
+        item = QString::number(tTrainConfigInfo.tNvrServerInfo[i].iCarriageNO);
+        item += tr("号车厢");
+        ui->carriageSelectionComboBox->addItem(item);
+        m_Phandle[i] = STATE_GetNvrServerPmsgHandle(i);
+    }
+
+    for (i = 0; i < ui->trainTypeSetComboBox->count(); i++)
+    {
+        if (ui->trainTypeSetComboBox->itemText(i) == QString(QLatin1String(acTrainType)))
+        {
+            ui->trainTypeSetComboBox->setCurrentIndex(i);
+            m_TrainType = ui->trainTypeSetComboBox->currentText();
+            break;
+        }
+    }
+}
+
+void devUpdateWidget::setPollingTimeRadioButton()     //获取轮询时间，设置轮询时间单选按钮组的样式
+{
+    int iPollingTime = 0;
+    iPollingTime = STATE_GetPollingTime();
+
+    ui->pollingTimeSetLineEdit->setText(QString::number(iPollingTime));
+    m_pollingtTimeText = ui->pollingTimeSetLineEdit->text();
+
+    if (10 == iPollingTime)   //轮询时间为10秒，则第一个表示10秒的RadioButton被选中
+    {
+        ui->pollingTimeSetRadioButton->setChecked(true);
+        ui->pollingTimeSetLineEdit->setReadOnly(true);
+    }
+    else if (20 == iPollingTime)
+    {
+        ui->pollingTimeSetRadioButton_2->setChecked(true);
+        ui->pollingTimeSetLineEdit->setReadOnly(true);
+    }
+    else if (30 == iPollingTime)
+    {
+        ui->pollingTimeSetRadioButton_3->setChecked(true);
+        ui->pollingTimeSetLineEdit->setReadOnly(true);
+    }
+    else
+    {
+        ui->pollingTimeSetRadioButton_4->setChecked(true);
+        ui->pollingTimeSetLineEdit->setReadOnly(false);
+    }
+}
+
+void devUpdateWidget::setPresetReturnTimeRadioButton()     //获取预置点返回时间，设置预置点返回时间单选按钮组的样式
+{
+    int iReturnTime = 0;
+    iReturnTime = STATE_GetPresetReturnTime();
+
+    ui->presetReturnTimeSetLineEdit->setText(QString::number(iReturnTime));
+    m_presetReturnTimeText = ui->presetReturnTimeSetLineEdit->text();
+
+    if (5 == iReturnTime)   //预置点返回时间为5分钟，则第一个表示5分钟的RadioButton被选中
+    {
+        ui->presetReturnTimeSetRadioButton->setChecked(true);
+        ui->presetReturnTimeSetLineEdit->setReadOnly(true);
+    }
+    else if (10 == iReturnTime)
+    {
+        ui->presetReturnTimeSetRadioButton_2->setChecked(true);
+        ui->presetReturnTimeSetLineEdit->setReadOnly(true);
+    }
+    else if (15 == iReturnTime)
+    {
+        ui->presetReturnTimeSetRadioButton_3->setChecked(true);
+        ui->presetReturnTimeSetLineEdit->setReadOnly(true);
+    }
+    else
+    {
+        ui->presetReturnTimeSetRadioButton_4->setChecked(true);
+        ui->presetReturnTimeSetLineEdit->setReadOnly(false);
+    }
+}
+
+
+void devUpdateWidget::setTrainType()
+{
+    char acUserType[16] = {0}, acTrainType[128] = {0};
+    int iRet = 0;
+    T_LOG_INFO tLogInfo;
+
+//    DebugPrint(DEBUG_UI_OPTION_PRINT, "devUpdateWidget trainTypeSet button pressed!\n");
+
+    STATE_GetCurrentUserType(acUserType, sizeof(acUserType));
+    if (!strcmp(acUserType, "operator"))   //操作员不能设置车型
+    {
+//        DebugPrint(DEBUG_UI_MESSAGE_PRINT, "devUpdateWidget this user type has no right to set train type!\n");
+        QMessageBox box(QMessageBox::Warning,QString::fromUtf8("提示"),QString::fromUtf8("无权限设置!"));     //新建消息提示框，提示错误信息
+        box.setStandardButtons (QMessageBox::Ok);   //设置提示框只有一个标准按钮
+        box.setButtonText (QMessageBox::Ok,QString::fromUtf8("确 定"));     //将按钮显示改成"确 定"
+        box.exec();
+    }
+    else
+    {
+        if (m_TrainType != ui->trainTypeSetComboBox->currentText())   //只有当车型选择被改变才进行设置
+        {
+//            DebugPrint(DEBUG_UI_MESSAGE_PRINT, "devUpdateWidget set train type will reboot client, confirm?\n");
+            QMessageBox msgBox(QMessageBox::Question,QString(tr("提示")),QString(tr("将重启使车型设置生效，是否继续？")));
+            msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+            msgBox.button(QMessageBox::Yes)->setText("确 定");
+            msgBox.button(QMessageBox::No)->setText("取 消");
+            iRet=msgBox.exec();
+            if(iRet != QMessageBox::Yes)
+            {
+                return;
+            }
+            snprintf(acTrainType, sizeof(acTrainType), "%s", ui->trainTypeSetComboBox->currentText().toLatin1().data());
+            STATE_SetCurrentTrainType(acTrainType);
+//            DebugPrint(DEBUG_UI_NOMAL_PRINT, "[%s] set currernt traintype to %s\n", __FUNCTION__, acTrainType);
+
+            memset(&tLogInfo, 0, sizeof(T_LOG_INFO));
+            tLogInfo.iLogType = 0;
+            snprintf(tLogInfo.acLogDesc, sizeof(tLogInfo.acLogDesc), "change traintype to %s and monitor Client reboot!", acTrainType);
+            LOG_WriteLog(&tLogInfo);
+
+            QApplication *app;
+            app->exit();
+        }
+    }
+}
+
 void devUpdateWidget::setCameraImageParamSlot()
 {
     int idex = 0, iRet = 0;
@@ -179,6 +351,8 @@ void devUpdateWidget::setCameraImageParamSlot()
         picParam.iBrightness = ui->brightnessLineEdit->text().toInt();
         picParam.iSaturation = ui->saturationLineEdit->text().toInt();
         picParam.iContrast = ui->contrastLineEdit->text().toInt();
+
+
         iRet = PMSG_SendPmsgData(m_Phandle[idex], CLI_SERV_MSG_TYPE_SET_PIC_ATTRIBUTE, (char *)&picParam, sizeof(T_PIC_ATTRIBUTE));    //发送设置图像效果参数命令
         if (iRet < 0)
         {
@@ -334,6 +508,42 @@ void devUpdateWidget::configUpdateFileSLOT()
                 ui->configFileDisplayLineEdit_2->setText(filename);
             }
         }
+
+
+}
+void devUpdateWidget::devUpdateSlot()
+{
+
+
+
+
+}
+void devUpdateWidget::devRebootSlot()
+{
+    char acUserType[64] = {0};
+    T_LOG_INFO tLogInfo;
+
+//    DebugPrint(DEBUG_UI_OPTION_PRINT, "devUpdateWidget client reboot!\n");
+
+    STATE_GetCurrentUserType(acUserType, sizeof(acUserType));
+    if (!strcmp(acUserType, "operator"))	 //操作员无权校时
+    {
+//        DebugPrint(DEBUG_UI_MESSAGE_PRINT, "devUpdateWidget this user type has no right to reboot client!\n");
+        QMessageBox box(QMessageBox::Warning,tr("提示"),tr("无权限设置!"));	  //新建消息提示框，提示错误信息
+        box.setStandardButtons (QMessageBox::Ok);	//设置提示框只有一个标准按钮
+        box.setButtonText (QMessageBox::Ok,tr("确 定")); 	//将按钮显示改成"确 定"
+        box.exec();
+    }
+    else
+    {
+        memset(&tLogInfo, 0, sizeof(T_LOG_INFO));
+        tLogInfo.iLogType = 0;
+        snprintf(tLogInfo.acLogDesc, sizeof(tLogInfo.acLogDesc), "monitor Client reboot!");
+        LOG_WriteLog(&tLogInfo);
+
+        QApplication *app;
+        app->exit();
+    }
 
 
 }
