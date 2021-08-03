@@ -5,10 +5,10 @@
 
 #define VERSION "V1.0.0"
 
-#define SYSCONFIGFILEPATH "/home/data/emuVideoMornitorClient/C3SysConfig.ini"
-#define DATACONFIGFILEPATH "/home/data/emuVideoMornitorClient/C3DataConfig.ini" 
-#define CFGCONFIGFILEPATH "/home/data/emuVideoMornitorClient/cfg"
-#define STATIONCONFIGFILEPATH "/home/data/emuVideoMornitorClient/Station.ini"
+#define SYSCONFIGFILEPATH "/userdata/C3SysConfig.ini"
+#define DATACONFIGFILEPATH "/userdata/C3DataConfig.ini"
+#define CFGCONFIGFILEPATH "/userdata/cfg"
+#define STATIONCONFIGFILEPATH "/userdata/Station.ini"
 #define NETCONFIGFILEPATH "/home/conf/netconf.ini"
 
 static char g_acTrainType[32] = {0};    //列车车型

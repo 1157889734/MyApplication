@@ -8,6 +8,7 @@ choiceLoginDevWidget::choiceLoginDevWidget(QWidget *parent) :
 {
     ui->setupUi(this);
     this->setWindowFlags(Qt::FramelessWindowHint);
+    this->setGeometry(0,0,1024,768);
     ui->cvmsPushButton->setFocusPolicy(Qt::NoFocus); // 得到焦点时，不显示虚线框
     ui->pvmsPushButton->setFocusPolicy(Qt::NoFocus);
 

@@ -7,6 +7,7 @@
 #include "log.h"
 #include <QEvent>
 #include <QMouseEvent>
+
 static pthread_mutex_t g_tCmpCtrlMutex;
 
 
@@ -307,7 +308,7 @@ pvmsMonitorWidget::pvmsMonitorWidget(QWidget *parent) :
 
 void pvmsMonitorWidget::startVideoPolling()    //开启视频轮询的处理
 {
-#if 0
+#if 1
     m_iFullScreenFlag = 1;
 
     m_playWin = new QWidget(this->parentWidget());    //新建一个与目前窗体同属一个父窗体的播放子窗体，方便实现全屏
@@ -893,12 +894,12 @@ void pvmsMonitorWidget::videoPollingSignalCtrl()
 void pvmsMonitorWidget::setFullScreenSignalCtrl()
 {
     T_CMP_PACKET tPkt;
-#if 0
+#if 1
 //    DebugPrint(DEBUG_UI_NOMAL_PRINT, "[%s] fullScreen Ctrl!\n", __FUNCTION__);
     if ((this->isHidden() != 1)  && (m_iAlarmNotCtrlFlag != 1) && (m_iBlackScreenFlag != 1))    //当前未显示，不做全屏监视处理,有报警信息未处理也不做全屏监视处理,处于黑屏状态也不做全屏监视处理
     {
-//        m_playWin->move(0, 0);
-//        m_playWin->resize(1024, 768);
+        m_playWin->move(0, 0);
+        m_playWin->resize(1024, 768);
 
         tPkt.iMsgCmd = CMP_CMD_CHG_ALL_VIDEOWIN;
         tPkt.iCh = 0;
@@ -953,7 +954,13 @@ void pvmsMonitorWidget::recordPlayCtrlSlot()
     videoChannelCtrl();   //通道视频开关处理
 }
 
+void pvmsMonitorWidget::cmpOptionCtrlSlot(int iType, int iCh)
+{
 
+
+
+
+}
 
 void pvmsMonitorWidget::chLabelDisplayCtrlSlot()   //通道状态和通道号标签是否显示的处理函数
 {
@@ -1236,12 +1243,12 @@ bool pvmsMonitorWidget::eventFilter(QObject *target, QEvent *event)    //事件�
 
 
 
-//                tPkt.iMsgCmd = CMP_CMD_CHG_ALL_VIDEOWIN;
-//                tPkt.iCh = 0;
-//                PutNodeToCmpQueue(m_ptQueue, &tPkt);
+                tPkt.iMsgCmd = CMP_CMD_CHG_ALL_VIDEOWIN;
+                tPkt.iCh = 0;
+                PutNodeToCmpQueue(m_ptQueue, &tPkt);
 
-//                m_channelStateLabel->setGeometry(320, 385, 121, 50);
-//                m_channelNoLabel->setGeometry(20, 690, 65, 50);
+                m_channelStateLabel->setGeometry(320, 385, 121, 50);
+                m_channelNoLabel->setGeometry(20, 690, 65, 50);
 //                if (m_presetPasswdConfirmPage != NULL)
 //                {
 //                    m_presetPasswdConfirmPage->show();
@@ -1253,6 +1260,8 @@ bool pvmsMonitorWidget::eventFilter(QObject *target, QEvent *event)    //事件�
 //                emit showAlarmWidgetSignal();
             }
     }
+
+ #if 0
     if (target == m_playWin)
     {
         if (event->type()==QEvent::MouseButtonDblClick && (m_iAlarmNotCtrlFlag != 1))   //双击全屏,但是如何有报警未处理也不全屏
@@ -1260,17 +1269,21 @@ bool pvmsMonitorWidget::eventFilter(QObject *target, QEvent *event)    //事件�
             if (0 == m_iFullScreenFlag)
             {
 //                DebugPrint(DEBUG_UI_OPTION_PRINT, "pvmsMonitorWidget mouse double click to full screen!\n");
-#if 0 ///////////????????????????????????????????
+                qDebug()<<"11111111111111111111111111111!!!!";
+#if 1
                 m_playWin->move(0, 0);
                 m_playWin->resize(1024, 768);
 #endif
+                qDebug()<<"222222222222222222222222222222";
 
-//                tPkt.iMsgCmd = CMP_CMD_CHG_ALL_VIDEOWIN;
-//                tPkt.iCh = 0;
-//                PutNodeToCmpQueue(m_ptQueue, &tPkt);
 
-//                m_channelStateLabel->setGeometry(452, 360, 121, 50);
-//                m_channelNoLabel->setGeometry(20, 690, 65, 50);
+                tPkt.iMsgCmd = CMP_CMD_CHG_ALL_VIDEOWIN;
+                tPkt.iCh = 0;
+                PutNodeToCmpQueue(m_ptQueue, &tPkt);
+
+                m_channelStateLabel->setGeometry(452, 360, 121, 50);
+                m_channelNoLabel->setGeometry(20, 690, 65, 50);
+
 //                if (m_presetPasswdConfirmPage != NULL)
 //                {
 //                    m_presetPasswdConfirmPage->hide();
@@ -1283,6 +1296,8 @@ bool pvmsMonitorWidget::eventFilter(QObject *target, QEvent *event)    //事件�
             }
         }
     }
+
+#endif
 }
 #endif
 

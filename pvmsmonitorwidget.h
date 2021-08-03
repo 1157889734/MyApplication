@@ -142,6 +142,7 @@ signals:
     void hideAlarmWidgetSignal();
     void videoPollingSignal();
     void presetReturnSignal(int iCameraNO);
+    void cmpOptionCtrlSignal(int iType, int iCh);
 
 
 
@@ -175,6 +176,7 @@ public slots:
     void chStateLabelTextCtrlSlot(int iFlag);   //通道状态标签文本显示的处理函数，0-显示关闭，1-显示开启
     void camSwitchButtonTextCtrlSlot(int iFlag);   //摄像机开关状态按钮文本显示的处理函数，0-显示关闭，1-显示开启
     void fillLightSwitchButtonTextCtrlSlot(int iFlag);   //补光灯开关状态按钮文本显示的处理函数，0-显示关闭，1-显示开启
+    void cmpOptionCtrlSlot(int iType, int iCh);
 
 private:
     Ui::pvmsMonitorWidget *ui;

@@ -10,7 +10,7 @@ pvmsMenuWidget::pvmsMenuWidget(QWidget *parent) :
 {
     ui->setupUi(this);
     this->setWindowFlags(Qt::FramelessWindowHint);
-
+    this->setGeometry(0,0,1024,768);
     m_pvmsMonitorPage = new pvmsMonitorWidget(this);   //受电弓监控页面
     m_pvmsMonitorPage->setGeometry(0, 103, m_pvmsMonitorPage->width(), m_pvmsMonitorPage->height());   //设置位置
     m_recordPlayPage = new recordPlayWidget(this);     //录像回放页面
@@ -48,6 +48,8 @@ pvmsMenuWidget::pvmsMenuWidget(QWidget *parent) :
     connect(m_pvmsMonitorPage,SIGNAL(registOutSignal(int)),this,SLOT(registOutButtonClick()));
     connect(m_recordPlayPage,SIGNAL(registOutSignal(int)),this,SLOT(registOutButtonClick()));
     connect(m_inteAnalyPage,SIGNAL(registOutSignal(int)),this,SLOT(registOutButtonClick()));
+    connect(m_devUpdatePage,SIGNAL(registOutSignal(int)),this,SLOT(registOutButtonClick()));
+
 
 
 
@@ -185,6 +187,8 @@ void pvmsMenuWidget::menuButtonClick()
         m_devUpdatePage->hide();
         m_pvmsMonitorPage->show();
 //        m_pvmsMonitorPage->m_playWin->show();
+
+        m_pvmsMonitorPage->showMaximized();
 
 
         ui->pvmsMonitorMenuPushButton->setChecked(true);

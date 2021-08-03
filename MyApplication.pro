@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui widgets virtualkeyboard multimedia multimediawidgets
+QT       += core gui widgets virtualkeyboard multimedia multimediawidgets sql
 
 TARGET = MyApplication
 TEMPLATE = app
@@ -43,7 +43,10 @@ SOURCES += \
     pmsgcli.c \
     presetpasswdconfirm.cpp \
     myslider.cpp \
-    qplayer.cpp
+    qplayer.cpp \
+#    useredit.cpp \
+#    useradd.cpp \
+#    usermanage.cpp
 
 HEADERS += \
     MyApplication.h \
@@ -67,7 +70,10 @@ HEADERS += \
     types.h \
     presetpasswdconfirm.h \
     myslider.h \
-    qplayer.h
+    qplayer.h \
+#    useredit.h \
+#    useradd.h \
+#    usermanage.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -87,4 +93,8 @@ FORMS += \
     devmanagewidget.ui \
     devupdatewidget.ui \
     alarmwidget.ui \
-    presetpasswdconfirm.ui
+    presetpasswdconfirm.ui \
+    useredit.ui \
+    useradd.ui \
+    usermanage.ui
+

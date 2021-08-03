@@ -5,7 +5,7 @@
 extern "C"{
 #endif /* End of #ifdef __cplusplus */
 
-#define LOG_FILE_NAME "/home/data/log/sys.log"
+#define LOG_FILE_NAME "/userdata/sys.log"
 
 #define	MAX_LOG_NUMBER	5000
 

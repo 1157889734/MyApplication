@@ -16,8 +16,8 @@
   <widget class="QPushButton" name="clientRebootPushButton">
    <property name="geometry">
     <rect>
-     <x>370</x>
-     <y>620</y>
+     <x>760</x>
+     <y>300</y>
      <width>81</width>
      <height>27</height>
     </rect>
@@ -41,8 +41,8 @@ border-style: solid;</string>
   <widget class="QPushButton" name="permissonManagePushButton">
    <property name="geometry">
     <rect>
-     <x>650</x>
-     <y>20</y>
+     <x>400</x>
+     <y>590</y>
      <width>111</width>
      <height>35</height>
     </rect>
@@ -65,44 +65,11 @@ border-style: solid;
     <string>权限管理</string>
    </property>
   </widget>
-  <widget class="QLineEdit" name="brightnessLineEdit">
-   <property name="geometry">
-    <rect>
-     <x>780</x>
-     <y>510</y>
-     <width>41</width>
-     <height>27</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>12</pointsize>
-    </font>
-   </property>
-   <property name="text">
-    <string>128</string>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="timeSetLineEdit">
-   <property name="geometry">
-    <rect>
-     <x>240</x>
-     <y>257</y>
-     <width>201</width>
-     <height>27</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>12</pointsize>
-    </font>
-   </property>
-  </widget>
   <widget class="QLabel" name="presetReturnTimeSetLabel">
    <property name="geometry">
     <rect>
-     <x>130</x>
-     <y>150</y>
+     <x>110</x>
+     <y>92</y>
      <width>211</width>
      <height>21</height>
     </rect>
@@ -124,7 +91,7 @@ background-color: rgb(255, 255, 255);</string>
    <property name="geometry">
     <rect>
      <x>700</x>
-     <y>87</y>
+     <y>10</y>
      <width>101</width>
      <height>27</height>
     </rect>
@@ -141,34 +108,13 @@ background-color: rgb(255, 255, 255);</string>
     <bool>false</bool>
    </property>
   </widget>
-  <widget class="QLabel" name="brightnessLabel">
-   <property name="geometry">
-    <rect>
-     <x>590</x>
-     <y>515</y>
-     <width>51</width>
-     <height>17</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>12</pointsize>
-    </font>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">background-color: rgb(255, 255, 255);</string>
-   </property>
-   <property name="text">
-    <string>亮 度</string>
-   </property>
-  </widget>
   <widget class="QLabel" name="label_3">
    <property name="geometry">
     <rect>
-     <x>120</x>
-     <y>133</y>
-     <width>771</width>
-     <height>55</height>
+     <x>100</x>
+     <y>90</y>
+     <width>821</width>
+     <height>31</height>
     </rect>
    </property>
    <property name="font">
@@ -191,8 +137,8 @@ background-color: rgb(255, 255, 255);</string>
   <widget class="QLabel" name="updateStatusLabel">
    <property name="geometry">
     <rect>
-     <x>270</x>
-     <y>459</y>
+     <x>660</x>
+     <y>150</y>
      <width>71</width>
      <height>17</height>
     </rect>
@@ -206,7 +152,7 @@ background-color: rgb(255, 255, 255);</string>
     <string notr="true">background-color: rgb(255, 255, 255);</string>
    </property>
    <property name="text">
-    <string>更新状态</string>
+    <string>程序更新</string>
    </property>
   </widget>
   <widget class="QComboBox" name="carriageSelectionComboBox">
@@ -216,7 +162,7 @@ background-color: rgb(255, 255, 255);</string>
    <property name="geometry">
     <rect>
      <x>600</x>
-     <y>476</y>
+     <y>390</y>
      <width>85</width>
      <height>24</height>
     </rect>
@@ -246,10 +192,10 @@ background-color: rgb(255, 255, 255);</string>
   <widget class="QPushButton" name="trainTypeSetPushButton">
    <property name="geometry">
     <rect>
-     <x>350</x>
-     <y>20</y>
+     <x>360</x>
+     <y>50</y>
      <width>101</width>
-     <height>35</height>
+     <height>31</height>
     </rect>
    </property>
    <property name="font">
@@ -272,7 +218,7 @@ border-style: solid;</string>
    <property name="geometry">
     <rect>
      <x>540</x>
-     <y>90</y>
+     <y>13</y>
      <width>61</width>
      <height>22</height>
     </rect>
@@ -295,8 +241,8 @@ border-style: solid;</string>
   <widget class="QLabel" name="label_5">
    <property name="geometry">
     <rect>
-     <x>160</x>
-     <y>315</y>
+     <x>140</x>
+     <y>270</y>
      <width>67</width>
      <height>17</height>
     </rect>
@@ -307,15 +253,15 @@ border-style: solid;</string>
     </font>
    </property>
    <property name="text">
-    <string>系统校时</string>
+    <string>系统时间</string>
    </property>
   </widget>
   <widget class="QPushButton" name="configFileImportPushButton">
    <property name="geometry">
     <rect>
-     <x>800</x>
-     <y>340</y>
-     <width>81</width>
+     <x>150</x>
+     <y>500</y>
+     <width>61</width>
      <height>27</height>
     </rect>
    </property>
@@ -338,20 +284,20 @@ border-style: solid;</string>
   <widget class="QTextEdit" name="updateStatueTextEdit">
    <property name="geometry">
     <rect>
-     <x>150</x>
-     <y>479</y>
+     <x>550</x>
+     <y>180</y>
      <width>302</width>
-     <height>131</height>
+     <height>111</height>
     </rect>
    </property>
   </widget>
   <widget class="QLabel" name="label_2">
    <property name="geometry">
     <rect>
-     <x>120</x>
-     <y>71</y>
-     <width>771</width>
-     <height>55</height>
+     <x>100</x>
+     <y>8</y>
+     <width>821</width>
+     <height>31</height>
     </rect>
    </property>
    <property name="font">
@@ -374,11 +320,16 @@ border-style: solid;</string>
   <widget class="QLabel" name="label_10">
    <property name="geometry">
     <rect>
-     <x>120</x>
-     <y>227</y>
-     <width>361</width>
-     <height>181</height>
+     <x>100</x>
+     <y>140</y>
+     <width>411</width>
+     <height>201</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+    </font>
    </property>
    <property name="styleSheet">
     <string notr="true"> #label_10 { 
@@ -395,8 +346,8 @@ border-style: solid;</string>
   <widget class="QPushButton" name="updateBeginPushButton">
    <property name="geometry">
     <rect>
-     <x>260</x>
-     <y>620</y>
+     <x>660</x>
+     <y>300</y>
      <width>81</width>
      <height>27</height>
     </rect>
@@ -417,29 +368,11 @@ border-style: solid;</string>
     <string>开始更新</string>
    </property>
   </widget>
-  <widget class="QLabel" name="label_6">
-   <property name="geometry">
-    <rect>
-     <x>160</x>
-     <y>260</y>
-     <width>67</width>
-     <height>17</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>12</pointsize>
-    </font>
-   </property>
-   <property name="text">
-    <string>手动校时</string>
-   </property>
-  </widget>
   <widget class="QRadioButton" name="pollingTimeSetRadioButton">
    <property name="geometry">
     <rect>
      <x>370</x>
-     <y>90</y>
+     <y>13</y>
      <width>61</width>
      <height>22</height>
     </rect>
@@ -456,33 +389,11 @@ border-style: solid;</string>
     <string>10秒</string>
    </property>
   </widget>
-  <widget class="QLabel" name="label_17">
-   <property name="geometry">
-    <rect>
-     <x>530</x>
-     <y>447</y>
-     <width>361</width>
-     <height>211</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>12</pointsize>
-    </font>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">background-color: rgb(255, 255, 255);
-</string>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-  </widget>
   <widget class="QLabel" name="cameraLabel">
    <property name="geometry">
     <rect>
      <x>706</x>
-     <y>480</y>
+     <y>394</y>
      <width>61</width>
      <height>17</height>
     </rect>
@@ -497,8 +408,8 @@ border-style: solid;</string>
   <widget class="QLabel" name="devConfigLabel">
    <property name="geometry">
     <rect>
-     <x>530</x>
-     <y>199</y>
+     <x>130</x>
+     <y>370</y>
      <width>361</width>
      <height>31</height>
     </rect>
@@ -509,18 +420,17 @@ border-style: solid;</string>
     </font>
    </property>
    <property name="styleSheet">
-    <string notr="true">color: rgb(255, 255, 255);
-background-color: rgb(33, 131, 229);</string>
+    <string notr="true"/>
    </property>
    <property name="text">
-    <string>    设备配置</string>
+    <string>                                         设备配置</string>
    </property>
   </widget>
   <widget class="QRadioButton" name="presetReturnTimeSetRadioButton_2">
    <property name="geometry">
     <rect>
      <x>450</x>
-     <y>150</y>
+     <y>95</y>
      <width>81</width>
      <height>22</height>
     </rect>
@@ -537,90 +447,11 @@ background-color: rgb(33, 131, 229);</string>
     <string>10分钟</string>
    </property>
   </widget>
-  <widget class="QLabel" name="saturationLabel">
-   <property name="geometry">
-    <rect>
-     <x>590</x>
-     <y>545</y>
-     <width>51</width>
-     <height>17</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>12</pointsize>
-    </font>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">background-color: rgb(255, 255, 255);</string>
-   </property>
-   <property name="text">
-    <string>饱和度</string>
-   </property>
-  </widget>
-  <widget class="QSlider" name="contrastSlider">
-   <property name="geometry">
-    <rect>
-     <x>640</x>
-     <y>570</y>
-     <width>131</width>
-     <height>29</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">QSlider::groove:horizontal{border: 1px solid #4A708B;background: #C0C0C0;height: 5px;border-radius: 1px;padding-left:-1px;padding-right:-1px;}
-
-QSlider::sub-page:horizontal{background: qlineargradient(x1:0, y1:0, x2:0, y2:1,stop:0 #B1B1B1,stop:1 #c4c4c4);background:qlineargradient(x1: 0, y1: 0.2, x2: 1, y2: 1,stop: 0 #5DCCFF,stop: 1 #1874CD);border: 1px solid #4A708B;height: 10px;border-radius: 2px;}
-
-QSlider::add-page:horizontal{background: #575757;border: 0px solid #777;height: 10px;border-radius: 2px;}
-
-QSlider::handle:horizontal{background: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5,stop:0.6 #45ADED, stop:0.778409 rgba(255, 255, 255, 255));width: 11px;margin-top: -3px;margin-bottom: -3px;border-radius: 5px;}
-
-QSlider::handle:horizontal:hover{background: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0.6 #2A8BDA,stop:0.778409 rgba(255, 255, 255, 255));width: 11px;margin-top: -3px;margin-bottom: -3px;border-radius: 5px;}
-
-QSlider::sub-page:horizontal:disabled{background: #00009C;border-color: #999;}
-
-QSlider::add-page:horizontal:disabled{background: #eee;border-color: #999;}
-
-QSlider::handle:horizontal:disabled{background: #eee;border: 1px solid #aaa;border-radius: 4px;}</string>
-   </property>
-   <property name="maximum">
-    <number>100</number>
-   </property>
-   <property name="value">
-    <number>50</number>
-   </property>
-   <property name="orientation">
-    <enum>Qt::Horizontal</enum>
-   </property>
-  </widget>
-  <widget class="QLabel" name="updateLabel">
-   <property name="geometry">
-    <rect>
-     <x>120</x>
-     <y>417</y>
-     <width>361</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>12</pointsize>
-    </font>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">color: rgb(255, 255, 255);
-background-color: rgb(33, 131, 229);</string>
-   </property>
-   <property name="text">
-    <string>   程序更新</string>
-   </property>
-  </widget>
   <widget class="QRadioButton" name="pollingTimeSetRadioButton_4">
    <property name="geometry">
     <rect>
      <x>620</x>
-     <y>90</y>
+     <y>13</y>
      <width>81</width>
      <height>22</height>
     </rect>
@@ -640,23 +471,22 @@ background-color: rgb(33, 131, 229);</string>
     <bool>false</bool>
    </property>
   </widget>
-  <widget class="QLabel" name="sysTimeAdjustLabel">
+  <widget class="QLabel" name="sysDataAdjustLabel">
    <property name="geometry">
     <rect>
-     <x>240</x>
-     <y>310</y>
-     <width>201</width>
-     <height>27</height>
+     <x>230</x>
+     <y>270</y>
+     <width>161</width>
+     <height>21</height>
     </rect>
    </property>
    <property name="font">
     <font>
-     <pointsize>12</pointsize>
+     <pointsize>10</pointsize>
     </font>
    </property>
    <property name="styleSheet">
-    <string notr="true">background-color: rgb(214, 218, 226);
-color: rgb(0, 0, 0);</string>
+    <string notr="true"/>
    </property>
    <property name="text">
     <string/>
@@ -666,7 +496,7 @@ color: rgb(0, 0, 0);</string>
    <property name="geometry">
     <rect>
      <x>540</x>
-     <y>150</y>
+     <y>95</y>
      <width>81</width>
      <height>22</height>
     </rect>
@@ -690,7 +520,7 @@ color: rgb(0, 0, 0);</string>
    <property name="geometry">
     <rect>
      <x>260</x>
-     <y>360</y>
+     <y>300</y>
      <width>81</width>
      <height>27</height>
     </rect>
@@ -713,7 +543,7 @@ border-style: solid;</string>
    <property name="geometry">
     <rect>
      <x>770</x>
-     <y>476</y>
+     <y>390</y>
      <width>101</width>
      <height>24</height>
     </rect>
@@ -740,8 +570,8 @@ border-style: solid;</string>
   <widget class="QLabel" name="pollingTimeSetLabel">
    <property name="geometry">
     <rect>
-     <x>130</x>
-     <y>90</y>
+     <x>110</x>
+     <y>10</y>
      <width>211</width>
      <height>21</height>
     </rect>
@@ -763,7 +593,7 @@ background-color: rgb(255, 255, 255);</string>
    <property name="geometry">
     <rect>
      <x>370</x>
-     <y>150</y>
+     <y>95</y>
      <width>71</width>
      <height>22</height>
     </rect>
@@ -780,81 +610,11 @@ background-color: rgb(255, 255, 255);</string>
     <string>5分钟</string>
    </property>
   </widget>
-  <widget class="QRadioButton" name="setSysTimeRadioButton">
-   <property name="geometry">
-    <rect>
-     <x>135</x>
-     <y>312</y>
-     <width>21</width>
-     <height>22</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-  </widget>
-  <widget class="QSlider" name="saturationSlider">
-   <property name="geometry">
-    <rect>
-     <x>640</x>
-     <y>540</y>
-     <width>131</width>
-     <height>29</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">QSlider::groove:horizontal{border: 1px solid #4A708B;background: #C0C0C0;height: 5px;border-radius: 1px;padding-left:-1px;padding-right:-1px;}
-
-QSlider::sub-page:horizontal{background: qlineargradient(x1:0, y1:0, x2:0, y2:1,stop:0 #B1B1B1,stop:1 #c4c4c4);background:qlineargradient(x1: 0, y1: 0.2, x2: 1, y2: 1,stop: 0 #5DCCFF,stop: 1 #1874CD);border: 1px solid #4A708B;height: 10px;border-radius: 2px;}
-
-QSlider::add-page:horizontal{background: #575757;border: 0px solid #777;height: 10px;border-radius: 2px;}
-
-QSlider::handle:horizontal{background: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5,stop:0.6 #45ADED, stop:0.778409 rgba(255, 255, 255, 255));width: 11px;margin-top: -3px;margin-bottom: -3px;border-radius: 5px;}
-
-QSlider::handle:horizontal:hover{background: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0.6 #2A8BDA,stop:0.778409 rgba(255, 255, 255, 255));width: 11px;margin-top: -3px;margin-bottom: -3px;border-radius: 5px;}
-
-QSlider::sub-page:horizontal:disabled{background: #00009C;border-color: #999;}
-
-QSlider::add-page:horizontal:disabled{background: #eee;border-color: #999;}
-
-QSlider::handle:horizontal:disabled{background: #eee;border: 1px solid #aaa;border-radius: 4px;}</string>
-   </property>
-   <property name="maximum">
-    <number>100</number>
-   </property>
-   <property name="value">
-    <number>50</number>
-   </property>
-   <property name="orientation">
-    <enum>Qt::Horizontal</enum>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="saturationLineEdit">
-   <property name="geometry">
-    <rect>
-     <x>780</x>
-     <y>540</y>
-     <width>41</width>
-     <height>27</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>12</pointsize>
-    </font>
-   </property>
-   <property name="text">
-    <string>128</string>
-   </property>
-  </widget>
   <widget class="QPushButton" name="imageParamSetPushButton">
    <property name="geometry">
     <rect>
-     <x>670</x>
-     <y>610</y>
+     <x>680</x>
+     <y>520</y>
      <width>81</width>
      <height>27</height>
     </rect>
@@ -879,7 +639,7 @@ border-style: solid;</string>
    <property name="geometry">
     <rect>
      <x>620</x>
-     <y>150</y>
+     <y>95</y>
      <width>81</width>
      <height>22</height>
     </rect>
@@ -896,54 +656,11 @@ border-style: solid;</string>
     <string>自定义</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="configFileSelectionPushButton">
-   <property name="geometry">
-    <rect>
-     <x>810</x>
-     <y>311</y>
-     <width>81</width>
-     <height>27</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>12</pointsize>
-    </font>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">color: rgb(255, 255, 255);
-background-image: url(:/res/anniubk.png);
-border-color: rgb(33, 131, 229);
-border-width: 1px;
-border-style: solid;</string>
-   </property>
-   <property name="text">
-    <string>浏览</string>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="contrastLineEdit">
-   <property name="geometry">
-    <rect>
-     <x>780</x>
-     <y>570</y>
-     <width>41</width>
-     <height>27</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>12</pointsize>
-    </font>
-   </property>
-   <property name="text">
-    <string>128</string>
-   </property>
-  </widget>
   <widget class="QLabel" name="label_7">
    <property name="geometry">
     <rect>
      <x>810</x>
-     <y>150</y>
+     <y>100</y>
      <width>31</width>
      <height>17</height>
     </rect>
@@ -963,8 +680,8 @@ border-style: solid;</string>
   <widget class="QLabel" name="configFileSelectionLabel">
    <property name="geometry">
     <rect>
-     <x>540</x>
-     <y>290</y>
+     <x>130</x>
+     <y>430</y>
      <width>101</width>
      <height>17</height>
     </rect>
@@ -978,15 +695,15 @@ border-style: solid;</string>
     <string notr="true">background-color: rgb(255, 255, 255);</string>
    </property>
    <property name="text">
-    <string>选择配置文件</string>
+    <string>选择配置文件:</string>
    </property>
   </widget>
   <widget class="QLineEdit" name="configFileDisplayLineEdit">
    <property name="geometry">
     <rect>
-     <x>540</x>
-     <y>310</y>
-     <width>251</width>
+     <x>130</x>
+     <y>460</y>
+     <width>121</width>
      <height>27</height>
     </rect>
    </property>
@@ -1000,7 +717,7 @@ border-style: solid;</string>
    <property name="geometry">
     <rect>
      <x>450</x>
-     <y>90</y>
+     <y>13</y>
      <width>61</width>
      <height>22</height>
     </rect>
@@ -1017,35 +734,13 @@ border-style: solid;</string>
     <string>20秒</string>
    </property>
   </widget>
-  <widget class="QLabel" name="imageParamSetLabel">
-   <property name="geometry">
-    <rect>
-     <x>530</x>
-     <y>417</y>
-     <width>361</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>12</pointsize>
-    </font>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">color: rgb(255, 255, 255);
-background-color: rgb(33, 131, 229);</string>
-   </property>
-   <property name="text">
-    <string>   图像参数设置</string>
-   </property>
-  </widget>
   <widget class="QLabel" name="label_14">
    <property name="geometry">
     <rect>
-     <x>120</x>
-     <y>447</y>
-     <width>361</width>
-     <height>211</height>
+     <x>530</x>
+     <y>140</y>
+     <width>394</width>
+     <height>201</height>
     </rect>
    </property>
    <property name="styleSheet">
@@ -1064,7 +759,7 @@ background-color: rgb(33, 131, 229);</string>
    <property name="geometry">
     <rect>
      <x>550</x>
-     <y>480</y>
+     <y>394</y>
      <width>51</width>
      <height>17</height>
     </rect>
@@ -1084,10 +779,10 @@ background-color: rgb(33, 131, 229);</string>
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
-     <x>120</x>
-     <y>10</y>
-     <width>771</width>
-     <height>55</height>
+     <x>100</x>
+     <y>50</y>
+     <width>821</width>
+     <height>31</height>
     </rect>
    </property>
    <property name="font">
@@ -1111,7 +806,7 @@ background-color: rgb(33, 131, 229);</string>
    <property name="geometry">
     <rect>
      <x>210</x>
-     <y>23</y>
+     <y>50</y>
      <width>131</width>
      <height>27</height>
     </rect>
@@ -1126,7 +821,7 @@ background-color: rgb(33, 131, 229);</string>
    <property name="geometry">
     <rect>
      <x>700</x>
-     <y>147</y>
+     <y>95</y>
      <width>101</width>
      <height>27</height>
     </rect>
@@ -1143,29 +838,13 @@ background-color: rgb(33, 131, 229);</string>
     <bool>false</bool>
    </property>
   </widget>
-  <widget class="QRadioButton" name="setManalTimeRadioButton">
-   <property name="geometry">
-    <rect>
-     <x>135</x>
-     <y>258</y>
-     <width>21</width>
-     <height>22</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-   <property name="checked">
-    <bool>false</bool>
-   </property>
-  </widget>
   <widget class="QLabel" name="label_11">
    <property name="geometry">
     <rect>
-     <x>530</x>
-     <y>227</y>
-     <width>361</width>
-     <height>181</height>
+     <x>100</x>
+     <y>350</y>
+     <width>411</width>
+     <height>201</height>
     </rect>
    </property>
    <property name="styleSheet">
@@ -1183,8 +862,8 @@ background-color: rgb(33, 131, 229);</string>
   <widget class="QPushButton" name="alarmPushButton">
    <property name="geometry">
     <rect>
-     <x>770</x>
-     <y>20</y>
+     <x>590</x>
+     <y>590</y>
      <width>111</width>
      <height>35</height>
     </rect>
@@ -1212,71 +891,11 @@ QPushButton:checked
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QSlider" name="brightnessSlider">
-   <property name="geometry">
-    <rect>
-     <x>640</x>
-     <y>510</y>
-     <width>131</width>
-     <height>29</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">QSlider::groove:horizontal{border: 1px solid #4A708B;background: #C0C0C0;height: 5px;border-radius: 1px;padding-left:-1px;padding-right:-1px;}
-
-QSlider::sub-page:horizontal{background: qlineargradient(x1:0, y1:0, x2:0, y2:1,stop:0 #B1B1B1,stop:1 #c4c4c4);background:qlineargradient(x1: 0, y1: 0.2, x2: 1, y2: 1,stop: 0 #5DCCFF,stop: 1 #1874CD);border: 1px solid #4A708B;height: 10px;border-radius: 2px;}
-
-QSlider::add-page:horizontal{background: #575757;border: 0px solid #777;height: 10px;border-radius: 2px;}
-
-QSlider::handle:horizontal{background: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5,stop:0.6 #45ADED, stop:0.778409 rgba(255, 255, 255, 255));width: 11px;margin-top: -3px;margin-bottom: -3px;border-radius: 5px;}
-
-QSlider::handle:horizontal:hover{background: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0.6 #2A8BDA,stop:0.778409 rgba(255, 255, 255, 255));width: 11px;margin-top: -3px;margin-bottom: -3px;border-radius: 5px;}
-
-QSlider::sub-page:horizontal:disabled{background: #00009C;border-color: #999;}
-
-QSlider::add-page:horizontal:disabled{background: #eee;border-color: #999;}
-
-QSlider::handle:horizontal:disabled{background: #eee;border: 1px solid #aaa;border-radius: 4px;}</string>
-   </property>
-   <property name="minimum">
-    <number>0</number>
-   </property>
-   <property name="maximum">
-    <number>100</number>
-   </property>
-   <property name="value">
-    <number>50</number>
-   </property>
-   <property name="orientation">
-    <enum>Qt::Horizontal</enum>
-   </property>
-  </widget>
-  <widget class="QLabel" name="contrastLabel">
-   <property name="geometry">
-    <rect>
-     <x>590</x>
-     <y>575</y>
-     <width>51</width>
-     <height>17</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>12</pointsize>
-    </font>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">background-color: rgb(255, 255, 255);</string>
-   </property>
-   <property name="text">
-    <string>对比度</string>
-   </property>
-  </widget>
   <widget class="QLabel" name="label_4">
    <property name="geometry">
     <rect>
      <x>810</x>
-     <y>90</y>
+     <y>13</y>
      <width>31</width>
      <height>17</height>
     </rect>
@@ -1293,33 +912,11 @@ QSlider::handle:horizontal:disabled{background: #eee;border: 1px solid #aaa;bord
     <string>秒</string>
    </property>
   </widget>
-  <widget class="QLabel" name="devTimeAdjustLabel">
-   <property name="geometry">
-    <rect>
-     <x>120</x>
-     <y>199</y>
-     <width>361</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>12</pointsize>
-    </font>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">color: rgb(255, 255, 255);
-background-color: rgb(33, 131, 229);</string>
-   </property>
-   <property name="text">
-    <string>   设备校时</string>
-   </property>
-  </widget>
   <widget class="QPushButton" name="localSetPushButton">
    <property name="geometry">
     <rect>
-     <x>150</x>
-     <y>620</y>
+     <x>550</x>
+     <y>300</y>
      <width>81</width>
      <height>27</height>
     </rect>
@@ -1340,82 +937,615 @@ border-style: solid;</string>
     <string>本地设置</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="timeSetPushButton">
+  <widget class="QPushButton" name="canselPushButton">
    <property name="geometry">
     <rect>
-     <x>450</x>
-     <y>259</y>
-     <width>21</width>
-     <height>21</height>
+     <x>760</x>
+     <y>590</y>
+     <width>111</width>
+     <height>35</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+    </font>
+   </property>
    <property name="styleSheet">
-    <string notr="true">border-image: url(:/res/time_set.png);</string>
+    <string notr="true">QPushButton
+{background-color: rgb(255, 255, 255);color: rgb(86, 164, 246);border-color: rgb(86, 164, 246);border-width: 1px;border-style: solid;}
+
+QPushButton:hover{background-color: rgb(246, 246, 246);color: rgb(86, 164, 246);border-color: rgb(86, 164, 246);border-width: 1px;border-style: solid;}
+
+QPushButton:pressed{background-color: rgb(86, 164, 246);color: rgb(255, 255, 255);border-color: rgb(86, 164, 246);border-width: 1px;border-style: solid;}
+
+QPushButton:checked
+{background-color: rgb(255, 0, 0);color: rgb(86, 164, 246);border-color: rgb(86, 164, 246);border-width: 1px;border-style: solid;}</string>
+   </property>
+   <property name="text">
+    <string>注销</string>
+   </property>
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_8">
+   <property name="geometry">
+    <rect>
+     <x>490</x>
+     <y>60</y>
+     <width>67</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>PIS设置</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="PISSetcomboBox">
+   <property name="geometry">
+    <rect>
+     <x>570</x>
+     <y>50</y>
+     <width>121</width>
+     <height>27</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="PISSetPushButton">
+   <property name="geometry">
+    <rect>
+     <x>720</x>
+     <y>50</y>
+     <width>101</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">color: rgb(255, 255, 255);
+background-image: url(:/res/anniubk.png);
+border-color: rgb(33, 131, 229);
+border-width: 1px;
+border-style: solid;</string>
+   </property>
+   <property name="text">
+    <string>确定</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_9">
+   <property name="geometry">
+    <rect>
+     <x>250</x>
+     <y>150</y>
+     <width>67</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>手动校时</string>
+   </property>
+  </widget>
+  <widget class="QTextEdit" name="textEdit">
+   <property name="geometry">
+    <rect>
+     <x>140</x>
+     <y>170</y>
+     <width>341</width>
+     <height>91</height>
+    </rect>
+   </property>
+   <property name="html">
+    <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;更改系统时间&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_6">
+   <property name="geometry">
+    <rect>
+     <x>150</x>
+     <y>200</y>
+     <width>67</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>日期</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_12">
+   <property name="geometry">
+    <rect>
+     <x>150</x>
+     <y>230</y>
+     <width>67</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>时间</string>
+   </property>
+  </widget>
+  <widget class="QDateEdit" name="dateEdit">
+   <property name="geometry">
+    <rect>
+     <x>230</x>
+     <y>200</y>
+     <width>118</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="dateTime">
+    <datetime>
+     <hour>0</hour>
+     <minute>0</minute>
+     <second>0</second>
+     <year>2021</year>
+     <month>8</month>
+     <day>1</day>
+    </datetime>
+   </property>
+   <property name="maximumTime">
+    <time>
+     <hour>23</hour>
+     <minute>59</minute>
+     <second>59</second>
+    </time>
+   </property>
+   <property name="displayFormat">
+    <string>yyyy-MM-dd</string>
+   </property>
+  </widget>
+  <widget class="QTimeEdit" name="timeEdit">
+   <property name="geometry">
+    <rect>
+     <x>230</x>
+     <y>230</y>
+     <width>118</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="dateTime">
+    <datetime>
+     <hour>10</hour>
+     <minute>3</minute>
+     <second>3</second>
+     <year>2000</year>
+     <month>1</month>
+     <day>1</day>
+    </datetime>
+   </property>
+   <property name="displayFormat">
+    <string>hh:mm:ss</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="systimeAdjustLabel">
+   <property name="geometry">
+    <rect>
+     <x>410</x>
+     <y>270</y>
+     <width>91</width>
+     <height>21</height>
+    </rect>
    </property>
    <property name="text">
     <string/>
    </property>
   </widget>
-  <zorder>updateStatueTextEdit</zorder>
+  <widget class="QLineEdit" name="configFileDisplayLineEdit_2">
+   <property name="geometry">
+    <rect>
+     <x>320</x>
+     <y>460</y>
+     <width>121</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+    </font>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="configFilelookPushButton">
+   <property name="geometry">
+    <rect>
+     <x>260</x>
+     <y>460</y>
+     <width>51</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">color: rgb(255, 255, 255);
+background-image: url(:/res/anniubk.png);
+border-color: rgb(33, 131, 229);
+border-width: 1px;
+border-style: solid;</string>
+   </property>
+   <property name="text">
+    <string>浏览</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="configFilelookPushButton_2">
+   <property name="geometry">
+    <rect>
+     <x>450</x>
+     <y>460</y>
+     <width>51</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">color: rgb(255, 255, 255);
+background-image: url(:/res/anniubk.png);
+border-color: rgb(33, 131, 229);
+border-width: 1px;
+border-style: solid;</string>
+   </property>
+   <property name="text">
+    <string>浏览</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="configFileImportPushButton_2">
+   <property name="geometry">
+    <rect>
+     <x>320</x>
+     <y>500</y>
+     <width>71</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">color: rgb(255, 255, 255);
+background-image: url(:/res/anniubk.png);
+border-color: rgb(33, 131, 229);
+border-width: 1px;
+border-style: solid;</string>
+   </property>
+   <property name="text">
+    <string>导出日志</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_13">
+   <property name="geometry">
+    <rect>
+     <x>530</x>
+     <y>350</y>
+     <width>394</width>
+     <height>201</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(255, 255, 255);</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_15">
+   <property name="geometry">
+    <rect>
+     <x>660</x>
+     <y>360</y>
+     <width>101</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>图形参数配置</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_16">
+   <property name="geometry">
+    <rect>
+     <x>250</x>
+     <y>360</y>
+     <width>67</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>设备配置</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_18">
+   <property name="geometry">
+    <rect>
+     <x>180</x>
+     <y>380</y>
+     <width>67</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>设备选择:</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="comboBox">
+   <property name="geometry">
+    <rect>
+     <x>270</x>
+     <y>380</y>
+     <width>86</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <item>
+    <property name="text">
+     <string>终端软件</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QLabel" name="label_19">
+   <property name="geometry">
+    <rect>
+     <x>320</x>
+     <y>430</y>
+     <width>101</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>选择升级文件:</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_17">
+   <property name="geometry">
+    <rect>
+     <x>1100</x>
+     <y>430</y>
+     <width>16</width>
+     <height>18</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(255, 255, 255);
+</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="brightnessLabel">
+   <property name="geometry">
+    <rect>
+     <x>540</x>
+     <y>430</y>
+     <width>51</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(255, 255, 255);</string>
+   </property>
+   <property name="text">
+    <string>亮   度:</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="saturationLineEdit">
+   <property name="geometry">
+    <rect>
+     <x>600</x>
+     <y>460</y>
+     <width>81</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>128</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="contrastLineEdit">
+   <property name="geometry">
+    <rect>
+     <x>600</x>
+     <y>490</y>
+     <width>81</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>128</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="saturationLabel">
+   <property name="geometry">
+    <rect>
+     <x>540</x>
+     <y>460</y>
+     <width>52</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(255, 255, 255);</string>
+   </property>
+   <property name="text">
+    <string>饱和度:</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="contrastLabel">
+   <property name="geometry">
+    <rect>
+     <x>540</x>
+     <y>490</y>
+     <width>52</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(255, 255, 255);</string>
+   </property>
+   <property name="text">
+    <string>对比度:</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="brightnessLineEdit">
+   <property name="geometry">
+    <rect>
+     <x>600</x>
+     <y>430</y>
+     <width>81</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>128</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="timeSetPushButton">
+   <property name="geometry">
+    <rect>
+     <x>370</x>
+     <y>220</y>
+     <width>71</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">color: rgb(255, 255, 255);
+background-image: url(:/res/anniubk.png);
+border-color: rgb(33, 131, 229);
+border-width: 1px;
+border-style: solid;</string>
+   </property>
+   <property name="text">
+    <string>确定</string>
+   </property>
+  </widget>
+  <zorder>label_13</zorder>
   <zorder>label_3</zorder>
   <zorder>label_2</zorder>
   <zorder>label_10</zorder>
-  <zorder>label_6</zorder>
   <zorder>pollingTimeSetRadioButton</zorder>
-  <zorder>label_17</zorder>
   <zorder>cameraLabel</zorder>
   <zorder>devConfigLabel</zorder>
   <zorder>presetReturnTimeSetRadioButton_2</zorder>
-  <zorder>saturationLabel</zorder>
-  <zorder>contrastSlider</zorder>
-  <zorder>updateLabel</zorder>
   <zorder>pollingTimeSetRadioButton_4</zorder>
-  <zorder>sysTimeAdjustLabel</zorder>
+  <zorder>sysDataAdjustLabel</zorder>
   <zorder>presetReturnTimeSetRadioButton_3</zorder>
   <zorder>timeAdjustPushButton</zorder>
   <zorder>cameraSelectionComboBox</zorder>
   <zorder>pollingTimeSetLabel</zorder>
   <zorder>presetReturnTimeSetRadioButton</zorder>
-  <zorder>setSysTimeRadioButton</zorder>
-  <zorder>saturationSlider</zorder>
-  <zorder>saturationLineEdit</zorder>
   <zorder>imageParamSetPushButton</zorder>
   <zorder>presetReturnTimeSetRadioButton_4</zorder>
-  <zorder>configFileSelectionPushButton</zorder>
-  <zorder>contrastLineEdit</zorder>
   <zorder>label_7</zorder>
   <zorder>pollingTimeSetRadioButton_2</zorder>
-  <zorder>imageParamSetLabel</zorder>
   <zorder>label_14</zorder>
   <zorder>carriageLabel</zorder>
   <zorder>label</zorder>
   <zorder>trainTypeSetComboBox</zorder>
   <zorder>presetReturnTimeSetLineEdit</zorder>
-  <zorder>setManalTimeRadioButton</zorder>
   <zorder>label_11</zorder>
   <zorder>alarmPushButton</zorder>
-  <zorder>brightnessSlider</zorder>
-  <zorder>contrastLabel</zorder>
   <zorder>label_4</zorder>
-  <zorder>devTimeAdjustLabel</zorder>
   <zorder>localSetPushButton</zorder>
-  <zorder>timeSetPushButton</zorder>
-  <zorder>brightnessLabel</zorder>
-  <zorder>brightnessLineEdit</zorder>
   <zorder>carriageSelectionComboBox</zorder>
   <zorder>clientRebootPushButton</zorder>
   <zorder>configFileDisplayLineEdit</zorder>
-  <zorder>configFileImportPushButton</zorder>
   <zorder>configFileSelectionLabel</zorder>
-  <zorder>timeSetLineEdit</zorder>
   <zorder>label_5</zorder>
   <zorder>updateStatusLabel</zorder>
-  <zorder>permissonManagePushButton</zorder>
   <zorder>trainTypeSetPushButton</zorder>
   <zorder>pollingTimeSetRadioButton_3</zorder>
   <zorder>pollingTimeSetLineEdit</zorder>
   <zorder>presetReturnTimeSetLabel</zorder>
   <zorder>updateBeginPushButton</zorder>
+  <zorder>canselPushButton</zorder>
+  <zorder>label_8</zorder>
+  <zorder>PISSetcomboBox</zorder>
+  <zorder>PISSetPushButton</zorder>
+  <zorder>label_9</zorder>
+  <zorder>textEdit</zorder>
+  <zorder>label_6</zorder>
+  <zorder>label_12</zorder>
+  <zorder>dateEdit</zorder>
+  <zorder>timeEdit</zorder>
+  <zorder>systimeAdjustLabel</zorder>
+  <zorder>updateStatueTextEdit</zorder>
+  <zorder>configFileDisplayLineEdit_2</zorder>
+  <zorder>configFilelookPushButton</zorder>
+  <zorder>configFilelookPushButton_2</zorder>
+  <zorder>configFileImportPushButton_2</zorder>
+  <zorder>label_17</zorder>
+  <zorder>permissonManagePushButton</zorder>
+  <zorder>label_16</zorder>
+  <zorder>label_15</zorder>
+  <zorder>label_18</zorder>
+  <zorder>comboBox</zorder>
+  <zorder>label_19</zorder>
+  <zorder>brightnessLabel</zorder>
+  <zorder>saturationLineEdit</zorder>
+  <zorder>contrastLineEdit</zorder>
+  <zorder>saturationLabel</zorder>
+  <zorder>contrastLabel</zorder>
+  <zorder>brightnessLineEdit</zorder>
+  <zorder>configFileImportPushButton</zorder>
+  <zorder>timeSetPushButton</zorder>
  </widget>
  <resources/>
  <connections/>

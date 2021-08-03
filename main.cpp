@@ -6,6 +6,12 @@
 #include <QtVirtualKeyboard>
 #include <QPixmap>
 #include <QSplashScreen>
+#include <QTextCodec>
+#include <QDebug>
+#include <QSqlDatabase>
+#include <QtPlugin>
+#include "log.h"
+
 
 
 choiceLoginDevWidget *g_choiceLoginDevPage = NULL;    //选择登录设备页面
@@ -19,9 +25,33 @@ int main(int argc, char *argv[])
     qputenv("QT_IM_MODULE", QByteArray("qtvirtualkeyboard"));
 
     QApplication a(argc, argv);
+    char acNvrServerIp[128] = {0}, acClientVersion[64] = {0};
+    T_LOG_INFO tLogInfo;
+
+
+    LOG_Init();    //本地日志模块初始化
+
+    /*程序启动记录日志*/
+    memset(&tLogInfo, 0, sizeof(T_LOG_INFO));
+    tLogInfo.iLogType = 0;
+    STATE_GetSysVersion(acClientVersion, sizeof(acClientVersion));
+    snprintf(tLogInfo.acLogDesc, sizeof(tLogInfo.acLogDesc), "Startup %s!", acClientVersion);
+    LOG_WriteLog(&tLogInfo);
+
+    PMSG_Init();    //协议通信模块初始化
+
+    STATE_ReadTrainConfigFile();	//程序运行起来读取一次车型配置文件
+
+
 
     a.setWindowIcon(QIcon(":/res/info.png"));   //设置窗口图标，这里主要是messagebox窗体会显示，而避免出现QT图标
+    qDebug() << "drivers------------------------"<< QSqlDatabase::drivers();
 
+
+//    QTextCodec *codec = QTextCodec::codecForName("System");
+//    QTextCodec::setCodecForLocale(codec);
+//    QTextCodec::setCodecForCStrings(codec);
+//    QTextCodec::setCodecForTr(codec);
 
     QPixmap pixmap(":/res/background.png");
     QSplashScreen splash(pixmap);
@@ -32,6 +62,7 @@ int main(int argc, char *argv[])
     g_choiceLoginDevPage = new choiceLoginDevWidget();
     g_loginPage = new loginWidget();
     g_pvmsMenuPage = new pvmsMenuWidget();
+
     g_choiceLoginDevPage->show();
     g_loginPage->hide();
     g_pvmsMenuPage->hide();

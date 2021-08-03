@@ -9,7 +9,7 @@ loginWidget::loginWidget(QWidget *parent) :
 {
     ui->setupUi(this);
     this->setWindowFlags(Qt::FramelessWindowHint);
-
+    this->setGeometry(0,0,1024,768);
     ui->ensure->setFocusPolicy(Qt::NoFocus); // 得到焦点时，不显示虚线框
     ui->cansel->setFocusPolicy(Qt::NoFocus);
 
@@ -51,7 +51,6 @@ void loginWidget::canselButtonSlot()
 }
 void loginWidget::showPageSlot(int iType)
 {
-    qDebug()<<"000000000000000";
     this->show();
 }
 void loginWidget::canselSlot()
