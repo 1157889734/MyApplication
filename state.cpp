@@ -536,6 +536,7 @@ int STATE_ReadTrainConfigFile()
 	memset(&g_tTrainConfigInfo, 0, sizeof(T_TRAIN_CONFIG));
 	STATE_GetCurrentTrainType(acTrainType, sizeof(acTrainType));   //获取车型
 	snprintf(acTrainConfigFile, sizeof(acTrainConfigFile), "%s/%s.ini", CFGCONFIGFILEPATH, acTrainType);
+
 	iRet = ReadParam(acTrainConfigFile, "[PVSM_TRAIN]", "FormationType", acparseStr);
 	if (iRet < 0)
 	{
