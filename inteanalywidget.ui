@@ -980,7 +980,7 @@ border-style: solid;</string>
     <string>时间</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_34">
+  <widget class="QPushButton" name="alarmPushButton">
    <property name="geometry">
     <rect>
      <x>800</x>
@@ -1066,7 +1066,7 @@ border-style: solid;</string>
   <zorder>EnddateEdit</zorder>
   <zorder>label_15</zorder>
   <zorder>label</zorder>
-  <zorder>pushButton_34</zorder>
+  <zorder>alarmPushButton</zorder>
   <zorder>canselPushButton</zorder>
  </widget>
  <resources>

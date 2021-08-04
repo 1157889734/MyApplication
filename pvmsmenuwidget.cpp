@@ -57,6 +57,8 @@ pvmsMenuWidget::pvmsMenuWidget(QWidget *parent) :
     connect(m_recordPlayPage, SIGNAL(alarmPushButoonClickSignal()), this, SLOT(alarmPageShowSlot()));
     connect(m_devManagePage, SIGNAL(alarmPushButoonClickSignal()), this, SLOT(alarmPageShowSlot()));
     connect(m_devUpdatePage, SIGNAL(alarmPushButoonClickSignal()), this, SLOT(alarmPageShowSlot()));
+    connect(m_inteAnalyPage, SIGNAL(alarmPushButoonClickSignal()), this, SLOT(alarmPageShowSlot()));
+
 
 
     ui->pvmsMonitorMenuPushButton->setChecked(true);

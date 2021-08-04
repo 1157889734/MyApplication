@@ -5,6 +5,7 @@
 #include "log.h"
 #include <stdio.h>
 #include <netinet/in.h>
+#include <QDebug>
 
 static int g_iDNum = 0;
 
@@ -241,6 +242,8 @@ void devManageWidget::getTrainConfig()   //获取车型配置信息，填充页�
 
     memset(&tTrainConfigInfo, 0, sizeof(T_TRAIN_CONFIG));
     STATE_GetCurrentTrainConfigInfo(&tTrainConfigInfo);
+
+    qDebug()<<"*****************--:"<<tTrainConfigInfo.iFormationType;
     /*获取编组信息，再填充编组设置单选框*/
     if (1 == tTrainConfigInfo.iFormationType)
     {
