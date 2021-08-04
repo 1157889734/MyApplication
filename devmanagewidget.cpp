@@ -15,6 +15,7 @@ devManageWidget::devManageWidget(QWidget *parent) :
 {
     ui->setupUi(this);
     this->setWindowFlags(Qt::FramelessWindowHint);
+    this->showFullScreen();
 
 
     ui->devStorageTableWidget->setFocusPolicy(Qt::NoFocus);
@@ -76,6 +77,7 @@ devManageWidget::devManageWidget(QWidget *parent) :
 
 
     getTrainConfig();
+
 
     m_alarmHappenTimer = NULL;
 
@@ -243,7 +245,6 @@ void devManageWidget::getTrainConfig()   //获取车型配置信息，填充页�
     memset(&tTrainConfigInfo, 0, sizeof(T_TRAIN_CONFIG));
     STATE_GetCurrentTrainConfigInfo(&tTrainConfigInfo);
 
-    qDebug()<<"*****************--:"<<tTrainConfigInfo.iFormationType;
     /*获取编组信息，再填充编组设置单选框*/
     if (1 == tTrainConfigInfo.iFormationType)
     {

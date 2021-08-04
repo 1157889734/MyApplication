@@ -281,16 +281,6 @@ border-style: solid;</string>
     <string>导入</string>
    </property>
   </widget>
-  <widget class="QTextEdit" name="updateStatueTextEdit">
-   <property name="geometry">
-    <rect>
-     <x>550</x>
-     <y>180</y>
-     <width>302</width>
-     <height>111</height>
-    </rect>
-   </property>
-  </widget>
   <widget class="QLabel" name="label_2">
    <property name="geometry">
     <rect>
@@ -912,31 +902,6 @@ QPushButton:checked
     <string>秒</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="localSetPushButton">
-   <property name="geometry">
-    <rect>
-     <x>550</x>
-     <y>300</y>
-     <width>81</width>
-     <height>27</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>12</pointsize>
-    </font>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">color: rgb(255, 255, 255);
-background-image: url(:/res/anniubk.png);
-border-color: rgb(33, 131, 229);
-border-width: 1px;
-border-style: solid;</string>
-   </property>
-   <property name="text">
-    <string>本地设置</string>
-   </property>
-  </widget>
   <widget class="QPushButton" name="canselPushButton">
    <property name="geometry">
     <rect>
@@ -1028,23 +993,6 @@ border-style: solid;</string>
    </property>
    <property name="text">
     <string>手动校时</string>
-   </property>
-  </widget>
-  <widget class="QTextEdit" name="textEdit">
-   <property name="geometry">
-    <rect>
-     <x>140</x>
-     <y>170</y>
-     <width>341</width>
-     <height>91</height>
-    </rect>
-   </property>
-   <property name="html">
-    <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;更改系统时间&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_6">
@@ -1454,7 +1402,7 @@ border-style: solid;</string>
   <widget class="QPushButton" name="timeSetPushButton">
    <property name="geometry">
     <rect>
-     <x>370</x>
+     <x>380</x>
      <y>220</y>
      <width>71</width>
      <height>31</height>
@@ -1503,7 +1451,6 @@ border-style: solid;</string>
   <zorder>label_11</zorder>
   <zorder>alarmPushButton</zorder>
   <zorder>label_4</zorder>
-  <zorder>localSetPushButton</zorder>
   <zorder>carriageSelectionComboBox</zorder>
   <zorder>clientRebootPushButton</zorder>
   <zorder>configFileDisplayLineEdit</zorder>
@@ -1520,13 +1467,11 @@ border-style: solid;</string>
   <zorder>PISSetcomboBox</zorder>
   <zorder>PISSetPushButton</zorder>
   <zorder>label_9</zorder>
-  <zorder>textEdit</zorder>
   <zorder>label_6</zorder>
   <zorder>label_12</zorder>
   <zorder>dateEdit</zorder>
   <zorder>timeEdit</zorder>
   <zorder>systimeAdjustLabel</zorder>
-  <zorder>updateStatueTextEdit</zorder>
   <zorder>configFileDisplayLineEdit_2</zorder>
   <zorder>configFilelookPushButton</zorder>
   <zorder>configFilelookPushButton_2</zorder>

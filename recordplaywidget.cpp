@@ -74,6 +74,10 @@ recordPlayWidget::recordPlayWidget(QWidget *parent) :
     ui->minusStepPushButton->setFocusPolicy(Qt::NoFocus);
     ui->playSpeedLineEdit->setFocusPolicy(Qt::NoFocus);
 
+
+    setPlayButtonStyleSheet();
+
+    getTrainConfig();
     /*新建一个播放窗体*/
 #if 1
     m_playWin = new QWidget(this);
@@ -82,20 +86,20 @@ recordPlayWidget::recordPlayWidget(QWidget *parent) :
     m_playWin->setStyleSheet("QWidget{background-color: rgb(0, 0, 0);}");
 #endif
 
-#if 0
+#if 1
     list = new QMediaPlaylist;
-    list->addMedia(QUrl("/oem/SampleVideo_1280x720_5mb.mp4"));
+//    list->addMedia(QUrl("/oem/SampleVideo_1280x720_5mb.mp4"));
     QUrl url("rtsp://admin:admin123@168.168.102.20");
 
     player = new QMediaPlayer();
-    player->setPlaylist(list);
-//    player->setMedia(url);
+//    player->setPlaylist(list);
+    player->setMedia(url);
 
     videoViewer = new QVideoWidget(m_playWin);
     videoViewer->setGeometry(0, 7, 698, 580);
     player->setVideoOutput(videoViewer);
 
-    player->play();
+//    player->play();
 
 
 #endif
@@ -119,11 +123,6 @@ recordPlayWidget::recordPlayWidget(QWidget *parent) :
     ui->StartdateEdit->setCalendarPopup(true);
     ui->EnddateEdit->setCalendarPopup(true);
 //    ui->StartdateEdit->setAttribute(Qt::WA_TransparentForMouseEvents,Mouseflag);
-
-
-//    connect(ui->canselPushButton, SIGNAL(clicked()), this, SLOT(registOutButtonClick()));
-
-    connect(ui->queryPushButton, SIGNAL(clicked(bool)), this, SLOT(recordQuerySlot()));    //录像查询按钮按键信号响应
 
     /*创建时间设置子窗体，默认隐藏*/
 //    timeSetWidget = new timeSet(this);
@@ -180,6 +179,8 @@ recordPlayWidget::recordPlayWidget(QWidget *parent) :
 
     connect(ui->alarmPushButton, SIGNAL(clicked(bool)), this, SLOT(alarmPushButoonClickSlot()));   //报警按钮按键信号响应打开报警信息界面
     connect(ui->canselPushButton, SIGNAL(clicked()), this, SLOT(registOutButtonClick()));
+
+    connect(ui->queryPushButton, SIGNAL(clicked(bool)), this, SLOT(recordQuerySlot()));    //录像查询按钮按键信号响应
     connect(ui->downLoadPushButton, SIGNAL(clicked(bool)), this, SLOT(recordDownloadSlot()));    //录像下载按钮按键信号响应
     connect(ui->playPushButton, SIGNAL(clicked(bool)), this, SLOT(recordPlayStartSlot()));	   //播放按钮按键信号响应
     connect(ui->stopPushButton, SIGNAL(clicked(bool)), this, SLOT(recordPlayStopSlot()));		//停止按钮按键信号响应
@@ -288,9 +289,59 @@ void recordPlayWidget::recordDownloadSlot()
 
 
 }
+
+void recordPlayWidget::setPlayButtonStyleSheet()
+{
+    if (0 == m_iPlayFlag)
+    {
+        ui->playPushButton->setStyleSheet("QPushButton{border-image: url(:/res/play_nor.png);background-color: rgb(255, 255, 255);}"
+                                            "QPushButton:hover{border-image: url(:/res/play_hover.png);background-color: rgb(255, 255, 255);}"
+                                            "QPushButton:pressed{border-image: url(:/res/play_down.png);background-color: rgb(255, 255, 255);}");
+    }
+    else
+    {
+        ui->playPushButton->setStyleSheet("QPushButton{border-image: url(:/res/pause_nor.png);background-color: rgb(255, 255, 255);}"
+                                            "QPushButton:hover{border-image: url(:/res/pause_hover.png);background-color: rgb(255, 255, 255);}"
+                                            "QPushButton:pressed{border-image: url(:/res/pause_down.png);background-color: rgb(255, 255, 255);}");
+    }
+}
+
+void recordPlayWidget::getTrainConfig()    	//获取车型配置文件，初始化车厢及摄像机下拉框
+{
+    int i = 0, j = 0;
+    QString item = "";
+
+    T_TRAIN_CONFIG tTrainConfigInfo;
+    memset(&tTrainConfigInfo, 0, sizeof(T_TRAIN_CONFIG));
+    STATE_GetCurrentTrainConfigInfo(&tTrainConfigInfo);
+
+//    DebugPrint(DEBUG_UI_NOMAL_PRINT, "[%s] GetCurrentTrainConfigInfo, nvr server num=%d\n",__FUNCTION__,tTrainConfigInfo.iNvrServerCount);
+
+    for (i = 0; i < tTrainConfigInfo.iNvrServerCount; i++)
+    {
+        item = "";
+        item = QString::number(tTrainConfigInfo.tNvrServerInfo[i].iCarriageNO);
+        item += tr("号车厢");
+        ui->carSeletionComboBox->addItem(item);
+        m_Phandle[i] = STATE_GetNvrServerPmsgHandle(i);
+        if (0 == i)
+        {
+//            DebugPrint(DEBUG_UI_NOMAL_PRINT, "[%s] the first server has camera num=%d\n",__FUNCTION__,tTrainConfigInfo.tNvrServerInfo[i].iPvmsCameraNum);
+            for (j = 0; j < tTrainConfigInfo.tNvrServerInfo[i].iPvmsCameraNum; j++)
+            {
+                item = "";
+                item = QString::number(8+j);
+                item += tr("号摄像机");
+                ui->cameraSelectionComboBox->addItem(item);
+            }
+        }
+    }
+}
+
+
 void recordPlayWidget::recordPlayStartSlot()
 {
-#if 0
+#if 1
     qDebug()<<"******player.state"<<player->state();
 
     switch(player->state()) {
@@ -323,15 +374,14 @@ void recordPlayWidget::carNoChangeSlot()   //车厢号切换信号响应槽函�
     int i = 0, idex = ui->carSeletionComboBox->currentIndex();    //获取当前车厢选择下拉框的索引
     QString item = "";
     T_TRAIN_CONFIG tTrainConfigInfo;
-
 //    DebugPrint(DEBUG_UI_OPTION_PRINT, "recordPlayWidget change server carriage No!\n");
 
     memset(&tTrainConfigInfo, 0, sizeof(T_TRAIN_CONFIG));
     STATE_GetCurrentTrainConfigInfo(&tTrainConfigInfo);
-#if 0  //不知道为什么要清除
-    ui->camerasSelectionComboBox->setCurrentIndex(-1);
+    ui->cameraSelectionComboBox->setCurrentIndex(-1);
     ui->cameraSelectionComboBox->clear();
-#endif
+
+
     for (i = 0; i < tTrainConfigInfo.tNvrServerInfo[idex].iPvmsCameraNum; i++)        //根据不同车厢位置的NVR服务器的摄像机数量个数跟新摄像机选择下拉框
     {
         item = "";
@@ -339,9 +389,6 @@ void recordPlayWidget::carNoChangeSlot()   //车厢号切换信号响应槽函�
         item += tr("号摄像机");
         ui->cameraSelectionComboBox->addItem(item);
     }
-    qDebug()<<"----"<<ui->cameraSelectionComboBox->currentText();
-
-
 
 }
 

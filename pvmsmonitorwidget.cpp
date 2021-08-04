@@ -7,6 +7,7 @@
 #include "log.h"
 #include <QEvent>
 #include <QMouseEvent>
+#include <qdebug.h>
 
 static pthread_mutex_t g_tCmpCtrlMutex;
 

@@ -49,7 +49,7 @@ devUpdateWidget::devUpdateWidget(QWidget *parent) :
 {
     ui->setupUi(this);
     this->setWindowFlags(Qt::FramelessWindowHint);
-    this->setGeometry(0,0,1024,665);
+
     connect(ui->alarmPushButton, SIGNAL(clicked(bool)), this, SLOT(alarmPushButoonClickSlot()));   //报警按钮按键信号响应打开报警信息界面
     ui->alarmPushButton->setFocusPolicy(Qt::NoFocus);
     m_alarmHappenTimer = NULL;

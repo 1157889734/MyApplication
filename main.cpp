@@ -55,6 +55,7 @@ int main(int argc, char *argv[])
 
     QPixmap pixmap(":/res/background.png");
     QSplashScreen splash(pixmap);
+    splash.showFullScreen();
     splash.show();
     a.processEvents();
 

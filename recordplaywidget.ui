@@ -27,21 +27,6 @@
      <pointsize>12</pointsize>
     </font>
    </property>
-   <item>
-    <property name="text">
-     <string>一号</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>二号</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>三号</string>
-    </property>
-   </item>
   </widget>
   <widget class="QLabel" name="playSecLabel">
    <property name="geometry">
@@ -945,26 +930,6 @@ QPushButton:pressed
      <pointsize>12</pointsize>
     </font>
    </property>
-   <item>
-    <property name="text">
-     <string>一号车厢</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>二号车厢</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>三号车厢</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>四号车厢</string>
-    </property>
-   </item>
    <item>
     <property name="text">
      <string/>

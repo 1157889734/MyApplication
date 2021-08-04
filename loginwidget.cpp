@@ -10,6 +10,7 @@ loginWidget::loginWidget(QWidget *parent) :
     ui->setupUi(this);
     this->setWindowFlags(Qt::FramelessWindowHint);
     this->setGeometry(0,0,1024,768);
+    this->showFullScreen();
     ui->ensure->setFocusPolicy(Qt::NoFocus); // 得到焦点时，不显示虚线框
     ui->cansel->setFocusPolicy(Qt::NoFocus);
 

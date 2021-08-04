@@ -36,6 +36,7 @@ public:
     timeSet *timeSetWidget;    //时间设置控制窗体
     bool Mouseflag;
     QMouseEvent *e;
+    int m_iPlayFlag;   //播放标志，0-暂停状态，未播放，1-在播放
 
 protected:
     void mousePressEvent(QMouseEvent *event);
@@ -72,6 +73,10 @@ private:
     int m_iTotalLen;
     char m_acFilePath[MAX_RECORD_SEACH_NUM][MAX_RECFILE_PATH_LEN];   //记录查询到的录像文件路径全名
     PMSG_HANDLE m_Phandle[MAX_SERVER_NUM];    //服务器PMSG通信句柄
+    void setPlayButtonStyleSheet();
+    void getTrainConfig();     //获取车型配置信息
+
+
 
     QMediaPlayer *player;
     QMediaPlaylist *list;

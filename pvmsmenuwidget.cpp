@@ -11,6 +11,8 @@ pvmsMenuWidget::pvmsMenuWidget(QWidget *parent) :
     ui->setupUi(this);
     this->setWindowFlags(Qt::FramelessWindowHint);
     this->setGeometry(0,0,1024,768);
+    this->showFullScreen();
+
     m_pvmsMonitorPage = new pvmsMonitorWidget(this);   //受电弓监控页面
     m_pvmsMonitorPage->setGeometry(0, 103, m_pvmsMonitorPage->width(), m_pvmsMonitorPage->height());   //设置位置
     m_recordPlayPage = new recordPlayWidget(this);     //录像回放页面
@@ -169,7 +171,11 @@ void pvmsMenuWidget::closeAlarmWidget()
 }
 void pvmsMenuWidget::registOutButtonClick()
 {
-
+    ui->pvmsMonitorMenuPushButton->setChecked(true);
+    ui->recordPlayMenuPushButton->setChecked(false);
+    ui->inteAnalyMenuPushButton->setChecked(false);
+    ui->devManageMenuPushButton->setChecked(false);
+    ui->devUpdateMenuPushButton->setChecked(false);
     this->hide();
     emit registOutSignal(PVMSPAGETYPE);    //触发注销信号，带上当前设备类型
 }
