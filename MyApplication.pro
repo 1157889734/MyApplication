@@ -33,7 +33,6 @@ SOURCES += \
     inteanalywidget.cpp \
     devmanagewidget.cpp \
     devupdatewidget.cpp \
-#    pmsgcli.c
     alarmwidget.cpp \
     fileConfig.cpp \
     state.cpp \
@@ -59,7 +58,6 @@ HEADERS += \
     inteanalywidget.h \
     devmanagewidget.h \
     devupdatewidget.h \
-#    pmsgcli.h
     alarmwidget.h \
 #    debug.h \
     fileConfig.h \

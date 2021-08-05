@@ -248,7 +248,7 @@ background-color: rgb(33, 131, 229); </string>
   <widget class="QPushButton" name="stopPushButton">
    <property name="geometry">
     <rect>
-     <x>560</x>
+     <x>550</x>
      <y>620</y>
      <width>41</width>
      <height>41</height>
@@ -502,7 +502,7 @@ background-color: rgb(255, 255, 255);</string>
   <widget class="QPushButton" name="playLastOnePushButton">
    <property name="geometry">
     <rect>
-     <x>340</x>
+     <x>390</x>
      <y>620</y>
      <width>41</width>
      <height>41</height>
@@ -669,7 +669,7 @@ QPushButton:pressed
   <widget class="QPushButton" name="playPushButton">
    <property name="geometry">
     <rect>
-     <x>440</x>
+     <x>450</x>
      <y>620</y>
      <width>41</width>
      <height>41</height>
@@ -860,7 +860,7 @@ QPushButton:pressed
   <widget class="QPushButton" name="slowForwardPushButton">
    <property name="geometry">
     <rect>
-     <x>390</x>
+     <x>330</x>
      <y>620</y>
      <width>41</width>
      <height>41</height>

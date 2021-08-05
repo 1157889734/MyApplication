@@ -9,10 +9,14 @@
 #include "log.h"
 #include <QDebug>
 #include "qplayer.h"
+#include "myslider.h"
+#include <QSlider>
 
 int g_iDateEditNo = 0;      //要显示时间的不同控件的编号
 static int g_iRNum = 0;
 #define PVMSPAGETYPE  2    //此页面类型，2表示受电弓监控页面
+pthread_mutex_t g_sliderValueSetMutex;
+
 
 recordPlayWidget::recordPlayWidget(QWidget *parent) :
     QWidget(parent),
@@ -46,7 +50,8 @@ recordPlayWidget::recordPlayWidget(QWidget *parent) :
                                 "QSlider::sub-page:horizontal:disabled{background: #00009C;border-color: #999;}"
                                 "QSlider::add-page:horizontal:disabled{background: #eee;border-color: #999;}"
                                 "QSlider::handle:horizontal:disabled{background: #eee;border: 1px solid #aaa;border-radius: 4px;}");
-
+    connect(m_playSlider, SIGNAL(presliderPressSianal(int)), this, SLOT(playSliderPressSlot(int)));   //点击进度条信号响应
+    connect(m_playSlider, SIGNAL(presliderMoveSianal(int)), this, SLOT(playSliderMoveSlot(int)));   //拖动进度条信号响应
 
     connect(ui->alarmPushButton, SIGNAL(clicked(bool)), this, SLOT(alarmPushButoonClickSlot()));   //报警按钮按键信号响应打开报警信息界面
     m_alarmHappenTimer = NULL;
@@ -75,48 +80,12 @@ recordPlayWidget::recordPlayWidget(QWidget *parent) :
     ui->playSpeedLineEdit->setFocusPolicy(Qt::NoFocus);
 
 
+    //
+    m_iPlayFlag = 0;
+
     setPlayButtonStyleSheet();
-
     getTrainConfig();
-    /*新建一个播放窗体*/
-#if 1
-    m_playWin = new QWidget(this);
-    m_playWin->setGeometry(320, 7, 698, 580);
-    m_playWin->show();
-    m_playWin->setStyleSheet("QWidget{background-color: rgb(0, 0, 0);}");
-#endif
-
-#if 1
-    list = new QMediaPlaylist;
-//    list->addMedia(QUrl("/oem/SampleVideo_1280x720_5mb.mp4"));
-    QUrl url("rtsp://admin:admin123@168.168.102.20");
-
-    player = new QMediaPlayer();
-//    player->setPlaylist(list);
-    player->setMedia(url);
-
-    videoViewer = new QVideoWidget(m_playWin);
-    videoViewer->setGeometry(0, 7, 698, 580);
-    player->setVideoOutput(videoViewer);
-
-//    player->play();
-
-
-#endif
-
-//    vidoplayer = new QPlayer(this);
-//    vidoplayer->setGeometry(320, 7, 698, 580);
-//    vidoplayer->setStyleSheet("QWidget{background-color: rgb(0, 0, 0);}");
-//    QUrl url("rtsp://admin:cx123456@168.168.102.71");
-
-//    if(url.isValid())
-//    {
-//        qDebug() << "opening" << url;
-//        vidoplayer->load(url);
-//        vidoplayer->play();
-//    }
-//    vidoplayer->show();
-
+    mediaInit();
 
 
 //    Mouseflag = true;
@@ -124,56 +93,10 @@ recordPlayWidget::recordPlayWidget(QWidget *parent) :
     ui->EnddateEdit->setCalendarPopup(true);
 //    ui->StartdateEdit->setAttribute(Qt::WA_TransparentForMouseEvents,Mouseflag);
 
-    /*创建时间设置子窗体，默认隐藏*/
-//    timeSetWidget = new timeSet(this);
-//    timeSetWidget->hide();
-
-//    QDateTime time = QDateTime::currentDateTime();
-//    snprintf(timestr, sizeof(timestr), "%4d-%02d-%02d %02d:%02d:%02d", time.date().year(), time.date().month(), time.date().day(), time.time().hour(), time.time().minute(), time.time().second());
-//    string = QString(QLatin1String(timestr)) ;
     ui->EnddateEdit->setDateTime(QDateTime::currentDateTime());
     ui->EndtimeEdit->setDateTime(QDateTime::currentDateTime());
 
-//    ui->EnddateEdit->setText(string);		 //结束时间控件初始显示当前系统时间
-#if 0
 
-    memset(&timestr, 0, sizeof(timestr));
-    iYear = time.date().year();
-    iMonth = time.date().month();
-    iDay = time.date().day()-1;
-    if (0 == iDay)
-    {
-        iMonth = time.date().month()-1;
-        if (0 == iMonth)
-        {
-            iMonth = 12;
-            iYear = time.date().year() - 1;
-        }
-        if (1 == iMonth || 3 == iMonth || 5 == iMonth || 7 == iMonth || 8 == iMonth || 10 == iMonth || 12 == iMonth)
-        {
-            iDay = 31;
-        }
-        else if (4 == iMonth || 6 == iMonth || 9 == iMonth || 11 == iMonth)
-        {
-            iDay = 30;
-        }
-        else
-        {
-            if((0 == iYear%4 && 0 == iYear%100)||(0 == iYear%400))
-            {
-                iDay = 29;
-            }
-            else
-            {
-                iDay = 28;
-            }
-        }
-    }
-
-    snprintf(timestr, sizeof(timestr), "%4d-%02d-%02d %02d:%02d:%02d", iYear, iMonth, iDay, time.time().hour(), time.time().minute(), time.time().second());
-    string = QString(QLatin1String(timestr)) ;
-    ui->startTimeLabel->setText(string);     //起始时间控件初始显示当前系统时间前一天
-#endif
     ui->StartdateEdit->setDateTime(QDateTime::currentDateTime());
     ui->StarttimeEdit->setDateTime(QDateTime::currentDateTime());
 
@@ -184,103 +107,170 @@ recordPlayWidget::recordPlayWidget(QWidget *parent) :
     connect(ui->downLoadPushButton, SIGNAL(clicked(bool)), this, SLOT(recordDownloadSlot()));    //录像下载按钮按键信号响应
     connect(ui->playPushButton, SIGNAL(clicked(bool)), this, SLOT(recordPlayStartSlot()));	   //播放按钮按键信号响应
     connect(ui->stopPushButton, SIGNAL(clicked(bool)), this, SLOT(recordPlayStopSlot()));		//停止按钮按键信号响应
+    connect(ui->fastForwardPushButton, SIGNAL(clicked(bool)), this, SLOT(recordPlayFastForwardSlot()));    //快进按钮按键信号响应
+    connect(ui->slowForwardPushButton, SIGNAL(clicked(bool)), this, SLOT(recordPlaySlowForwardSlot()));    //慢放按钮按键信号响应
+    connect(ui->playLastOnePushButton, SIGNAL(clicked(bool)), this, SLOT(recordPlayLastOneSlot()));    //播放上一个按钮按键信号响应
+    connect(ui->playNextOnePushButton, SIGNAL(clicked(bool)), this, SLOT(recordPlayNextOneSlot()));	 //播放下一个按钮按键信号响应
+
+
 
 
     connect(ui->carSeletionComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(carNoChangeSlot()));  //车厢选择下拉框当前索引改变信号响应
+
+
+    QObject::connect(player,SIGNAL(durationChanged(qint64)),this,SLOT(getduration(qint64)));
+    QObject::connect(player,SIGNAL(positionChanged(qint64)),this,SLOT(positionchaged(qint64)));
 
 
 }
 
 recordPlayWidget::~recordPlayWidget()
 {
+
+    pthread_mutex_destroy(&g_sliderValueSetMutex);
+    closePlayWin();
+
+    if (m_tableWidgetStyle != NULL)
+    {
+        delete m_tableWidgetStyle;
+        m_tableWidgetStyle = NULL;
+    }
+    delete m_playSlider;
+    m_playSlider = NULL;
+    delete m_playWin;
+    m_playWin = NULL;
+
     delete ui;
+}
+
+void recordPlayWidget::mediaInit()
+{
+    /*新建一个播放窗体*/
+
+    m_playWin = new QWidget(this);
+    m_playWin->setGeometry(320, 7, 698, 580);
+    m_playWin->show();
+    m_playWin->setStyleSheet("QWidget{background-color: rgb(0, 0, 0);}");
+
+//    list = new QMediaPlaylist;
+//    list->addMedia(QUrl("/oem/SampleVideo_1280x720_5mb.mp4"));
+
+    QFile file("/userdata/apink.mp4");
+
+    QUrl url("rtsp://admin:admin123@168.168.102.20");
+
+    player = new QMediaPlayer();
+//    player->setPlaylist(list);
+//    player->setMedia(url);
+    if(file.exists())
+    {
+        player->setMedia(QUrl::fromLocalFile(file.fileName()));
+    }
+
+    videoViewer = new QVideoWidget(m_playWin);
+    videoViewer->setGeometry(0, 7, 698, 580);
+    player->setVideoOutput(videoViewer);
+
+//    player->play();
+
+
+}
+
+void recordPlayWidget::playSliderPressSlot(int iPosTime)
+{
+
+    QString playSpeedStr = "";
+
+//    DebugPrint(DEBUG_UI_OPTION_PRINT, "recordPlayWidget  press play slider!\n");
+
+    if (iPosTime < 0)
+    {
+        return;
+    }
+    else if (iPosTime == m_playSlider->value())    //时间值没有变化不进行处理
+    {
+//        DebugPrint(DEBUG_UI_NOMAL_PRINT, "[%s] value is not change, do not set!\n", __FUNCTION__);
+        return;
+    }
+    else if (0 == iPosTime) //防止pos值为0而服务器不处理，所有值最小为1
+    {
+        iPosTime = 1;
+    }
+    if(player->state()== QMediaPlayer::StoppedState)
+    {
+        return;
+    }
+    m_iPlayFlag = 1;
+    m_dPlaySpeed = 1.00;
+    playSpeedStr = "1.00x";
+    ui->playSpeedLineEdit->setText(playSpeedStr);
+
+    pthread_mutex_lock(&g_sliderValueSetMutex);
+    //m_iSliderValue = iPosTime;
+    m_playSlider->setValue(iPosTime);
+
+//    player->setPosition(iPosTime*player->duration()/ 1000);
+     player->setPosition(m_playSlider->value()*totalplaytime);
+    pthread_mutex_unlock(&g_sliderValueSetMutex);
+
+
+}
+void recordPlayWidget::getduration(qint64 playtime)
+{
+    playtime =player->duration();
+    totalplaytime = playtime /= 1000;
+
+}
+
+void recordPlayWidget::positionchaged(qint64 pos)
+{
+    m_playSlider->setMaximum(totalplaytime);
+    m_playSlider->setValue(pos/1000);
+}
+void recordPlayWidget::playSliderMoveSlot(int iPosTime)
+{
+
+    QString playSpeedStr = "";
+
+//    DebugPrint(DEBUG_UI_OPTION_PRINT, "recordPlayWidget  press play slider!\n");
+
+    if (iPosTime < 0)
+    {
+        return;
+    }
+    else if (iPosTime == m_playSlider->value())    //时间值没有变化不进行处理
+    {
+//        DebugPrint(DEBUG_UI_NOMAL_PRINT, "[%s] value is not change, do not set!\n", __FUNCTION__);
+        return;
+    }
+    else if (0 == iPosTime) //防止pos值为0而服务器不处理，所有值最小为1
+    {
+        iPosTime = 1;
+    }
+    if(player->state()== QMediaPlayer::StoppedState)
+    {
+        return;
+    }
+    m_iPlayFlag = 1;
+    m_dPlaySpeed = 1.00;
+    playSpeedStr = "1.00x";
+    ui->playSpeedLineEdit->setText(playSpeedStr);
+
+    pthread_mutex_lock(&g_sliderValueSetMutex);
+    //m_iSliderValue = iPosTime;
+    m_playSlider->setValue(iPosTime);
+//    player->setPosition(iPosTime);
+    player->setPosition(m_playSlider->value()*totalplaytime);
+
+    pthread_mutex_unlock(&g_sliderValueSetMutex);
+
+
+
 }
 
 void recordPlayWidget::recordQuerySlot()
 {
-#if 0
-    int iRet = 0, row = 0, iServerIdex = 0, iCameraIdex = 0, i = 0;
-    int year = 0, mon = 0, day = 0, hour = 0, min = 0, sec = 0;
-    short yr = 0;
-    T_TRAIN_CONFIG tTrainConfigInfo;
-    T_LOG_INFO tLogInfo;
 
-//    DebugPrint(DEBUG_UI_OPTION_PRINT, "recordPlayWidget record query PushButton pressed!\n");
-
-    for (i = 0; i < MAX_RECORD_SEACH_NUM; i++)
-    {
-        memset(m_acFilePath[i], 0, MAX_RECFILE_PATH_LEN);
-    }
-    memset(m_pcRecordFileBuf, 0, MAX_RECORD_SEACH_NUM*MAX_RECFILE_PATH_LEN);
-    m_iTotalLen = 0;
-    row = ui->recordFileTableWidget->rowCount();//获取录像文件列表总行数
-    for (i = 0; i < row; i++)
-    {
-        ui->recordFileTableWidget->removeRow(i);
-    }
-    ui->recordFileTableWidget->setRowCount(0);
-
-    memset(&tTrainConfigInfo, 0, sizeof(T_TRAIN_CONFIG));
-    STATE_GetCurrentTrainConfigInfo(&tTrainConfigInfo);
-
-    iServerIdex = ui->carSeletionComboBox->currentIndex();
-    iCameraIdex = ui->cameraSelectionComboBox->currentIndex();
-
-    if (m_Phandle[iServerIdex])
-    {
-        T_NVR_SEARCH_RECORD tRecordSeach;
-        memset(&tRecordSeach, 0, sizeof(T_NVR_SEARCH_RECORD));
-//        DebugPrint(DEBUG_UI_NOMAL_PRINT, "[%s] query  start timeStr:%s!\n", __FUNCTION__, ui->startTimeLabel->text().toLatin1().data());
-//-----        sscanf(ui->startTimeLabel->text().toLatin1().data(), "%4d-%2d-%2d %2d:%2d:%2d", &year, &mon, &day, &hour, &min, &sec);
-//        DebugPrint(DEBUG_UI_NOMAL_PRINT, "[%s] get query start time:%d-%d-%d %d:%d:%d!\n", __FUNCTION__, year, mon, day, hour, min, sec);
-        yr = year;
-        tRecordSeach.tStartTime.i16Year = htons(yr);
-        tRecordSeach.tStartTime.i8Mon = mon;
-        tRecordSeach.tStartTime.i8day = day;
-        tRecordSeach.tStartTime.i8Hour = hour;
-        tRecordSeach.tStartTime.i8Min = min;
-        tRecordSeach.tStartTime.i8Sec = sec;
-//        DebugPrint(DEBUG_UI_NOMAL_PRINT, "[%s] query  stop timeStr:%s!\n", __FUNCTION__, ui->endTimeLabel->text().toLatin1().data());
-//  -----      sscanf(ui->endTimeLabel->text().toLatin1().data(), "%4d-%2d-%2d %2d:%2d:%2d", &year, &mon, &day, &hour, &min, &sec);
-//        DebugPrint(DEBUG_UI_NOMAL_PRINT, "[%s] get query stop time:%d-%d-%d %d:%d:%d!\n", __FUNCTION__, year, mon, day, hour, min, sec);
-        yr = year;
-        tRecordSeach.tEndTime.i16Year = htons(yr);
-        tRecordSeach.tEndTime.i8Mon = mon;
-        tRecordSeach.tEndTime.i8day = day;
-        tRecordSeach.tEndTime.i8Hour = hour;
-        tRecordSeach.tEndTime.i8Min = min;
-        tRecordSeach.tEndTime.i8Sec = sec;
-
-        tRecordSeach.iCarriageNo = tTrainConfigInfo.tNvrServerInfo[iServerIdex].iCarriageNO;
-        tRecordSeach.iIpcPos = 8+iCameraIdex;
-
-//        DebugPrint(DEBUG_UI_NOMAL_PRINT, "[%s] query  iCarriageNo=%d, iIpcPos=%d!\n", __FUNCTION__, tRecordSeach.iCarriageNo, tRecordSeach.iIpcPos);
-        iRet = PMSG_SendPmsgData(m_Phandle[iServerIdex], CLI_SERV_MSG_TYPE_GET_RECORD_FILE, (char *)&tRecordSeach, sizeof(T_NVR_SEARCH_RECORD));
-        if (iRet < 0)
-        {
-//            DebugPrint(DEBUG_UI_ERROR_PRINT, "[%s] PMSG_SendPmsgData CLI_SERV_MSG_TYPE_GET_RECORD_FILE error!iRet=%d\n",__FUNCTION__, iRet);
-        }
-        else
-        {
-            memset(&tLogInfo, 0, sizeof(T_LOG_INFO));
-            tLogInfo.iLogType = 0;
-//    ----         snprintf(tLogInfo.acLogDesc, sizeof(tLogInfo.acLogDesc), "Req camera %d.%d record in %s to %s",
-//     ----           100+tTrainConfigInfo.tNvrServerInfo[iServerIdex].iCarriageNO, 200+iCameraIdex, ui->startTimeLabel->text().toLatin1().data(), ui->endTimeLabel->text().toLatin1().data());
-            LOG_WriteLog(&tLogInfo);
-        }
-
-        /*启动定时器检测录像是否查完，未查完不让再次按查询键*/
-        ui->queryPushButton->setEnabled(false);
-        ui->carSeletionComboBox->setEnabled(false);
-        ui->cameraSelectionComboBox->setEnabled(false);
-        if (NULL == m_recorQueryTimer)
-        {
-            m_recorQueryTimer = new QTimer(this);
-        }
-        m_recorQueryTimer->start(500);
-        connect(m_recorQueryTimer,SIGNAL(timeout()), this,SLOT(recordQueryEndSlot()));
-    }
-#endif
 
 }
 void recordPlayWidget::recordDownloadSlot()
@@ -341,32 +331,153 @@ void recordPlayWidget::getTrainConfig()    	//获取车型配置文件，初始�
 
 void recordPlayWidget::recordPlayStartSlot()
 {
-#if 1
-    qDebug()<<"******player.state"<<player->state();
+//    int h,m,s;
+    qint64 playtime;
 
-    switch(player->state()) {
-    case QMediaPlayer::PlayingState:
-        player->pause();
-        break;
-    default:
-        player->play();
-        break;
+    QString playSpeedStr = "1.00x";
+    if (0 == m_iPlayFlag)
+    {
+        m_iPlayFlag = 1;
+        m_dPlaySpeed = 1.00;
+        switch(player->state()) {
+        case QMediaPlayer::PlayingState:
+            player->pause();
+            break;
+        default:
+            player->play();
+            break;
+        }
+        player->setPlaybackRate(m_dPlaySpeed);
+        ui->playSpeedLineEdit->setText(playSpeedStr);
     }
+    else
+    {
+        player->pause();
+        m_iPlayFlag = 0;
+    }
+    videoTime =  player->duration();
+    setPlayButtonStyleSheet();
 
-#endif
+    int h,m,s;
+    h=totalplaytime/3600;
+    m=(totalplaytime-h*3600)/60;
+    s=totalplaytime-h*3600-m*60;
+    char acStr[32] = {0};
+
+    snprintf(acStr, sizeof(acStr), "%02d", m);
+    ui->rangeMinLabel->setText(QString(QLatin1String(acStr)));
+
+    memset(acStr, 0, sizeof(acStr));
+    snprintf(acStr, sizeof(acStr), "%02d", s);
+    ui->rangeSecLabel->setText(QString(QLatin1String(acStr)));
+
+    m_playSlider->setValue(totalplaytime);
 
 }
 void recordPlayWidget::recordPlayStopSlot()
 {
+    if(player->state()!= QMediaPlayer::StoppedState)
+    {
+        m_iPlayFlag = 0;
+        player->stop();
+    }
+    closePlayWin();
+    setPlayButtonStyleSheet();
+
+}
+
+void recordPlayWidget::closePlayWin()
+{
+    m_playSlider->setRange(0, 0);
+    m_playSlider->setValue(0);
+
+    ui->playMinLabel->setText("00");
+    ui->playSecLabel->setText("00");
+    ui->rangeMinLabel->setText("00");
+    ui->rangeSecLabel->setText("00");
+    ui->playSpeedLineEdit->setText("1.00x");
+
+    m_iPlayFlag = 0;
+
+}
+void recordPlayWidget::recordPlayFastForwardSlot()
+{
+    QString playSpeedStr;
+
+    if(player->state()!= QMediaPlayer::PlayingState)
+    {
+        return;
+    }
+    if (m_dPlaySpeed >= 4.00)
+    {
+        return;
+    }
+    m_iPlayFlag = 1;
+    m_dPlaySpeed = m_dPlaySpeed*2;
+
+    playSpeedStr = QString::number(m_dPlaySpeed);
+    if (m_dPlaySpeed == (int)m_dPlaySpeed)
+    {
+        playSpeedStr += ".00x";
+    }
+    else
+    {
+        playSpeedStr += "x";
+    }
+    ui->playSpeedLineEdit->setText(playSpeedStr);
+    player->setPlaybackRate(m_dPlaySpeed);
+    setPlayButtonStyleSheet();
+
+
+}
+void recordPlayWidget::recordPlaySlowForwardSlot()
+{
+    QString playSpeedStr;
+    if(player->state()!= QMediaPlayer::PlayingState)
+    {
+        return;
+    }
+    if (m_dPlaySpeed <= 1.25)
+    {
+        return;
+    }
+    m_iPlayFlag = 1;
+    m_dPlaySpeed = m_dPlaySpeed/2;
+
+    playSpeedStr = QString::number(m_dPlaySpeed);
+    if (m_dPlaySpeed == (int)m_dPlaySpeed)
+    {
+        playSpeedStr += ".00x";
+    }
+    else
+    {
+        playSpeedStr += "x";
+    }
+    ui->playSpeedLineEdit->setText(playSpeedStr);
+    player->setPlaybackRate(m_dPlaySpeed);
+    setPlayButtonStyleSheet();
+}
+
+void recordPlayWidget::recordPlayLastOneSlot()
+{
+
+
+
+
+
+}
+void recordPlayWidget::recordPlayNextOneSlot()
+{
+
+
+
 
 }
 
 void recordPlayWidget::registOutButtonClick()
 {
-
     this->hide();
     emit registOutSignal(PVMSPAGETYPE);    //触发注销信号，带上当前设备类型
-
 }
 
 void recordPlayWidget::carNoChangeSlot()   //车厢号切换信号响应槽函数

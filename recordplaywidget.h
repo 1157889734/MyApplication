@@ -37,6 +37,10 @@ public:
     bool Mouseflag;
     QMouseEvent *e;
     int m_iPlayFlag;   //播放标志，0-暂停状态，未播放，1-在播放
+    double m_dPlaySpeed;   //播放速度
+    qint64 videoTime;
+    qint64 totalplaytime;
+    void closePlayWin();
 
 protected:
     void mousePressEvent(QMouseEvent *event);
@@ -54,9 +58,16 @@ public slots:
     void recordDownloadSlot();
     void recordPlayStartSlot();
     void recordPlayStopSlot();
+    void recordPlayFastForwardSlot();
+    void recordPlaySlowForwardSlot();
+    void recordPlayLastOneSlot();
+    void recordPlayNextOneSlot();
     void carNoChangeSlot();
 
-
+    void playSliderMoveSlot(int iPosTime);
+    void playSliderPressSlot(int iPosTime);
+    void positionchaged(qint64 pos);
+    void getduration(qint64  playtime);
 
 signals:
     void alarmPushButoonClickSignal();
@@ -76,13 +87,15 @@ private:
     void setPlayButtonStyleSheet();
     void getTrainConfig();     //获取车型配置信息
 
-
+    void mediaInit();
 
     QMediaPlayer *player;
     QMediaPlaylist *list;
     QVideoWidget *videoViewer;
-
     QPlayer *vidoplayer;
+
+    QStringList mVideoList;
+    QString mVideoNmae;
 
 };
 

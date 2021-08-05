@@ -170,6 +170,7 @@ int STATE_GetCurrentTrainType(char *pcTrainType, int iLen)
 		memset(g_acTrainType, 0, sizeof(g_acTrainType));
 		strncpy(g_acTrainType, acparseStr, strlen(acparseStr));
 	}
+
 	strncpy(pcTrainType, g_acTrainType, iLen);
 	return 0;
 }
@@ -243,14 +244,14 @@ int STATE_SetPresetReturnTime(int iPresetReturnTime)
 {
 	if (iPresetReturnTime <= 0)
 	{
-		return -1;
+        return -1;
 	}
 	char acPresetReturnTime[16] = {0};
 	snprintf(acPresetReturnTime, sizeof(acPresetReturnTime), "%d", iPresetReturnTime);
 	int iRet = ModifyParam(DATACONFIGFILEPATH, "[PantoBackTime]", "BackTime", acPresetReturnTime);
 	if (iRet < 0)
 	{
-		return -1;
+        return -1;
 	}
 	g_iPresetReturnTime= iPresetReturnTime;
 	return 0;
@@ -261,20 +262,20 @@ int STATE_GetTrainNumber(char *pcTrainNo, int iLen)
 	char acparseStr[32] = {0};
 	if (NULL == pcTrainNo || iLen <= 0)
 	{
-		return -1;
+        return -1;
 	}
 	if (0 == strlen(g_acTrainNumber))    //g_acTrainNo为空，则通过配置文件获取
 	{
 		int iRet = ReadParam(DATACONFIGFILEPATH, "[TrainNumber]", "Value", acparseStr);
 		if (iRet < 0)
 		{
-			return -1;
+            return -1;
 		}
 		memset(g_acTrainNumber, 0, sizeof(g_acTrainNumber));
 		strncpy(g_acTrainNumber, acparseStr, strlen(acparseStr));
 	}
 	strncpy(pcTrainNo, g_acTrainNumber, iLen);
-	return 0;
+    return 0;
 }
 
 int STATE_SetTrainNumber(char *pcTrainNo)
@@ -292,6 +293,8 @@ int STATE_SetTrainNumber(char *pcTrainNo)
 	strncpy(g_acTrainNumber, pcTrainNo, sizeof(g_acTrainNumber));
 	return 0;
 }
+
+
 
 int STATE_GetTrainTypeNum()
 {
