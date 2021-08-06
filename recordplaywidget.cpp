@@ -50,8 +50,11 @@ recordPlayWidget::recordPlayWidget(QWidget *parent) :
                                 "QSlider::sub-page:horizontal:disabled{background: #00009C;border-color: #999;}"
                                 "QSlider::add-page:horizontal:disabled{background: #eee;border-color: #999;}"
                                 "QSlider::handle:horizontal:disabled{background: #eee;border: 1px solid #aaa;border-radius: 4px;}");
+
     connect(m_playSlider, SIGNAL(presliderPressSianal(int)), this, SLOT(playSliderPressSlot(int)));   //点击进度条信号响应
     connect(m_playSlider, SIGNAL(presliderMoveSianal(int)), this, SLOT(playSliderMoveSlot(int)));   //拖动进度条信号响应
+
+
 
     connect(ui->alarmPushButton, SIGNAL(clicked(bool)), this, SLOT(alarmPushButoonClickSlot()));   //报警按钮按键信号响应打开报警信息界面
     m_alarmHappenTimer = NULL;
@@ -111,7 +114,8 @@ recordPlayWidget::recordPlayWidget(QWidget *parent) :
     connect(ui->slowForwardPushButton, SIGNAL(clicked(bool)), this, SLOT(recordPlaySlowForwardSlot()));    //慢放按钮按键信号响应
     connect(ui->playLastOnePushButton, SIGNAL(clicked(bool)), this, SLOT(recordPlayLastOneSlot()));    //播放上一个按钮按键信号响应
     connect(ui->playNextOnePushButton, SIGNAL(clicked(bool)), this, SLOT(recordPlayNextOneSlot()));	 //播放下一个按钮按键信号响应
-
+    connect(ui->plusStepPushButton, SIGNAL(clicked(bool)), this, SLOT(playPlusStepSlot()));   //拖动进度条信号响应
+    connect(ui->minusStepPushButton, SIGNAL(clicked(bool)), this, SLOT(playMinusStepSlot()));   //拖动进度条信号响应
 
 
 
@@ -122,6 +126,7 @@ recordPlayWidget::recordPlayWidget(QWidget *parent) :
     QObject::connect(player,SIGNAL(positionChanged(qint64)),this,SLOT(positionchaged(qint64)));
 
 
+//    QObject::connect(m_playSlider,SIGNAL(QSlider::sliderMoved()),this,SLOT(setpostion()));
 }
 
 recordPlayWidget::~recordPlayWidget()
@@ -206,11 +211,11 @@ void recordPlayWidget::playSliderPressSlot(int iPosTime)
     ui->playSpeedLineEdit->setText(playSpeedStr);
 
     pthread_mutex_lock(&g_sliderValueSetMutex);
-    //m_iSliderValue = iPosTime;
     m_playSlider->setValue(iPosTime);
 
 //    player->setPosition(iPosTime*player->duration()/ 1000);
-     player->setPosition(m_playSlider->value()*totalplaytime);
+
+     player->setPosition(iPosTime);
     pthread_mutex_unlock(&g_sliderValueSetMutex);
 
 
@@ -259,8 +264,8 @@ void recordPlayWidget::playSliderMoveSlot(int iPosTime)
     pthread_mutex_lock(&g_sliderValueSetMutex);
     //m_iSliderValue = iPosTime;
     m_playSlider->setValue(iPosTime);
-//    player->setPosition(iPosTime);
-    player->setPosition(m_playSlider->value()*totalplaytime);
+
+    player->setPosition(iPosTime);
 
     pthread_mutex_unlock(&g_sliderValueSetMutex);
 
@@ -371,18 +376,29 @@ void recordPlayWidget::recordPlayStartSlot()
     snprintf(acStr, sizeof(acStr), "%02d", s);
     ui->rangeSecLabel->setText(QString(QLatin1String(acStr)));
 
-    m_playSlider->setValue(totalplaytime);
+//    m_playSlider->setValue(totalplaytime);
+
+
 
 }
+
+void recordPlayWidget::onTimerOut()
+{
+//    player->setPosition(m_playSlider->value()*player->duration()/maxValue);
+
+}
+
 void recordPlayWidget::recordPlayStopSlot()
 {
+    closePlayWin();
+    setPlayButtonStyleSheet();
+
     if(player->state()!= QMediaPlayer::StoppedState)
     {
         m_iPlayFlag = 0;
         player->stop();
     }
-    closePlayWin();
-    setPlayButtonStyleSheet();
+
 
 }
 
@@ -472,6 +488,75 @@ void recordPlayWidget::recordPlayNextOneSlot()
 
 
 
+}
+void recordPlayWidget::playPlusStepSlot()
+{
+    qint64 iPosTime = 0;
+    QString playSpeedStr;
+    if(player->state()!= QMediaPlayer::PlayingState)
+    {
+        return;
+    }
+    m_iPlayFlag = 1;
+    m_dPlaySpeed = 1.00;
+    playSpeedStr = "1.00x";
+    ui->playSpeedLineEdit->setText(playSpeedStr);
+    setPlayButtonStyleSheet();
+
+    iPosTime = player->position() + 60;
+    if (iPosTime > 0)
+    {
+        pthread_mutex_lock(&g_sliderValueSetMutex);
+        m_playSlider->setValue(iPosTime);
+        player->setPosition(iPosTime);
+        pthread_mutex_unlock(&g_sliderValueSetMutex);
+
+    }
+    else
+    {
+        iPosTime = 1;
+        pthread_mutex_lock(&g_sliderValueSetMutex);
+        m_playSlider->setValue(iPosTime);
+        player->setPosition(iPosTime);
+        pthread_mutex_unlock(&g_sliderValueSetMutex);
+
+    }
+
+}
+
+void recordPlayWidget::playMinusStepSlot()
+{
+    qint64 iPosTime = 0;
+    QString playSpeedStr;
+    if(player->state()!= QMediaPlayer::PlayingState)
+    {
+        return;
+    }
+    m_iPlayFlag = 1;
+    m_dPlaySpeed = 1.00;
+    playSpeedStr = "1.00x";
+    ui->playSpeedLineEdit->setText(playSpeedStr);
+    setPlayButtonStyleSheet();
+
+    iPosTime = player->position() - 60;
+    qDebug()<<"111playMinusStepSlot"<<iPosTime;
+    if (iPosTime > 0)
+    {
+        pthread_mutex_lock(&g_sliderValueSetMutex);
+        m_playSlider->setValue(iPosTime);
+        player->setPosition(iPosTime);
+        pthread_mutex_unlock(&g_sliderValueSetMutex);
+
+    }
+    else
+    {
+        iPosTime = 1;
+        pthread_mutex_lock(&g_sliderValueSetMutex);
+        m_playSlider->setValue(iPosTime);
+        player->setPosition(iPosTime);
+        pthread_mutex_unlock(&g_sliderValueSetMutex);
+
+    }
 }
 
 void recordPlayWidget::registOutButtonClick()

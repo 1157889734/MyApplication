@@ -10,6 +10,11 @@
 #include "pmsgcli.h"
 #include "state.h"
 
+#include <QVideoWidget>
+#include <QMediaPlaylist>
+#include <QMediaPlayer>
+#include "qplayer.h"
+
 
 namespace Ui {
 class pvmsMonitorWidget;
@@ -89,7 +94,7 @@ class pvmsMonitorWidget : public QWidget
 public:
     explicit pvmsMonitorWidget(QWidget *parent = 0);
     ~pvmsMonitorWidget();
-//    bool eventFilter(QObject *target, QEvent *event);  //事件过滤器
+    bool eventFilter(QObject *target, QEvent *event);  //事件过滤器
     QPushButton *m_presetNoPushbutton[8];
     QButtonGroup *g_buttonGroup;
     time_t m_lastActionTime;    //界面最后一次操作时间
@@ -112,6 +117,9 @@ public:
     int m_iFullScreenFlag;   //全屏标识
     int m_iPtzMoveType;   //正在进行的云台操作类型类型，开始或停止
     int m_iPtzCtrType;   //正在进行的云台控制类型
+    PMSG_HANDLE m_NvrServerPhandle[MAX_SERVER_NUM];    //nvr服务器PMSG通信句柄
+    pthread_t m_threadId;    //线程ID
+    int m_iThreadRunFlag;   //线程运行标识
 
 
     QWidget *m_playWin;    //播放窗体
@@ -128,7 +136,8 @@ public:
     void getChStreamState(int iCh);
     void closePlayWin();
 
-
+    void triggerCmpOptionCtrlSinal(int iType, int iCh);
+    void mediaInit();
 
 signals:
     void alarmPushButoonClickSignal();
@@ -186,6 +195,11 @@ private:
     presetPasswdConfirm *m_presetPasswdConfirmPage;    //预置点密码确认界面
     QTimer *m_fillLightSwitchTimer;
     QTimer *m_cameraSwitchTimer;
+
+    QMediaPlayer *player;
+    QMediaPlaylist *list;
+    QVideoWidget *videoViewer;
+    QPlayer *vidoplayer;
 
 };
 

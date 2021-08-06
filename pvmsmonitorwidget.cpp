@@ -25,6 +25,48 @@ typedef enum _E_CAMERA_SWITCH_STATE    //摄像机切换状态
 } E_CAMERA_SWITCH_STATE;
 
 
+int GetNodeFromCmpQueue(PT_CMP_QUEUE ptCmpQueue, PT_CMP_PACKET ptPkt)
+{
+    T_CMP_PACKET_LIST *ptTmp = NULL;
+
+    if ((NULL == ptCmpQueue) || (NULL == ptPkt))
+    {
+        return 0;
+    }
+
+    if (ptCmpQueue->pMutex)
+    {
+        pthread_mutex_lock(ptCmpQueue->pMutex);
+    }
+
+    if (NULL == ptCmpQueue->ptFirst)
+    {
+        if (ptCmpQueue->pMutex)
+        {
+            pthread_mutex_unlock(ptCmpQueue->pMutex);
+        }
+
+        return 0;
+    }
+
+    ptTmp = ptCmpQueue->ptFirst;
+    ptCmpQueue->ptFirst = ptCmpQueue->ptFirst->next;
+    if (NULL == ptCmpQueue->ptFirst)
+    {
+        ptCmpQueue->ptLast= NULL;
+    }
+    ptCmpQueue->iPktCount--;
+    *ptPkt = ptTmp->tPkt;
+    free(ptTmp);
+    ptTmp = NULL;
+
+    if (ptCmpQueue->pMutex)
+    {
+        pthread_mutex_unlock(ptCmpQueue->pMutex);
+    }
+
+    return 1;
+}
 
 
 
@@ -127,12 +169,6 @@ int DestroyCmpQueue(PT_CMP_QUEUE ptCmpQueue)
 
     return 0;
 }
-
-
-
-
-
-
 
 
 pvmsMonitorWidget::pvmsMonitorWidget(QWidget *parent) :
@@ -307,13 +343,92 @@ pvmsMonitorWidget::pvmsMonitorWidget(QWidget *parent) :
     m_ptQueue = CreateCmpQueue(&tMutex, 0);
 }
 
+
+void pvmsMonitorWidget::mediaInit()
+{
+#if 0
+    /*新建一个播放窗体*/
+
+    m_playWin = new QWidget(this);
+    m_playWin->setGeometry(320, 7, 698, 580);
+    m_playWin->show();
+    m_playWin->setStyleSheet("QWidget{background-color: rgb(0, 0, 0);}");
+
+//    list = new QMediaPlaylist;
+//    list->addMedia(QUrl("/oem/SampleVideo_1280x720_5mb.mp4"));
+
+    QFile file("/userdata/apink.mp4");
+
+    QUrl url("rtsp://admin:admin123@168.168.102.20");
+
+    player = new QMediaPlayer();
+//    player->setPlaylist(list);
+//    player->setMedia(url);
+    if(file.exists())
+    {
+        player->setMedia(QUrl::fromLocalFile(file.fileName()));
+    }
+
+    videoViewer = new QVideoWidget(m_playWin);
+    videoViewer->setGeometry(0, 7, 698, 580);
+    player->setVideoOutput(videoViewer);
+
+//    player->play();
+#endif
+
+}
+
+void *monitorThread(void *param)     //实时监控线程，对通道轮询、全屏、预置点返回、设备状态等进行循环监控
+{
+#if 0
+    int i = 0, iRet = 0;
+
+    T_CMP_PACKET tCmpPkt;
+
+    pvmsMonitorWidget *pvmsMonitorPage = (pvmsMonitorWidget *)param;
+    if (NULL == pvmsMonitorPage)
+    {
+        return NULL;
+    }
+
+    while (1 == pvmsMonitorPage->m_iThreadRunFlag)
+    {
+        memset(&tCmpPkt, 0, sizeof(T_CMP_PACKET));
+        iRet = GetNodeFromCmpQueue(pvmsMonitorPage->m_ptQueue, &tCmpPkt);   //读取cmp队列，对解码通道进行相应处理
+        if (iRet > 0)
+        {
+//            DebugPrint(DEBUG_UI_NOMAL_PRINT, "MonitorPlayThread get cmpctrl cmd:%d, ch=%d\n", tCmpPkt.iMsgCmd, tCmpPkt.iCh);
+            pvmsMonitorPage->triggerCmpOptionCtrlSinal(tCmpPkt.iMsgCmd, tCmpPkt.iCh);
+        }
+
+    }
+
+#endif
+
+
+
+}
+
 void pvmsMonitorWidget::startVideoPolling()    //开启视频轮询的处理
 {
-#if 1
-    m_iFullScreenFlag = 1;
+    static int iFirstFlag = 1;
+    int i = 0, j = 0, iRet = 0;
+    char acSendBuf[4] = {0};
+    char acRtspUrl[128] = {0};
+    T_TRAIN_CONFIG tTrainConfigInfo;
+    T_LOG_INFO tLogInfo;
+    T_CMP_PACKET tPkt;
+    QString chStr = tr("通道");
 
+    struct sysinfo s_info;
+    memset(&s_info,0,sizeof(s_info));
+    sysinfo(&s_info);
+    m_lastActionTime = s_info.uptime;
+
+    m_iFullScreenFlag = 1;
     m_playWin = new QWidget(this->parentWidget());    //新建一个与目前窗体同属一个父窗体的播放子窗体，方便实现全屏
-    m_playWin->setGeometry(0, 0, 1024, 768);      //设置窗体在父窗体中的位置，默认一开始为全屏
+//    m_playWin->setGeometry(0, 0, 1024, 768);      //设置窗体在父窗体中的位置，默认一开始为全屏
+    m_playWin->setGeometry(6, 110, 782, 656);
     m_playWin->show();  //默认显示
     m_playWin->setObjectName("m_playWin");
     m_playWin->setStyleSheet("#m_playWin{background-color: rgb(0, 0, 0);}");     //设置播放窗口背景色为黑色
@@ -331,7 +446,50 @@ void pvmsMonitorWidget::startVideoPolling()    //开启视频轮询的处理
     m_channelNoLabel->setStyleSheet("QLabel{color:rgb(255, 255, 255);font: 24pt;background-color: rgb(0, 0, 0);}");
     m_channelNoLabel->setAttribute(Qt::WA_TranslucentBackground, true);
     m_channelNoLabel->show();
-#endif
+
+
+    memset(&tTrainConfigInfo, 0, sizeof(T_TRAIN_CONFIG));
+    STATE_GetCurrentTrainConfigInfo(&tTrainConfigInfo);
+
+    for (i = 0; i < tTrainConfigInfo.iNvrServerCount; i++)
+    {
+        memset(acRtspUrl, 0, sizeof(acRtspUrl));
+//        snprintf(acRtspUrl, sizeof(acRtspUrl), "192.168.%d.81", 100+tTrainConfigInfo.tNvrServerInfo[i].iCarriageNO);
+        snprintf(acRtspUrl, sizeof(acRtspUrl), "168.168.102.%d", 70+tTrainConfigInfo.tNvrServerInfo[i].iCarriageNO);
+
+        qDebug()<<"tTrainConfigInfo.iNvrServerCount"<<tTrainConfigInfo.iNvrServerCount<<endl;
+        qDebug()<<"acRtspUrl****"<<acRtspUrl;
+
+//        DebugPrint(DEBUG_UI_NOMAL_PRINT, "[%s] server:%s has camera num=%d\n",__FUNCTION__,acRtspUrl, tTrainConfigInfo.tNvrServerInfo[i].iPvmsCameraNum);
+        m_NvrServerPhandle[i] = STATE_GetNvrServerPmsgHandle(i);
+
+        for (j = 0; j < tTrainConfigInfo.tNvrServerInfo[i].iPvmsCameraNum; j++)
+        {
+            /*保存所有摄像机的信息*/
+            m_tCameraInfo[m_iCameraNum].phandle = STATE_GetNvrServerPmsgHandle(i);
+            m_tCameraInfo[m_iCameraNum].iPosNO = 8+j;
+            snprintf(m_tCameraInfo[m_iCameraNum].acCameraRtspUrl, sizeof(m_tCameraInfo[m_iCameraNum].acCameraRtspUrl), "%s:554/%d",acRtspUrl, 8+j);
+
+
+
+//            DebugPrint(DEBUG_UI_NOMAL_PRINT, "[%s] camer %d rtspUrl=%s\n",__FUNCTION__,m_iCameraNum, m_tCameraInfo[m_iCameraNum].acCameraRtspUrl);
+            printf("##############i=%d, rtspurl:%s\n",m_iCameraNum,m_tCameraInfo[m_iCameraNum].acCameraRtspUrl);
+            tPkt.iMsgCmd = CMP_CMD_CREATE_CH;
+            tPkt.iCh = m_iCameraNum;
+            PutNodeToCmpQueue(m_ptQueue, &tPkt);
+
+            struct sysinfo s_info;
+            sysinfo(&s_info);
+            m_tCameraInfo[m_iCameraNum].tPtzOprateTime = s_info.uptime;
+            m_iCameraNum++;
+        }
+    }
+    m_threadId = 0;
+    m_iThreadRunFlag = 1;
+//    pthread_create(&m_threadId, NULL, monitorThread, (void *)this);    //创建监控线程
+
+
+
 }
 
 
@@ -1120,9 +1278,28 @@ void pvmsMonitorWidget::videoChannelCtrl()
 }
 
 
+
+void pvmsMonitorWidget::triggerCmpOptionCtrlSinal(int iType, int iCh)
+{
+    emit cmpOptionCtrlSignal(iType, iCh);
+}
+
 void pvmsMonitorWidget::closePlayWin()
 {
 
+
+
+
+    if (m_channelStateLabel != NULL)
+    {
+        delete m_channelStateLabel;
+        m_channelStateLabel = NULL;
+    }
+    if (m_channelNoLabel != NULL)
+    {
+        delete m_channelNoLabel;
+        m_channelNoLabel = NULL;
+    }
 
     if (m_playWin != NULL)
     {
@@ -1198,9 +1375,6 @@ void pvmsMonitorWidget::alarmClearSlot()
     g_iPNum = 0;
 }
 
-
-
-#if 0
 bool pvmsMonitorWidget::eventFilter(QObject *target, QEvent *event)    //事件过滤器，过滤处理不同控件的不同事件
 {
 
@@ -1262,7 +1436,6 @@ bool pvmsMonitorWidget::eventFilter(QObject *target, QEvent *event)    //事件�
             }
     }
 
- #if 0
     if (target == m_playWin)
     {
         if (event->type()==QEvent::MouseButtonDblClick && (m_iAlarmNotCtrlFlag != 1))   //双击全屏,但是如何有报警未处理也不全屏
@@ -1270,13 +1443,9 @@ bool pvmsMonitorWidget::eventFilter(QObject *target, QEvent *event)    //事件�
             if (0 == m_iFullScreenFlag)
             {
 //                DebugPrint(DEBUG_UI_OPTION_PRINT, "pvmsMonitorWidget mouse double click to full screen!\n");
-                qDebug()<<"11111111111111111111111111111!!!!";
-#if 1
+
                 m_playWin->move(0, 0);
                 m_playWin->resize(1024, 768);
-#endif
-                qDebug()<<"222222222222222222222222222222";
-
 
                 tPkt.iMsgCmd = CMP_CMD_CHG_ALL_VIDEOWIN;
                 tPkt.iCh = 0;
@@ -1297,12 +1466,113 @@ bool pvmsMonitorWidget::eventFilter(QObject *target, QEvent *event)    //事件�
             }
         }
     }
+    if ((target == ui->ptzUpPushButton) || (target == ui->ptzDownPushButton) || (target == ui->ptzLeftPushButton) ||
+        (target == ui->ptzRightPushButton) || (target == ui->zoomInPushButton) || (target == ui->zoomOutPushButton) ||
+        (target == ui->focusFarPushButton) || (target == ui->focusNearPushButton))     //云台控制类按钮事件触发，发送云台控制消息到服务器
+    {
+        /*发送云台控制的消息给服务器，消息内容为3个字节:
+          第一个字节表示控制类型（云台上：01；云台下：02；云台左：03；云台右：04；调焦伸：05；调焦缩：06；聚焦远：07；聚焦近：08），
+          第二个字节表示移动类型（开始移动：01；停止移动：02），
+          第三个字节表示受电弓摄像机位置号
+        */
+        if (m_iCameraPlayNo < 0)
+        {
+            return 0;
+        }
+        T_PTZ_OPT t_ptzOption;
+        memset(&t_ptzOption, 0, sizeof(T_PTZ_OPT));
+        char acSendBuf[4] = {0};
 
-#endif
+        if (event->type()==QEvent::MouseButtonPress)     //按钮按下，i8MoveType移动类型值置1，表示开始移动
+        {
+            t_ptzOption.i8MoveType = E_START_MOVE;
+        }
+        else if (event->type()==QEvent::MouseButtonRelease)    //按钮松开，i8MoveType移动类型值置2，表示停止移动
+        {
+            t_ptzOption.i8MoveType = E_STOP_MOVE;
+        }
+        else
+        {
+            return 0;
+        }
+        /*根据操作的按键不同设置不同的控制命令*/
+        if (target == ui->ptzUpPushButton)
+        {
+            t_ptzOption.i8CtrlType = E_PTZ_UP;
+        }
+        else if (target == ui->ptzDownPushButton)
+        {
+            t_ptzOption.i8CtrlType = E_PTZ_DOWN;
+        }
+        else if (target == ui->ptzLeftPushButton)
+        {
+            t_ptzOption.i8CtrlType = E_PTZ_LEFT;
+        }
+        else if (target == ui->ptzRightPushButton)
+        {
+            t_ptzOption.i8CtrlType = E_PTZ_RIGHT;
+        }
+        else if (target == ui->zoomInPushButton)
+        {
+            t_ptzOption.i8CtrlType = E_ZOOM_OUT;
+        }
+        else if (target == ui->zoomOutPushButton)
+        {
+            t_ptzOption.i8CtrlType = E_ZOOM_IN;
+        }
+        else if (target == ui->focusFarPushButton)
+        {
+            t_ptzOption.i8CtrlType = E_FOCUS_FAR;
+        }
+        else if (target == ui->focusNearPushButton)
+        {
+            t_ptzOption.i8CtrlType = E_FOCUS_NEAR;
+        }
+        acSendBuf[0] = t_ptzOption.i8CtrlType;
+        acSendBuf[1] = t_ptzOption.i8MoveType;
+        acSendBuf[2] = this->m_tCameraInfo[m_iCameraPlayNo].iPosNO;      //发送消息的第3个字节表示受电弓摄像机位置号
+
+//        DebugPrint(DEBUG_UI_OPTION_PRINT, "pvmsMonitorWidget ptz option, CtrlType=%d, MoveType=%d, camera no=%d!\n",t_ptzOption.i8CtrlType, t_ptzOption.i8MoveType, m_iCameraPlayNo);
+        iRet = PMSG_SendPmsgData(this->m_tCameraInfo[m_iCameraPlayNo].phandle, CLI_SERV_MSG_TYPE_SET_PTZ, acSendBuf, 3);    //发送云台控制命令
+        if (iRet < 0)
+        {
+//            DebugPrint(DEBUG_UI_ERROR_PRINT, "[%s] camera %d send CLI_SERV_MSG_TYPE_SET_PTZ failed,iRet=%d\n", __FUNCTION__, m_iCameraPlayNo, iRet);
+        }
+        else
+        {
+            struct sysinfo s_info;
+            memset(&s_info,0,sizeof(s_info));
+            sysinfo(&s_info);
+            m_tCameraInfo[m_iCameraPlayNo].tPtzOprateTime = s_info.uptime;
+            m_tCameraInfo[m_iCameraPlayNo].iPresetNo = 0;   //云台控制成功，将预置点编号清空
+            m_iPtzCtrType = t_ptzOption.i8CtrlType;
+            m_iPtzMoveType = t_ptzOption.i8MoveType;
+        }
+    }
+
+    return QWidget::eventFilter(target, event);
+
+
 }
-#endif
 
 pvmsMonitorWidget::~pvmsMonitorWidget()
 {
+    closePlayWin();
+
+    pthread_mutex_destroy(&g_tCmpCtrlMutex);
+
+    if (m_ptQueue != NULL)
+    {
+        DestroyCmpQueue(m_ptQueue);
+        pthread_mutex_destroy(&tMutex);
+    }
+
+    if (m_presetPasswdConfirmPage != NULL)
+    {
+        delete m_presetPasswdConfirmPage;
+        m_presetPasswdConfirmPage = NULL;
+    }
+    delete g_buttonGroup;
+    g_buttonGroup = NULL;
     delete ui;
 }

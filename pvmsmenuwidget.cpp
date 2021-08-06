@@ -69,10 +69,29 @@ pvmsMenuWidget::pvmsMenuWidget(QWidget *parent) :
     ui->devManageMenuPushButton->setChecked(false);
     ui->devUpdateMenuPushButton->setChecked(false);
 
+#if 1
+    m_Rs485Timer = new QTimer(this);
+    m_Rs485Timer->start(100);
+    connect(m_Rs485Timer, SIGNAL(timeout()), this, SLOT(rs485TimerFunc()));
+#endif
 }
+
+
 
 pvmsMenuWidget::~pvmsMenuWidget()
 {
+
+
+    if (m_Rs485Timer != NULL)
+    {
+        if (m_Rs485Timer ->isActive())
+        {
+            m_Rs485Timer ->stop();
+        }
+        delete m_Rs485Timer;
+        m_Rs485Timer  = NULL;
+    }
+
     delete m_pvmsMonitorPage;
     m_pvmsMonitorPage = NULL;
     delete m_recordPlayPage;
@@ -90,6 +109,25 @@ pvmsMenuWidget::~pvmsMenuWidget()
     delete ui;
 
 }
+
+void pvmsMenuWidget::recvRs485Ctrl(char *pcData, int iDataLen)
+{
+//    if (m_devManagePage != NULL)
+//    {
+//        m_devManagePage->rs485Ctrl(pcData, iDataLen);
+//    }
+
+}
+
+void pvmsMenuWidget::rs485TimerFunc()
+{
+//    int iRet = 0;
+//    T_RS485_PACKET tPkt;
+
+//    recvRs485Ctrl(tPkt.pcData, tPkt.iDataLen);
+
+}
+
 
 void pvmsMenuWidget::alarmPageShowSlot()
 {
@@ -130,7 +168,7 @@ void pvmsMenuWidget::showPageSlot()
     m_devManagePage->hide();
     m_devUpdatePage->hide();
 
-//    m_pvmsMonitorPage->startVideoPolling();   //启动视频轮询
+    m_pvmsMonitorPage->startVideoPolling();   //启动视频轮询
 
     if (NULL == m_alarmPage)
     {
@@ -176,6 +214,10 @@ void pvmsMenuWidget::registOutButtonClick()
     ui->inteAnalyMenuPushButton->setChecked(false);
     ui->devManageMenuPushButton->setChecked(false);
     ui->devUpdateMenuPushButton->setChecked(false);
+
+    m_pvmsMonitorPage->closePlayWin();   //关闭受电弓监控界面的播放窗口
+    m_recordPlayPage->closePlayWin();   //关闭录像回放界面的播放窗口
+
     this->hide();
     emit registOutSignal(PVMSPAGETYPE);    //触发注销信号，带上当前设备类型
 }
@@ -190,11 +232,12 @@ void pvmsMenuWidget::menuButtonClick()
     if (Sender->objectName() == "pvmsMonitorMenuPushButton")     //受电弓监控按钮被按，则切换到受电弓监控页面
     {
         m_recordPlayPage->hide();
+        m_recordPlayPage->closePlayWin();   //关闭录像回放界面的播放窗口
         m_inteAnalyPage->hide();
         m_devManagePage->hide();
         m_devUpdatePage->hide();
         m_pvmsMonitorPage->show();
-//        m_pvmsMonitorPage->m_playWin->show();
+        m_pvmsMonitorPage->m_playWin->show();
 
         m_pvmsMonitorPage->showMaximized();
 
@@ -209,7 +252,7 @@ void pvmsMenuWidget::menuButtonClick()
     else if (Sender->objectName() == "recordPlayMenuPushButton")     //录像回放按钮被按，则切换到录像回放页面
     {
         m_pvmsMonitorPage->hide();
-//        m_pvmsMonitorPage->m_playWin->hide();
+        m_pvmsMonitorPage->m_playWin->hide();
         m_inteAnalyPage->hide();
         m_devManagePage->hide();
         m_devUpdatePage->hide();
@@ -227,8 +270,9 @@ void pvmsMenuWidget::menuButtonClick()
     else if (Sender->objectName() == "inteAnalyMenuPushButton")      //智能分析按钮被按，则切换到智能分析页面
     {
         m_pvmsMonitorPage->hide();
-//        m_pvmsMonitorPage->m_playWin->hide();
+        m_pvmsMonitorPage->m_playWin->hide();
         m_recordPlayPage->hide();
+        m_recordPlayPage->closePlayWin();   //关闭录像回放界面的播放窗口
         m_devManagePage->hide();
         m_devUpdatePage->hide();
         m_inteAnalyPage->show();
@@ -244,8 +288,9 @@ void pvmsMenuWidget::menuButtonClick()
     else if (Sender->objectName() == "devManageMenuPushButton")      //设备管理按钮被按，则切换到设备管理页面
     {
         m_pvmsMonitorPage->hide();
-//        m_pvmsMonitorPage->m_playWin->hide();
+        m_pvmsMonitorPage->m_playWin->hide();
         m_recordPlayPage->hide();
+        m_recordPlayPage->closePlayWin();   //关闭录像回放界面的播放窗口
         m_inteAnalyPage->hide();
         m_devUpdatePage->hide();
         m_devManagePage->show();
@@ -260,8 +305,9 @@ void pvmsMenuWidget::menuButtonClick()
     else if (Sender->objectName() == "devUpdateMenuPushButton")     //设备更新按钮被按，则切换到设备更新页面
     {
         m_pvmsMonitorPage->hide();
-//        m_pvmsMonitorPage->m_playWin->hide();
+        m_pvmsMonitorPage->m_playWin->hide();
         m_recordPlayPage->hide();
+        m_recordPlayPage->closePlayWin();   //关闭录像回放界面的播放窗口
         m_inteAnalyPage->hide();
         m_devManagePage->hide();
         m_devUpdatePage->show();

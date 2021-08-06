@@ -46,7 +46,8 @@ SOURCES += \
 #    useredit.cpp \
 #    useradd.cpp \
 #    usermanage.cpp
-    ftpApi.c
+    ftpApi.c \
+    rs485serv.c
 
 HEADERS += \
     MyApplication.h \
@@ -73,7 +74,8 @@ HEADERS += \
 #    useredit.h \
 #    useradd.h \
 #    usermanage.h
-    ftpApi.h
+    ftpApi.h \
+    rs485serv.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

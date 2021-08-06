@@ -18,6 +18,8 @@ public:
     explicit devManageWidget(QWidget *parent = 0);
     ~devManageWidget();
     void trainNumberSetSlot_fuction();
+    int rs485Ctrl(char *pcData, int iDataLen);
+    void pisMsgCtrl(char *pcMsgData);
 
 
 public slots:

@@ -62,12 +62,16 @@ public slots:
     void recordPlaySlowForwardSlot();
     void recordPlayLastOneSlot();
     void recordPlayNextOneSlot();
+    void playPlusStepSlot();
+    void playMinusStepSlot();
     void carNoChangeSlot();
 
     void playSliderMoveSlot(int iPosTime);
     void playSliderPressSlot(int iPosTime);
     void positionchaged(qint64 pos);
     void getduration(qint64  playtime);
+
+    void onTimerOut();
 
 signals:
     void alarmPushButoonClickSignal();
@@ -96,7 +100,8 @@ private:
 
     QStringList mVideoList;
     QString mVideoNmae;
-
+    QTimer *posTimer;
+    int maxValue = 1000;
 };
 
 #endif // RECORDPLAYWIDGET_H

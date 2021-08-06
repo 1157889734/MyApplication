@@ -87,6 +87,24 @@ devManageWidget::~devManageWidget()
 {
     delete ui;
 }
+int devManageWidget::rs485Ctrl(char *pcData, int iDataLen)
+{
+
+    pisMsgCtrl(pcData+4);
+
+
+}
+
+void devManageWidget::pisMsgCtrl(char *pcMsgData)
+{
+
+
+
+
+    ui->TrainNumberLineEdit->setText("CRH380");
+
+}
+
 void devManageWidget::alarmPushButoonClickSlot()
 {
     emit alarmPushButoonClickSignal();

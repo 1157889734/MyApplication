@@ -8,6 +8,8 @@
 #include "devmanagewidget.h"
 #include "devupdatewidget.h"
 #include "alarmwidget.h"
+#include <QTimer>
+#include "rs485serv.h"
 
 
 
@@ -22,6 +24,9 @@ class pvmsMenuWidget : public QWidget
 public:
     explicit pvmsMenuWidget(QWidget *parent = 0);
     ~pvmsMenuWidget();
+
+    void recvRs485Ctrl(char *pcData, int iDataLen);
+
 
 public slots:
     void registOutButtonClick();
@@ -46,8 +51,14 @@ private:
     int m_iAlarmPageOpenFlag;
     int m_iCheckDiskErrFlag[MAX_SERVER_NUM];  //是否检查服务器硬盘错误标志
     int m_iNoCheckDiskErrNum[MAX_SERVER_NUM];   //不检测服务器硬盘错误计数，每10秒加1
+
+    QTimer *m_Rs485Timer;
+    QTimer *m_PmsgTimer;
+
 public slots:
     void showPageSlot();
+    void rs485TimerFunc();
+
 };
 
 #endif // PVMSMENUWIDGET_H
