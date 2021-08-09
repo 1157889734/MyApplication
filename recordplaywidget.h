@@ -32,6 +32,7 @@ class recordPlayWidget : public QWidget
 public:
     explicit recordPlayWidget(QWidget *parent = 0);
     ~recordPlayWidget();
+    int pmsgCtrl(PMSG_HANDLE pHandle, unsigned char ucMsgCmd, char *pcMsgData, int iMsgDataLen);     //与服务器通信消息处理
     mySlider *m_playSlider;    //播放进度条
     timeSet *timeSetWidget;    //时间设置控制窗体
     bool Mouseflag;
@@ -41,6 +42,7 @@ public:
     qint64 videoTime;
     qint64 totalplaytime;
     void closePlayWin();
+    int m_iPlayRange;    //录像文件总播放时长
 
 protected:
     void mousePressEvent(QMouseEvent *event);
@@ -50,9 +52,6 @@ public slots:
     void alarmHappenCtrlSlot();
     void alarmHappenSlot();
     void alarmClearSlot();
-    void openStartTimeSetWidgetSlot();
-    void openStopTimeSetWidgetSlot();
-    void timeSetRecvMsg(QString year, QString month, QString day, QString hour, QString min, QString sec);
     void recordQuerySlot();
     void registOutButtonClick();
     void recordDownloadSlot();
@@ -76,6 +75,7 @@ public slots:
 signals:
     void alarmPushButoonClickSignal();
     void registOutSignal(int iType);     //注销信号，iType:表示执行注销的页面类型，这里应该为2，表示受电弓监控页面,
+    void setRecordPlayFlagSignal(int iFlag);
 
 private:
     Ui::recordPlayWidget *ui;

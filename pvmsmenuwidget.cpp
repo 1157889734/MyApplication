@@ -1,6 +1,8 @@
 #include "pvmsmenuwidget.h"
 #include "ui_pvmsmenuwidget.h"
 #include <QDebug>
+#include <netinet/in.h>
+
 
 #define PVMSPAGETYPE  2    //此页面类型，2表示受电弓监控页面
 
@@ -40,6 +42,9 @@ pvmsMenuWidget::pvmsMenuWidget(QWidget *parent) :
     ui->devUpdateMenuPushButton->setFocusPolicy(Qt::NoFocus);
 //    ui->loginOutPushButton->setFocusPolicy(Qt::NoFocus);
 
+    connect(m_recordPlayPage, SIGNAL(setRecordPlayFlagSignal(int)), m_pvmsMonitorPage, SLOT(setRecordPlayFlag(int)));
+
+
 //    connect(ui->loginOutPushButton, SIGNAL(clicked()), this, SLOT(registOutButtonClick()));
     connect(ui->pvmsMonitorMenuPushButton, SIGNAL(clicked()), this, SLOT(menuButtonClick()));     //连接受电弓监控菜单按钮的按键信号和响应函数
     connect(ui->recordPlayMenuPushButton, SIGNAL(clicked()), this, SLOT(menuButtonClick()));	  //连接录像回放菜单按钮的按键信号和响应函数
@@ -74,6 +79,11 @@ pvmsMenuWidget::pvmsMenuWidget(QWidget *parent) :
     m_Rs485Timer->start(100);
     connect(m_Rs485Timer, SIGNAL(timeout()), this, SLOT(rs485TimerFunc()));
 #endif
+
+
+    m_PmsgTimer = new QTimer(this);
+    m_PmsgTimer->start(50);
+    connect(m_PmsgTimer, SIGNAL(timeout()), this, SLOT(pmsgTimerFunc()));
 }
 
 
@@ -81,6 +91,15 @@ pvmsMenuWidget::pvmsMenuWidget(QWidget *parent) :
 pvmsMenuWidget::~pvmsMenuWidget()
 {
 
+    if (m_PmsgTimer != NULL)
+    {
+        if (m_PmsgTimer ->isActive())
+        {
+            m_PmsgTimer ->stop();
+        }
+        delete m_PmsgTimer;
+        m_PmsgTimer  = NULL;
+    }
 
     if (m_Rs485Timer != NULL)
     {
@@ -127,7 +146,198 @@ void pvmsMenuWidget::rs485TimerFunc()
 //    recvRs485Ctrl(tPkt.pcData, tPkt.iDataLen);
 
 }
+void pvmsMenuWidget::pmsgTimerFunc()
+{
+    int i = 0, iRet = 0;
+    T_TRAIN_CONFIG tTrainConfigInfo;
+    T_PMSG_PACKET tPkt;
+    PMSG_HANDLE pmsgHandle = 0;
 
+    memset(&tTrainConfigInfo, 0, sizeof(T_TRAIN_CONFIG));
+    STATE_GetCurrentTrainConfigInfo(&tTrainConfigInfo);
+    for (i = 0; i < tTrainConfigInfo.iNvrServerCount; i++)
+    {
+        memset(&tPkt, 0, sizeof(T_PMSG_PACKET));
+        pmsgHandle = STATE_GetNvrServerPmsgHandle(i);
+        iRet = PMSG_GetDataFromPmsgQueue(pmsgHandle, &tPkt);
+        if (iRet < 0)
+        {
+//            DebugPrint(DEBUG_PMSG_ERROR_PRINT, "get server 192.168.%d.81 pmsg data error\n", 100+tTrainConfigInfo.tNvrServerInfo[i].iCarriageNO);
+            continue;
+        }
+//        DebugPrint(DEBUG_PMSG_NORMAL_PRINT, "pmsgTimerFunc get pmsg message 0x%x, msgDataLen=%d\n",(int)tPkt.ucMsgCmd, tPkt.iMsgDataLen);
+        recvPmsgCtrl(tPkt.PHandle, tPkt.ucMsgCmd, tPkt.pcMsgData, tPkt.iMsgDataLen);
+        if (tPkt.pcMsgData)
+        {
+            free(tPkt.pcMsgData);
+            tPkt.pcMsgData = NULL;
+        }
+    }
+
+
+}
+
+void pvmsMenuWidget::recvPmsgCtrl(PMSG_HANDLE pHandle, unsigned char ucMsgCmd, char *pcMsgData, int iMsgDataLen)  //与服务器通信消息的分发处理
+{
+    int iAlarmType = 0, iDevPos = 0, iShadeAlarmEnableFlag = 0, i = 0;
+    T_TRAIN_CONFIG tTrainConfigInfo;
+
+    switch(ucMsgCmd)    //不同的应答消息类型分发给不同的页面处理
+    {
+        case SERV_CLI_MSG_TYPE_SET_PTZ_RESP:
+        case SERV_CLI_MSG_TYPE_SET_PRESETS_RESP:
+        case SERV_CLI_MSG_TYPE_PVMS_IPC_CTRL_RESP:
+        case SERV_CLI_MSG_TYPE_PVMS_LIGHT_CTRL_RESP:
+        case SERV_CLI_MSG_TYPE_PVMS_UPDOWN_REPORT:
+        case SERV_CLI_MSG_TYPE_PVMS_UP_DOWN_CTRL:
+        {
+//            DebugPrint(DEBUG_PMSG_NORMAL_PRINT, "pvmsMenu Widget get pmsg message 0x%x, msgDataLen=%d\n",(int)ucMsgCmd, iMsgDataLen);
+            if (m_pvmsMonitorPage != NULL)
+            {
+                m_pvmsMonitorPage->pmsgCtrl(pHandle, ucMsgCmd, pcMsgData, iMsgDataLen);
+            }
+            break;
+        }
+        case SERV_CLI_MSG_TYPE_GET_RECORD_TIME_LEN_RESP:
+        case SERV_CLI_MSG_TYPE_GET_RECORD_FILE_RESP:
+        {
+//            DebugPrint(DEBUG_PMSG_NORMAL_PRINT, "pvmsMenu Widget get pmsg message 0x%x, msgDataLen=%d\n",(int)ucMsgCmd, iMsgDataLen);
+            if (m_recordPlayPage != NULL)
+            {
+                m_recordPlayPage->pmsgCtrl(pHandle, ucMsgCmd, pcMsgData, iMsgDataLen);
+            }
+            break;
+        }
+        case SERV_CLI_MSG_TYPE_GET_NVR_STATUS_RESP:
+        {
+            if (pcMsgData == NULL || iMsgDataLen != 18)
+            {
+                break;
+            }
+            else
+            {
+                if (m_devManagePage != NULL)
+                {
+                    m_devManagePage->pmsgCtrl(pHandle, ucMsgCmd, pcMsgData, iMsgDataLen);
+                }
+
+                memset(&tTrainConfigInfo, 0, sizeof(T_TRAIN_CONFIG));
+                STATE_GetCurrentTrainConfigInfo(&tTrainConfigInfo);
+                for (i = 0; i < tTrainConfigInfo.iNvrServerCount; i++)
+                {
+                    if (pHandle == STATE_GetNvrServerPmsgHandle(i))
+                    {
+                        /*第一次连上服务器的3分钟之内不检测硬盘是否异常*/
+                        if (0 == m_iCheckDiskErrFlag[i])
+                        {
+                            m_iNoCheckDiskErrNum[i]++;
+                            if (18 == m_iNoCheckDiskErrNum[i])
+                            {
+                                m_iCheckDiskErrFlag[i] = 1;
+                                m_iNoCheckDiskErrNum[i] = 0;
+                            }
+                        }
+
+                        T_NVR_STATUS *ptNvrstaus = (T_NVR_STATUS *)pcMsgData;
+                        if (htons(ptNvrstaus->i16HdiskTotalSize) <= 0)
+                        {
+                            if (1 == m_iCheckDiskErrFlag[i])
+                            {
+                                iAlarmType = ALARM_HDISK_ERR;
+                            }
+                        }
+                        else
+                        {
+                            iAlarmType = ALARM_HDISK_CLEAR;
+                        }
+
+                        if (tTrainConfigInfo.tNvrServerInfo[i].iCarriageNO <= 0)
+                        {
+                            break;
+                        }
+                        emit reflushAlarmPageSignal(iAlarmType, tTrainConfigInfo.tNvrServerInfo[i].iCarriageNO, 0);
+                        break;
+                    }
+                }
+            }
+            break;
+        }
+        case SERV_CLI_MSG_TYPE_GET_IPC_STATUS_RESP:
+        case SERV_CLI_MSG_TYPE_PISMSG_REPORT:
+        {
+//            DebugPrint(DEBUG_PMSG_NORMAL_PRINT, "pvmsMenu Widget get pmsg message 0x%x, msgDataLen=%d\n",(int)ucMsgCmd, iMsgDataLen);
+            if (m_devManagePage != NULL)
+            {
+                m_devManagePage->pmsgCtrl(pHandle, ucMsgCmd, pcMsgData, iMsgDataLen);
+            }
+            break;
+        }
+        case SERV_CLI_MSG_TYPE_VIDEO_ALARM_REPORT:
+        {
+//            DebugPrint(DEBUG_PMSG_NORMAL_PRINT, "pvmsMenu Widget get pmsg message 0x%x, msgDataLen=%d\n",(int)ucMsgCmd, iMsgDataLen);
+            if (pcMsgData == NULL || iMsgDataLen != 4)
+            {
+                break;
+            }
+            else
+            {
+                if (m_devManagePage != NULL)
+                {
+                    m_devManagePage->pmsgCtrl(pHandle, ucMsgCmd, pcMsgData, iMsgDataLen);
+                }
+
+                T_VIDEO_ALARM_STATUS *ptVideoAlarmStatus = (T_VIDEO_ALARM_STATUS *)pcMsgData;
+                if (8 == ptVideoAlarmStatus->i8DevPos)
+                {
+                    iDevPos = 1;
+                }
+                else if (9 == ptVideoAlarmStatus->i8DevPos)
+                {
+                    iDevPos = 2;
+                }
+
+                if (1 == ptVideoAlarmStatus->i8VideoShade)
+                {
+                    iAlarmType = ALARM_VIDEO_SHADE;  //iAlarmType=1,表示遮挡报警
+                    iShadeAlarmEnableFlag = STATE_GetShadeAlarmEnableFlag();
+                    if (iShadeAlarmEnableFlag != 1)   //根据配置文件中的遮挡报警使能决定是否处理遮挡报警
+                    {
+                        break;
+                    }
+                }
+                else
+                {
+                    if (1 == ptVideoAlarmStatus->i8VideoLost)
+                    {
+                        iAlarmType = ALARM_VIDEO_LOST;   //iAlarmType=2,表示丢失报警
+                    }
+                    else
+                    {
+                        iAlarmType = ALARM_VIDEO_CLEAR;  //iAlarmType=0,表示报警恢复
+                    }
+                }
+
+                memset(&tTrainConfigInfo, 0, sizeof(T_TRAIN_CONFIG));
+                STATE_GetCurrentTrainConfigInfo(&tTrainConfigInfo);
+                for (i = 0; i < tTrainConfigInfo.iNvrServerCount; i++)
+                {
+                    if (pHandle == STATE_GetNvrServerPmsgHandle(i))
+                    {
+                        if (tTrainConfigInfo.tNvrServerInfo[i].iCarriageNO <= 0 || (iDevPos != 1 && iDevPos != 2))
+                        {
+                            break;
+                        }
+                        emit reflushAlarmPageSignal(iAlarmType, tTrainConfigInfo.tNvrServerInfo[i].iCarriageNO, iDevPos);
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+        default:
+            break;
+    }
+}
 
 void pvmsMenuWidget::alarmPageShowSlot()
 {

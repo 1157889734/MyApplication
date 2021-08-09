@@ -407,6 +407,9 @@ void recordPlayWidget::closePlayWin()
     m_playSlider->setRange(0, 0);
     m_playSlider->setValue(0);
 
+    player->stop();
+    emit setRecordPlayFlagSignal(0);
+
     ui->playMinLabel->setText("00");
     ui->playSecLabel->setText("00");
     ui->rangeMinLabel->setText("00");
@@ -652,72 +655,50 @@ void recordPlayWidget::alarmClearSlot()
 
     g_iRNum = 0;
 }
-void recordPlayWidget::openStartTimeSetWidgetSlot()    //时间设置按钮按键响应槽函数，按键显示时间设置窗体，根据按钮不同，其出现的位置也有不同
-{
-#if 0
-//    QString timeStr = ui->startTimeLabel->text();
-    char acTimeStr[256] = {0};
-    int iYear = 0, iMonth = 0, iDay = 0, iHour = 0, iMin = 0, iSec = 0;
 
-//	DebugPrint(DEBUG_UI_OPTION_PRINT, "recordPlayWidget startTimeSetPushButton pressed!\n");
-    strcpy(acTimeStr, timeStr.toLatin1().data());
-    if (strlen(acTimeStr) != 0)
+
+int recordPlayWidget::pmsgCtrl(PMSG_HANDLE pHandle, unsigned char ucMsgCmd, char *pcMsgData, int iMsgDataLen)    //与服务器通信消息处理
+{
+    char *pcToken = NULL;
+
+    if (0 == pHandle)
     {
-//		DebugPrint(DEBUG_UI_NOMAL_PRINT, "[%s] timeStr:%s!\n", __FUNCTION__, acTimeStr);
-        sscanf(acTimeStr, "%4d-%02d-%02d %02d:%02d:%02d", &iYear, &iMonth, &iDay, &iHour, &iMin, &iSec);
-//		DebugPrint(DEBUG_UI_NOMAL_PRINT, "[%s] %d-%d-%d %d:%d:%d!\n", __FUNCTION__, iYear, iMonth, iDay, iHour, iMin, iSec);
+        return 0;
     }
 
-#if 0
-    timeSetWidget->setGeometry(280, 50, timeSetWidget->width(), timeSetWidget->height());
-    g_iDateEditNo = 1;
-    timeSetWidget->se#define MAX_RECORD_SEACH_NUM 10000
-        #define MAX_RECFILE_PATH_LEN 256
-tTimeLabelText(iYear, iMonth, iDay, iHour, iMin, iSec);
-    timeSetWidget->show();
-#endif
-#endif
-
-}
-void recordPlayWidget::openStopTimeSetWidgetSlot()    //时间设置按钮按键响应槽函数，按键显示时间设置窗体，根据按钮不同，其出现的位置也有不同
-{
-#if 0
-
-//    QString timeStr = ui->endTimeLabel->text();
-    char acTimeStr[256] = {0};
-    int iYear = 0, iMonth = 0, iDay = 0, iHour = 0, iMin = 0, iSec = 0;
-
-//    DebugPrint(DEBUG_UI_OPTION_PRINT, "recordPlayWidget stopTimeSetPushButton pressed!\n");
-    strcpy(acTimeStr, timeStr.toLatin1().data());
-    if (strlen(acTimeStr) != 0)
+    switch(ucMsgCmd)
     {
-//        DebugPrint(DEBUG_UI_NOMAL_PRINT, "[%s] timeStr:%s!\n", __FUNCTION__, acTimeStr);
-        sscanf(acTimeStr, "%4d-%02d-%02d %02d:%02d:%02d", &iYear, &iMonth, &iDay, &iHour, &iMin, &iSec);
-//        DebugPrint(DEBUG_UI_NOMAL_PRINT, "[%s] %d-%d-%d %d:%d:%d!\n", __FUNCTION__, iYear, iMonth, iDay, iHour, iMin, iSec);
-    }
-#if 0
-    timeSetWidget->setGeometry(280, 90, timeSetWidget->width(), timeSetWidget->height());
-    g_iDateEditNo = 2;
-    timeSetWidget->setTimeLabelText(iYear, iMonth, iDay, iHour, iMin, iSec);
-    timeSetWidget->show();
-#endif
-#endif
+        case SERV_CLI_MSG_TYPE_GET_RECORD_TIME_LEN_RESP:
+        {
+            if (pcMsgData == NULL || iMsgDataLen != 2)
+            {
+                break;
+            }
+            else
+            {
+                short *iDuration = (short *)pcMsgData;
+//                DebugPrint(DEBUG_PMSG_DATA_PRINT, "recordPlay Widget get pmsg response cmd 0x%x data:%d\n", ucMsgCmd,*iDuration);
+                m_iPlayRange = htons(*iDuration);
+                break;
+            }
+        }
+        case SERV_CLI_MSG_TYPE_GET_RECORD_FILE_RESP:
+        {
+            pcToken = &pcMsgData[2];
+            iMsgDataLen = iMsgDataLen-2;  //先得到真正录像文件信息的内容长度，前两个字节表示分包序号
+//            DebugPrint(DEBUG_PMSG_DATA_PRINT, "recordPlay Widget get pmsg response cmd 0x%x data:\n%s\n", ucMsgCmd,pcToken);
 
-}
-void recordPlayWidget::timeSetRecvMsg(QString year, QString month, QString day, QString hour, QString min, QString sec)     //响应时间设置控件信号，更新起始、结束时间显示label的显示文本
-{
-#if 0
-    char timestr[128] = {0};
-    snprintf(timestr, sizeof(timestr), "%s-%s-%s %s:%s:%s", year.toStdString().data(), month.toStdString().data(), day.toStdString().data(),
-            hour.toStdString().data(), min.toStdString().data(), sec.toStdString().data());
-//    QString string = QString(QLatin1String(timestr)) ;
-//    if (1 == g_iDateEditNo)
-//    {
-//        ui->startTimeLabel->setText(string);
-//    }
-//    else if (2 == g_iDateEditNo)
-//    {
-//        ui->endTimeLabel->setText(string);
-//    }
-#endif
+            if (NULL == pcToken || iMsgDataLen <= 0)
+            {
+                break;
+            }
+
+//            recordQueryCtrl(pcToken, iMsgDataLen);    //触发录像查询处理信号，在UI主线程中处理，而不在这里直接处理
+            break;
+        }
+        default:
+            break;
+    }
+
+    return 0;
 }

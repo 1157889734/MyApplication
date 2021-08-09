@@ -98,6 +98,8 @@ public:
     QPushButton *m_presetNoPushbutton[8];
     QButtonGroup *g_buttonGroup;
     time_t m_lastActionTime;    //界面最后一次操作时间
+    int pmsgCtrl(PMSG_HANDLE pHandle, unsigned char ucMsgCmd, char *pcMsgData, int iMsgDataLen);   //与服务器通信消息处理
+    void pvmsUpdownCtrl(char *pcMsgData);
 
 
     QLabel *m_channelStateLabel;
@@ -120,7 +122,9 @@ public:
     PMSG_HANDLE m_NvrServerPhandle[MAX_SERVER_NUM];    //nvr服务器PMSG通信句柄
     pthread_t m_threadId;    //线程ID
     int m_iThreadRunFlag;   //线程运行标识
+    int m_iPisGetFlag;   //从PIS接收过消息的标志
 
+    PMSG_HANDLE m_PisServerPhandle;    //pis服务器PMSG通信句柄
 
     QWidget *m_playWin;    //播放窗体
     int m_iMousePosX;
@@ -177,6 +181,8 @@ public slots:
     void chLabelDisplayCtrlSlot();   //通道状态和通道号标签是否显示的处理函数
     void alarmHappenSlot();
     void alarmClearSlot();
+    void setRecordPlayFlag(int iFlag);
+
 
     void videoPollingSignalCtrl();
     void setFullScreenSignalCtrl();
@@ -187,6 +193,10 @@ public slots:
     void fillLightSwitchButtonTextCtrlSlot(int iFlag);   //补光灯开关状态按钮文本显示的处理函数，0-显示关闭，1-显示开启
     void cmpOptionCtrlSlot(int iType, int iCh);
 
+    void pvmsDownEndSlot1();
+    void pvmsDownEndSlot2();
+    void pvmsDownEndSlot3();
+    void pvmsDownEndSlot4();
 private:
     Ui::pvmsMonitorWidget *ui;
     QTimer *m_alarmHappenTimer;

@@ -26,6 +26,7 @@ public:
     ~pvmsMenuWidget();
 
     void recvRs485Ctrl(char *pcData, int iDataLen);
+    void recvPmsgCtrl(PMSG_HANDLE pHandle, unsigned char ucMsgCmd, char *pcMsgData, int iMsgDataLen);
 
 
 public slots:
@@ -58,6 +59,8 @@ private:
 public slots:
     void showPageSlot();
     void rs485TimerFunc();
+    void pmsgTimerFunc();
+
 
 };
 

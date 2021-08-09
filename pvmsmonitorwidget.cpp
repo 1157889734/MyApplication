@@ -330,6 +330,7 @@ pvmsMonitorWidget::pvmsMonitorWidget(QWidget *parent) :
     m_iFullScreenFlag = 0;
     m_iAlarmNotCtrlFlag = 0;
     m_iBlackScreenFlag = 0;
+    m_iPisGetFlag = 0;
 
     m_playWin = NULL;
 
@@ -436,7 +437,7 @@ void pvmsMonitorWidget::startVideoPolling()    //开启视频轮询的处理
     m_playWin->setMouseTracking(true);
 
     m_channelStateLabel = new QLabel(this->parentWidget());
-    m_channelStateLabel->setGeometry(452, 360, 121, 50);
+    m_channelStateLabel->setGeometry(452, 360, 130, 50);
     m_channelStateLabel->setStyleSheet("QLabel{color:rgb(255, 255, 255);font: 24pt;background-color: rgb(0, 0, 0);}");
     m_channelStateLabel->setAttribute(Qt::WA_TranslucentBackground, true); //设置控件背景透明
     m_channelStateLabel->show();
@@ -486,7 +487,9 @@ void pvmsMonitorWidget::startVideoPolling()    //开启视频轮询的处理
     }
     m_threadId = 0;
     m_iThreadRunFlag = 1;
-//    pthread_create(&m_threadId, NULL, monitorThread, (void *)this);    //创建监控线程
+    m_iDisplayEnable = 1;  //全局显示使能开启，使轮询线程正常轮询
+
+    pthread_create(&m_threadId, NULL, monitorThread, (void *)this);    //创建监控线程
 
 
 
@@ -755,7 +758,7 @@ void pvmsMonitorWidget::cameraSwitchSlot()
             emit chLabelDisplayCtrlSignal();  //触发通道状态和通道号标签显示处理信号
 
         }
-#if 0
+#if 1
 
         else
         {
@@ -955,6 +958,26 @@ void pvmsMonitorWidget::getChStreamState(int iCh)
 }
 
 
+void pvmsMonitorWidget::setRecordPlayFlag(int iFlag)
+{
+    int i = 0;
+    T_CMP_PACKET tPkt;
+
+//    DebugPrint(DEBUG_UI_NOMAL_PRINT, "[%s] set record flag to %d!\n", __FUNCTION__, iFlag);
+    m_iRecordPlayFlag = iFlag;
+
+    if (1 == m_iRecordPlayFlag)   //录像回放使禁止实时的所有使能，确保回放能正常打开并使能显示
+    {
+        for (i = 0; i < m_iCameraNum; i++)
+        {
+
+            tPkt.iMsgCmd = CMP_CMD_DESTORY_CH;
+            tPkt.iCh = i;
+            PutNodeToCmpQueue(m_ptQueue, &tPkt);
+        }
+    }
+}
+
 void pvmsMonitorWidget::videoPollingSignalCtrl()
 {
     QString ChannelNoStr = tr("通道");
@@ -1123,7 +1146,7 @@ void pvmsMonitorWidget::cmpOptionCtrlSlot(int iType, int iCh)
 
 void pvmsMonitorWidget::chLabelDisplayCtrlSlot()   //通道状态和通道号标签是否显示的处理函数
 {
-#if 0
+#if 1
 
     T_CMP_PACKET tPkt;
 
@@ -1551,6 +1574,386 @@ bool pvmsMonitorWidget::eventFilter(QObject *target, QEvent *event)    //事件�
     }
 
     return QWidget::eventFilter(target, event);
+
+
+}
+void pvmsMonitorWidget::pvmsDownEndSlot1()
+{
+    char acSendBuf[4] = {0};
+    int iRet = 0, i = 0;
+    T_TRAIN_CONFIG tTrainConfigInfo;
+    T_LOG_INFO tLogInfo;
+
+    if ((0 == m_iPollingFlag) && (0 == m_iCameraPlayNo))   //轮询暂停时，要根据当前相机的补光灯状态来手动刷新按钮样式，正常轮询不需要在这里手动刷新
+    {
+        emit fillLightSwitchButtonTextCtrlSignal(1);  //触发让补光灯开关按钮显示文本的信号
+    }
+
+    acSendBuf[0] = 2;  //操作类型为关闭补光灯
+    acSendBuf[1] = m_tCameraInfo[0].iPosNO;      //发送消息的第2个字节表示受电弓摄像机位置号
+    iRet = PMSG_SendPmsgData(m_tCameraInfo[0].phandle, CLI_SERV_MSG_TYPE_PVMS_LIGHT_CTRL, acSendBuf, 2);    //发送补光灯开关控制命令
+    if (iRet < 0)
+    {
+//        DebugPrint(DEBUG_UI_ERROR_PRINT, "[%s] PMSG_SendPmsgData CLI_SERV_MSG_TYPE_PVMS_LIGHT_CTRL error!iRet=%d, cameraNo=%d\n",__FUNCTION__,iRet, 0);
+    }
+    else
+    {
+        m_tCameraInfo[0].iManualFillLightCtrlFlag = 0;
+        memset(&tTrainConfigInfo, 0, sizeof(T_TRAIN_CONFIG));
+        STATE_GetCurrentTrainConfigInfo(&tTrainConfigInfo);
+
+        for (i = 0; i < tTrainConfigInfo.iNvrServerCount; i++)
+        {
+            if (m_tCameraInfo[0].phandle == STATE_GetNvrServerPmsgHandle(i))
+            {
+                memset(&tLogInfo, 0, sizeof(T_LOG_INFO));
+                tLogInfo.iLogType = 0;
+                snprintf(tLogInfo.acLogDesc, sizeof(tLogInfo.acLogDesc), "get camera %d.%d pvms down signal, close fillLight", 100+tTrainConfigInfo.tNvrServerInfo[i].iCarriageNO, 200+m_tCameraInfo[0].iPosNO-8);
+                LOG_WriteLog(&tLogInfo);
+                break;
+            }
+        }
+    }
+    m_tCameraInfo[0].iFillLightSwitchState = FILLLIGHT_OFF;
+
+    if (m_tCameraInfo[0].pvmsDownMonitorTimer != NULL)
+    {
+        if (m_tCameraInfo[0].pvmsDownMonitorTimer ->isActive())
+        {
+            m_tCameraInfo[0].pvmsDownMonitorTimer ->stop();
+        }
+        delete m_tCameraInfo[0].pvmsDownMonitorTimer ;
+        m_tCameraInfo[0].pvmsDownMonitorTimer  = NULL;
+    }
+}
+
+void pvmsMonitorWidget::pvmsDownEndSlot2()
+{
+    char acSendBuf[4] = {0};
+    int iRet = 0, i = 0;
+    T_TRAIN_CONFIG tTrainConfigInfo;
+    T_LOG_INFO tLogInfo;
+
+    if ((0 == m_iPollingFlag) && (1 == m_iCameraPlayNo))   //轮询暂停时，要根据当前相机的补光灯状态来手动刷新按钮样式，正常轮询不需要在这里手动刷新
+    {
+        emit fillLightSwitchButtonTextCtrlSignal(1);  //触发让补光灯开关按钮显示文本的信号
+    }
+
+    acSendBuf[0] = 2;  //操作类型为关闭补光灯
+    acSendBuf[1] = m_tCameraInfo[1].iPosNO;      //发送消息的第2个字节表示受电弓摄像机位置号
+    iRet = PMSG_SendPmsgData(m_tCameraInfo[1].phandle, CLI_SERV_MSG_TYPE_PVMS_LIGHT_CTRL, acSendBuf, 2);    //发送补光灯开关控制命令
+    if (iRet < 0)
+    {
+//        DebugPrint(DEBUG_UI_ERROR_PRINT, "[%s] PMSG_SendPmsgData CLI_SERV_MSG_TYPE_PVMS_LIGHT_CTRL error!iRet=%d, cameraNo=%d\n",__FUNCTION__,iRet, 1);
+    }
+    else
+    {
+        m_tCameraInfo[1].iManualFillLightCtrlFlag = 0;
+        memset(&tTrainConfigInfo, 0, sizeof(T_TRAIN_CONFIG));
+        STATE_GetCurrentTrainConfigInfo(&tTrainConfigInfo);
+
+        for (i = 0; i < tTrainConfigInfo.iNvrServerCount; i++)
+        {
+            if (m_tCameraInfo[1].phandle == STATE_GetNvrServerPmsgHandle(i))
+            {
+                memset(&tLogInfo, 0, sizeof(T_LOG_INFO));
+                tLogInfo.iLogType = 0;
+                snprintf(tLogInfo.acLogDesc, sizeof(tLogInfo.acLogDesc), "get camera %d.%d pvms down signal, close fillLight", 100+tTrainConfigInfo.tNvrServerInfo[i].iCarriageNO, 200+m_tCameraInfo[1].iPosNO-8);
+                LOG_WriteLog(&tLogInfo);
+                break;
+            }
+        }
+    }
+    m_tCameraInfo[1].iFillLightSwitchState = FILLLIGHT_OFF;
+
+    if (m_tCameraInfo[1].pvmsDownMonitorTimer != NULL)
+    {
+        if (m_tCameraInfo[1].pvmsDownMonitorTimer ->isActive())
+        {
+            m_tCameraInfo[1].pvmsDownMonitorTimer ->stop();
+        }
+        delete m_tCameraInfo[1].pvmsDownMonitorTimer ;
+        m_tCameraInfo[1].pvmsDownMonitorTimer  = NULL;
+    }
+}
+
+void pvmsMonitorWidget::pvmsDownEndSlot3()
+{
+    char acSendBuf[4] = {0};
+    int iRet = 0, i = 0;
+    T_TRAIN_CONFIG tTrainConfigInfo;
+    T_LOG_INFO tLogInfo;
+
+    if ((0 == m_iPollingFlag) && (2 == m_iCameraPlayNo))   //轮询暂停时，要根据当前相机的补光灯状态来手动刷新按钮样式，正常轮询不需要在这里手动刷新
+    {
+        emit fillLightSwitchButtonTextCtrlSignal(1);  //触发让补光灯开关按钮显示文本的信号
+    }
+
+    acSendBuf[0] = 2;  //操作类型为关闭补光灯
+    acSendBuf[1] = m_tCameraInfo[2].iPosNO;      //发送消息的第2个字节表示受电弓摄像机位置号
+    iRet = PMSG_SendPmsgData(m_tCameraInfo[2].phandle, CLI_SERV_MSG_TYPE_PVMS_LIGHT_CTRL, acSendBuf, 2);    //发送补光灯开关控制命令
+    if (iRet < 0)
+    {
+//        DebugPrint(DEBUG_UI_ERROR_PRINT, "[%s] PMSG_SendPmsgData CLI_SERV_MSG_TYPE_PVMS_LIGHT_CTRL error!iRet=%d, cameraNo=%d\n",__FUNCTION__,iRet, 2);
+    }
+    else
+    {
+        m_tCameraInfo[2].iManualFillLightCtrlFlag = 0;
+        memset(&tTrainConfigInfo, 0, sizeof(T_TRAIN_CONFIG));
+        STATE_GetCurrentTrainConfigInfo(&tTrainConfigInfo);
+
+        for (i = 0; i < tTrainConfigInfo.iNvrServerCount; i++)
+        {
+            if (m_tCameraInfo[2].phandle == STATE_GetNvrServerPmsgHandle(i))
+            {
+                memset(&tLogInfo, 0, sizeof(T_LOG_INFO));
+                tLogInfo.iLogType = 0;
+                snprintf(tLogInfo.acLogDesc, sizeof(tLogInfo.acLogDesc), "get camera %d.%d pvms down signal, close fillLight", 100+tTrainConfigInfo.tNvrServerInfo[i].iCarriageNO, 200+m_tCameraInfo[2].iPosNO-8);
+                LOG_WriteLog(&tLogInfo);
+                break;
+            }
+        }
+    }
+    m_tCameraInfo[2].iFillLightSwitchState = FILLLIGHT_OFF;
+
+    if (m_tCameraInfo[2].pvmsDownMonitorTimer != NULL)
+    {
+        if (m_tCameraInfo[2].pvmsDownMonitorTimer ->isActive())
+        {
+            m_tCameraInfo[2].pvmsDownMonitorTimer ->stop();
+        }
+        delete m_tCameraInfo[2].pvmsDownMonitorTimer ;
+        m_tCameraInfo[2].pvmsDownMonitorTimer  = NULL;
+    }
+}
+
+void pvmsMonitorWidget::pvmsDownEndSlot4()
+{
+    char acSendBuf[4] = {0};
+    int iRet = 0, i = 0;
+    T_TRAIN_CONFIG tTrainConfigInfo;
+    T_LOG_INFO tLogInfo;
+
+    if ((0 == m_iPollingFlag) && (3 == m_iCameraPlayNo))   //轮询暂停时，要根据当前相机的补光灯状态来手动刷新按钮样式，正常轮询不需要在这里手动刷新
+    {
+        emit fillLightSwitchButtonTextCtrlSignal(1);  //触发让补光灯开关按钮显示文本的信号
+    }
+
+    acSendBuf[0] = 2;  //操作类型为关闭补光灯
+    acSendBuf[1] = m_tCameraInfo[3].iPosNO;      //发送消息的第2个字节表示受电弓摄像机位置号
+    iRet = PMSG_SendPmsgData(m_tCameraInfo[3].phandle, CLI_SERV_MSG_TYPE_PVMS_LIGHT_CTRL, acSendBuf, 2);    //发送补光灯开关控制命令
+    if (iRet < 0)
+    {
+//        DebugPrint(DEBUG_UI_ERROR_PRINT, "[%s] PMSG_SendPmsgData CLI_SERV_MSG_TYPE_PVMS_LIGHT_CTRL error!iRet=%d, cameraNo=%d\n",__FUNCTION__,iRet, 3);
+    }
+    else
+    {
+        m_tCameraInfo[3].iManualFillLightCtrlFlag = 0;
+        memset(&tTrainConfigInfo, 0, sizeof(T_TRAIN_CONFIG));
+        STATE_GetCurrentTrainConfigInfo(&tTrainConfigInfo);
+
+        for (i = 0; i < tTrainConfigInfo.iNvrServerCount; i++)
+        {
+            if (m_tCameraInfo[3].phandle == STATE_GetNvrServerPmsgHandle(i))
+            {
+                memset(&tLogInfo, 0, sizeof(T_LOG_INFO));
+                tLogInfo.iLogType = 0;
+                snprintf(tLogInfo.acLogDesc, sizeof(tLogInfo.acLogDesc), "get camera %d.%d pvms down signal, close fillLight", 100+tTrainConfigInfo.tNvrServerInfo[i].iCarriageNO, 200+m_tCameraInfo[3].iPosNO-8);
+                LOG_WriteLog(&tLogInfo);
+                break;
+            }
+        }
+    }
+    m_tCameraInfo[3].iFillLightSwitchState = FILLLIGHT_OFF;
+
+    if (m_tCameraInfo[3].pvmsDownMonitorTimer != NULL)
+    {
+        if (m_tCameraInfo[3].pvmsDownMonitorTimer ->isActive())
+        {
+            m_tCameraInfo[3].pvmsDownMonitorTimer ->stop();
+        }
+        delete m_tCameraInfo[3].pvmsDownMonitorTimer ;
+        m_tCameraInfo[3].pvmsDownMonitorTimer  = NULL;
+    }
+}
+
+void pvmsMonitorWidget::pvmsUpdownCtrl(char *pcMsgData)
+{
+    char acSendBuf[4] = {0};
+    int iRet = 0, i = 0, j = 0;
+    T_TRAIN_CONFIG tTrainConfigInfo;
+    T_LOG_INFO tLogInfo;
+    T_PVMS_UPDOWN_INFO *ptPvmsUpdownInfo = (T_PVMS_UPDOWN_INFO *)pcMsgData;
+
+    for (i = 0; i < 4; i++)
+    {
+        m_tCameraInfo[i].iPvmsUpdownState = ptPvmsUpdownInfo->i8PvmsUpdownFlag[i];
+    }
+
+    for (i = 0; i < 4; i++)
+    {
+        if (PVMS_UP == m_tCameraInfo[i].iPvmsUpdownState)
+        {
+//            DebugPrint(DEBUG_UI_NOMAL_PRINT, "[%s] get cameraNo%d pvms updown signal,state is up\n",__FUNCTION__, i);
+            if (m_tCameraInfo[i].pvmsDownMonitorTimer != NULL)   //收到了升弓信号就删除降弓监控定时器，取消重新开始
+            {
+                if (m_tCameraInfo[i].pvmsDownMonitorTimer ->isActive())
+                {
+                    m_tCameraInfo[i].pvmsDownMonitorTimer ->stop();
+                }
+                delete m_tCameraInfo[i].pvmsDownMonitorTimer ;
+                m_tCameraInfo[i].pvmsDownMonitorTimer  = NULL;
+            }
+
+            if ((FILLLIGHT_OFF == m_tCameraInfo[i].iFillLightSwitchState) && (0 == m_tCameraInfo[i].iManualFillLightCtrlFlag))
+            {
+                if ((0 == m_iPollingFlag) && (i == m_iCameraPlayNo))   //轮询暂停时，要根据当前相机的补光灯状态来手动刷新按钮样式，正常轮询不需要在这里手动刷新
+                {
+                    emit fillLightSwitchButtonTextCtrlSignal(0);  //触发让补光灯开关按钮显示文本的信号
+                }
+                acSendBuf[0] = 1;  //操作类型为开启补光灯
+                acSendBuf[1] = m_tCameraInfo[i].iPosNO;      //发送消息的第2个字节表示受电弓摄像机位置号
+                iRet = PMSG_SendPmsgData(m_tCameraInfo[i].phandle, CLI_SERV_MSG_TYPE_PVMS_LIGHT_CTRL, acSendBuf, 2);    //发送补光灯开关控制命令
+                if (iRet < 0)
+                {
+//                    DebugPrint(DEBUG_UI_ERROR_PRINT, "[%s] PMSG_SendPmsgData CLI_SERV_MSG_TYPE_PVMS_LIGHT_CTRL error!iRet=%d, cameraNo=%d\n",__FUNCTION__,iRet, i);
+                }
+                else
+                {
+                    m_tCameraInfo[i].iManualFillLightCtrlFlag = 0;
+                    memset(&tTrainConfigInfo, 0, sizeof(T_TRAIN_CONFIG));
+                    STATE_GetCurrentTrainConfigInfo(&tTrainConfigInfo);
+
+                    for (j = 0; j < tTrainConfigInfo.iNvrServerCount; j++)
+                    {
+                        if (m_tCameraInfo[i].phandle == STATE_GetNvrServerPmsgHandle(j))
+                        {
+                            memset(&tLogInfo, 0, sizeof(T_LOG_INFO));
+                            tLogInfo.iLogType = 0;
+                            snprintf(tLogInfo.acLogDesc, sizeof(tLogInfo.acLogDesc), "get camera %d.%d pvms up signal, open fillLight", 100+tTrainConfigInfo.tNvrServerInfo[j].iCarriageNO, 200+m_tCameraInfo[i].iPosNO-8);
+                            LOG_WriteLog(&tLogInfo);
+                            break;
+                        }
+                    }
+                }
+                m_tCameraInfo[i].iFillLightSwitchState = FILLLIGHT_ON;
+            }
+        }
+        else if ((PVMS_DOWN == m_tCameraInfo[i].iPvmsUpdownState)  && (FILLLIGHT_ON == m_tCameraInfo[i].iFillLightSwitchState))
+        {
+//            DebugPrint(DEBUG_UI_NOMAL_PRINT, "[%s] get cameraNo%d pvms updown signal,state is down\n",__FUNCTION__, i);
+
+            if (NULL == m_tCameraInfo[i].pvmsDownMonitorTimer)
+            {
+                m_tCameraInfo[i].pvmsDownMonitorTimer = new QTimer(this);
+                m_tCameraInfo[i].pvmsDownMonitorTimer->start(10*60*1000);	//收到降弓信号10分钟后关闭相应补光灯
+
+                if (0 == i)
+                {
+                    connect(m_tCameraInfo[i].pvmsDownMonitorTimer,SIGNAL(timeout()), this,SLOT(pvmsDownEndSlot1()));
+                }
+                else if (1 == i)
+                {
+                    connect(m_tCameraInfo[i].pvmsDownMonitorTimer,SIGNAL(timeout()), this,SLOT(pvmsDownEndSlot2()));
+                }
+                else if (2 == i)
+                {
+                    connect(m_tCameraInfo[i].pvmsDownMonitorTimer,SIGNAL(timeout()), this,SLOT(pvmsDownEndSlot3()));
+                }
+                else
+                {
+                    connect(m_tCameraInfo[i].pvmsDownMonitorTimer,SIGNAL(timeout()), this,SLOT(pvmsDownEndSlot4()));
+                }
+            }
+        }
+    }
+}
+int pvmsMonitorWidget::pmsgCtrl(PMSG_HANDLE pHandle, unsigned char ucMsgCmd, char *pcMsgData, int iMsgDataLen)   //与服务器通信消息处理
+{
+    int i = 0;
+        T_PVMS_UPDOWN_INFO tPvmsUpdownInfo;
+        if (0 == pHandle)
+        {
+            return 0;
+        }
+
+        switch(ucMsgCmd)
+        {
+            case SERV_CLI_MSG_TYPE_SET_PTZ_RESP:
+            case SERV_CLI_MSG_TYPE_SET_PRESETS_RESP:
+            case SERV_CLI_MSG_TYPE_PVMS_IPC_CTRL_RESP:
+            case SERV_CLI_MSG_TYPE_PVMS_LIGHT_CTRL_RESP:
+            {
+                if ((NULL == pcMsgData) || (iMsgDataLen != 1))
+                {
+                    break;
+                }
+//                DebugPrint(DEBUG_PMSG_DATA_PRINT, "pvmsMonitorWidget Widget get pmsg response cmd 0x%x data:%d\n", ucMsgCmd, pcMsgData[0]);
+                break;
+            }
+            case SERV_CLI_MSG_TYPE_PVMS_UPDOWN_REPORT:
+            {
+                if ((NULL == pcMsgData) || (iMsgDataLen != 6))
+                {
+                    break;
+                }
+                else
+                {
+//                    DebugPrint(DEBUG_PMSG_NORMAL_PRINT, "pvmsMonitorWidget Widget get pmsg cmd 0x%x\n", ucMsgCmd);
+
+                    /*没收到PIS发送的升降弓命令之前，PIS和NVR发过来的升降弓命令都处理，一旦收到过PIS发过来的，之后对NVR发过来的命令就不处理了*/
+                    if (pHandle == m_PisServerPhandle)
+                    {
+                        if (0 == m_iPisGetFlag)
+                        {
+                            m_iPisGetFlag = 1;   //收到过PIS发送的升降弓命令了,之后对NVR发过来的SERV_CLI_MSG_TYPE_PVMS_UP_DOWN_CTRL命令就不处理了
+                        }
+
+                        pvmsUpdownCtrl(pcMsgData);
+                    }
+                    break;
+                }
+            }
+            case SERV_CLI_MSG_TYPE_PVMS_UP_DOWN_CTRL:
+            {
+                if ((NULL == pcMsgData) || (iMsgDataLen != 2))
+                {
+                    break;
+                }
+                else
+                {
+                    if (m_iPisGetFlag != 1)   //只有没收到过PIS发送的升降弓命令才进行这条命令的处理
+                    {
+//                        DebugPrint(DEBUG_PMSG_NORMAL_PRINT, "pvmsMonitorWidget Widget get pmsg cmd 0x%x %d-%d\n", ucMsgCmd, m_iPisGetFlag, pcMsgData[0]);
+                        memset(&tPvmsUpdownInfo, 0, sizeof(T_PVMS_UPDOWN_INFO));
+
+                        if (1 == pcMsgData[0])   //升弓
+                        {
+                            for (i = 0; i < 4; i++)
+                            {
+                                tPvmsUpdownInfo.i8PvmsUpdownFlag[i] = 1;
+                            }
+                        }
+                        else   //降弓
+                        {
+                            for (i = 0; i < 4; i++)
+                            {
+                                tPvmsUpdownInfo.i8PvmsUpdownFlag[i] = 0;
+                            }
+                        }
+                        pvmsUpdownCtrl((char *)&tPvmsUpdownInfo);
+                    }
+                }
+                break;
+            }
+            default:
+                break;
+        }
+
+        return 0;
+
+
+
 
 
 }

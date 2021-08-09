@@ -20,6 +20,11 @@ public:
     void trainNumberSetSlot_fuction();
     int rs485Ctrl(char *pcData, int iDataLen);
     void pisMsgCtrl(char *pcMsgData);
+    void videoAlarmCtrl(PMSG_HANDLE pHandle, char *pcMsgData);
+    void getNvrStatusCtrl(PMSG_HANDLE pHandle, char *pcMsgData);
+    void getIpcStatusCtrl(PMSG_HANDLE pHandle, char *pcMsgData);
+
+    int pmsgCtrl(PMSG_HANDLE pHandle, unsigned char ucMsgCmd, char *pcMsgData, int iMsgDataLen);
 
 
 public slots:
@@ -36,6 +41,7 @@ public slots:
 
 signals:
     void alarmPushButoonClickSignal();
+    void systimeSetSignal();
 
 private:
     Ui::devManageWidget *ui;
