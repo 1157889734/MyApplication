@@ -43,6 +43,8 @@ public:
     qint64 totalplaytime;
     void closePlayWin();
     int m_iPlayRange;    //录像文件总播放时长
+    void recordQueryCtrl(char *pcMsgData, int iMsgDataLen);
+    void mediaInit();
 
 protected:
     void mousePressEvent(QMouseEvent *event);
@@ -76,6 +78,7 @@ signals:
     void alarmPushButoonClickSignal();
     void registOutSignal(int iType);     //注销信号，iType:表示执行注销的页面类型，这里应该为2，表示受电弓监控页面,
     void setRecordPlayFlagSignal(int iFlag);
+    void recordTableWidgetFillSignal();
 
 private:
     Ui::recordPlayWidget *ui;
@@ -91,7 +94,6 @@ private:
     void setPlayButtonStyleSheet();
     void getTrainConfig();     //获取车型配置信息
 
-    void mediaInit();
 
     QMediaPlayer *player;
     QMediaPlaylist *list;

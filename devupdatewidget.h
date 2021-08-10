@@ -38,7 +38,9 @@ public slots:
     void alarmHappenSlot();
     void alarmClearSlot();
     void presetReturnTimeChange(int iComboBoxId);
+    void lineEditpresetReturnTimeChange(const QString &);
     void pollingTimeChange(int iComboBoxId);
+    void lineEditpollingTimeChange(const QString &);
     void showSysTime();
     void monitorSysTime();
     void systimeSlot();

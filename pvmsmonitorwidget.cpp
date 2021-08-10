@@ -381,7 +381,6 @@ void pvmsMonitorWidget::mediaInit()
 
 void *monitorThread(void *param)     //实时监控线程，对通道轮询、全屏、预置点返回、设备状态等进行循环监控
 {
-#if 0
     int i = 0, iRet = 0;
 
     T_CMP_PACKET tCmpPkt;
@@ -403,10 +402,6 @@ void *monitorThread(void *param)     //实时监控线程，对通道轮询、�
         }
 
     }
-
-#endif
-
-
 
 }
 
@@ -485,6 +480,84 @@ void pvmsMonitorWidget::startVideoPolling()    //开启视频轮询的处理
             m_iCameraNum++;
         }
     }
+
+    if (1 == iFirstFlag)    //程序运行起来第一次进当前界面，需要把所有的摄像头打开,摄像头开关状态为开，补光灯开关状态为开，预置点编号为0
+    {
+//        DebugPrint(DEBUG_UI_NOMAL_PRINT, "[%s] send CLI_SERV_MSG_TYPE_PVMS_IPC_CTRL to server to open all camera%d\n",__FUNCTION__);
+        for (i = 0; i < m_iCameraNum; i++)
+        {
+            acSendBuf[0] = 1;  //发送消息的第2个字节表示操作类型，这里为开启摄像头
+            acSendBuf[1] = m_tCameraInfo[i].iPosNO;	  //发送消息的第2个字节表示受电弓摄像机位置号
+            iRet = PMSG_SendPmsgData(m_tCameraInfo[i].phandle, CLI_SERV_MSG_TYPE_PVMS_IPC_CTRL, acSendBuf, 2);    //发送摄像头开关控制命令
+            if (iRet < 0)
+            {
+//                DebugPrint(DEBUG_UI_ERROR_PRINT, "[%s] PMSG_SendPmsgData CLI_SERV_MSG_TYPE_PVMS_IPC_CTRL error!iRet=%d, cameraNo=%d\n",__FUNCTION__,iRet, i);
+            }
+            else
+            {
+                for (j = 0; j < tTrainConfigInfo.iNvrServerCount; j++)
+                {
+                    if (m_tCameraInfo[i].phandle == STATE_GetNvrServerPmsgHandle(j))
+                    {
+                        memset(&tLogInfo, 0, sizeof(T_LOG_INFO));
+                        tLogInfo.iLogType = 0;
+                        snprintf(tLogInfo.acLogDesc, sizeof(tLogInfo.acLogDesc), "open camera %d.%d stream", 100+tTrainConfigInfo.tNvrServerInfo[j].iCarriageNO, 200+m_tCameraInfo[i].iPosNO-8);
+                        LOG_WriteLog(&tLogInfo);
+                        break;
+                    }
+                }
+            }
+
+
+            acSendBuf[0] = 1;  //发送消息的第2个字节表示操作类型,这里开启补光灯
+            acSendBuf[1] = m_tCameraInfo[i].iPosNO;	  //发送消息的第2个字节表示受电弓摄像机位置号
+            iRet = PMSG_SendPmsgData(m_tCameraInfo[i].phandle, CLI_SERV_MSG_TYPE_PVMS_LIGHT_CTRL, acSendBuf, 2);    //发送补光灯开关控制命令
+            if (iRet < 0)
+            {
+//                DebugPrint(DEBUG_UI_ERROR_PRINT, "[%s] PMSG_SendPmsgData CLI_SERV_MSG_TYPE_PVMS_LIGHT_CTRL error!iRet=%d, cameraNo=%d\n",__FUNCTION__,iRet, i);
+            }
+            else
+            {
+                for (j = 0; j < tTrainConfigInfo.iNvrServerCount; j++)
+                {
+                    if (m_tCameraInfo[i].phandle == STATE_GetNvrServerPmsgHandle(j))
+                    {
+                        memset(&tLogInfo, 0, sizeof(T_LOG_INFO));
+                        tLogInfo.iLogType = 0;
+                        snprintf(tLogInfo.acLogDesc, sizeof(tLogInfo.acLogDesc), "open camera %d.%d fillLight", 100+tTrainConfigInfo.tNvrServerInfo[j].iCarriageNO, 200+m_tCameraInfo[i].iPosNO-8);
+                        LOG_WriteLog(&tLogInfo);
+                        break;
+                    }
+                }
+            }
+
+            m_tCameraInfo[i].iCameraSwitchState = CAMERA_ON;
+            m_tCameraInfo[i].iFillLightSwitchState = FILLLIGHT_ON;
+            m_tCameraInfo[i].iPresetNo = 0;
+        }
+
+        m_channelStateLabel->setText(tr("摄像头开启"));
+        m_channelNoLabel->setText(tr("通道1"));
+//        m_iCameraPlayNo = -1;  ??????????
+        iFirstFlag = 0;
+
+    }
+    else    //非第一次，则保持摄像头开关状态、补光灯开关状态不变，也不用发开关摄像头的命令到服务器，并且根据不同的摄像头开关状态显示不同的通道状态
+    {
+        if (CAMERA_ON == m_tCameraInfo[m_iCameraPlayNo].iCameraSwitchState)
+        {
+            m_channelStateLabel->setText(tr("摄像头开启"));
+        }
+        else
+        {
+            m_channelStateLabel->setText(tr("摄像头关闭"));
+        }
+        chStr += QString::number(m_iCameraPlayNo+1);
+        m_channelNoLabel->setText(chStr);
+    }
+
+    m_PisServerPhandle = STATE_GetPisPmsgHandle();
+    tPollingOparateTime = s_info.uptime;
     m_threadId = 0;
     m_iThreadRunFlag = 1;
     m_iDisplayEnable = 1;  //全局显示使能开启，使轮询线程正常轮询
@@ -752,14 +825,10 @@ void pvmsMonitorWidget::cameraSwitchSlot()
             tPkt.iMsgCmd = CMP_CMD_DESTORY_CH;
             tPkt.iCh = m_iCameraPlayNo;
             PutNodeToCmpQueue(m_ptQueue, &tPkt);
-
-
             /*把相机的状态切换成关闭状态时，同时需显示通道状态和通道号*/
             emit chLabelDisplayCtrlSignal();  //触发通道状态和通道号标签显示处理信号
 
         }
-#if 1
-
         else
         {
 //                DebugPrint(DEBUG_UI_NOMAL_PRINT, "pvmsMonitorWidget open camera!\n");
@@ -822,12 +891,10 @@ void pvmsMonitorWidget::cameraSwitchSlot()
             m_cameraSwitchTimer->start(2*1000);
             connect(m_cameraSwitchTimer,SIGNAL(timeout()), this,SLOT(cameraSwitchEndSlot()));
         }
-
         if (1 == iFlag)
         {
             m_iPollingFlag = 1;   //如果上面手动将轮询标志清0，这里需要恢复为1
         }
-#endif
 }
 void pvmsMonitorWidget::fillLightSwitchSlot()
 {
@@ -1087,7 +1154,7 @@ void pvmsMonitorWidget::setFullScreenSignalCtrl()
         tPkt.iCh = 0;
         PutNodeToCmpQueue(m_ptQueue, &tPkt);
 
-        m_channelStateLabel->setGeometry(452, 360, 121, 50);
+        m_channelStateLabel->setGeometry(452, 360, 130, 50);
         m_channelNoLabel->setGeometry(20, 690, 65, 50);
         if (m_presetPasswdConfirmPage != NULL)
         {
@@ -1445,7 +1512,7 @@ bool pvmsMonitorWidget::eventFilter(QObject *target, QEvent *event)    //事件�
                 tPkt.iCh = 0;
                 PutNodeToCmpQueue(m_ptQueue, &tPkt);
 
-                m_channelStateLabel->setGeometry(320, 385, 121, 50);
+                m_channelStateLabel->setGeometry(320, 385, 130, 50);
                 m_channelNoLabel->setGeometry(20, 690, 65, 50);
 //                if (m_presetPasswdConfirmPage != NULL)
 //                {
@@ -1474,7 +1541,7 @@ bool pvmsMonitorWidget::eventFilter(QObject *target, QEvent *event)    //事件�
                 tPkt.iCh = 0;
                 PutNodeToCmpQueue(m_ptQueue, &tPkt);
 
-                m_channelStateLabel->setGeometry(452, 360, 121, 50);
+                m_channelStateLabel->setGeometry(452, 360, 130, 50);
                 m_channelNoLabel->setGeometry(20, 690, 65, 50);
 
 //                if (m_presetPasswdConfirmPage != NULL)

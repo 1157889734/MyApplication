@@ -17,7 +17,7 @@
 choiceLoginDevWidget *g_choiceLoginDevPage = NULL;    //选择登录设备页面
 loginWidget *g_loginPage = NULL;   //登录页面
 pvmsMenuWidget *g_pvmsMenuPage = NULL;   //受电弓监控主菜单页面
-
+recordPlayWidget *g_recordPage = NULL;
 pvmsMonitorWidget *g_monitorPage = NULL;
 
 int main(int argc, char *argv[])
@@ -43,7 +43,6 @@ int main(int argc, char *argv[])
     STATE_ReadTrainConfigFile();	//程序运行起来读取一次车型配置文件
 
 
-
     a.setWindowIcon(QIcon(":/res/info.png"));   //设置窗口图标，这里主要是messagebox窗体会显示，而避免出现QT图标
     qDebug() << "drivers------------------------"<< QSqlDatabase::drivers();
 
@@ -63,6 +62,7 @@ int main(int argc, char *argv[])
     g_choiceLoginDevPage = new choiceLoginDevWidget();
     g_loginPage = new loginWidget();
     g_pvmsMenuPage = new pvmsMenuWidget();
+
 
     g_choiceLoginDevPage->show();
     g_loginPage->hide();

@@ -11,6 +11,8 @@
 #include <QDebug>
 #include "stdio.h"
 #include "log.h"
+#include <arpa/inet.h>
+#include <netinet/in.h>
 
 
 static int g_iVNum = 0;
@@ -93,6 +95,8 @@ devUpdateWidget::devUpdateWidget(QWidget *parent) :
     connect(g_buttonGroup1, SIGNAL(buttonClicked(int)), this, SLOT(pollingTimeChange(int)));     //单选按钮组按键信号连接响应槽函数
     connect(g_buttonGroup2, SIGNAL(buttonClicked(int)), this, SLOT(presetReturnTimeChange(int)));
 
+    connect(ui->pollingTimeSetLineEdit,SIGNAL(textChanged(const QString &)),this,SLOT(lineEditpollingTimeChange(const QString &)));
+    connect(ui->presetReturnTimeSetLineEdit,SIGNAL(textChanged(const QString &)),this,SLOT(lineEditpresetReturnTimeChange(const QString &)));
     connect(ui->timeSetPushButton,SIGNAL(clicked()),this,SLOT(monitorSysTime()));
     connect(ui->timeAdjustPushButton,SIGNAL(clicked()),this,SLOT(systimeSlot()));
     connect(ui->imageParamSetPushButton, SIGNAL(clicked(bool)), this, SLOT(setCameraImageParamSlot()));     //图像参数设置
@@ -161,7 +165,82 @@ void devUpdateWidget::showSysTime()
 
 void devUpdateWidget::systimeSlot()
 {
+    char acUserType[64] = {0};
+    int year = 0, month = 0, day = 0, hour = 0, minute = 0, second = 0, i = 0, iRet = 0;
+    short yr = 0;
+    char acTimeStr[256] = {0};
+    T_TIME_INFO tTimeInfo;
+    T_TRAIN_CONFIG tTrainConfigInfo;
+    T_LOG_INFO tLogInfo;
 
+    STATE_GetCurrentUserType(acUserType, sizeof(acUserType));
+//        DebugPrint(DEBUG_UI_OPTION_PRINT, "devUpdateWidget set sys time!\n");
+    if (!strcmp(acUserType, "operator"))	 //操作员无权校时
+    {
+//            DebugPrint(DEBUG_UI_MESSAGE_PRINT, "devUpdateWidget this user type has no right to set system time!\n");
+        QMessageBox box(QMessageBox::Warning,tr("提示"),tr("无权限设置!"));	  //新建消息提示框，提示错误信息
+        box.setStandardButtons (QMessageBox::Ok);	//设置提示框只有一个标准按钮
+        box.setButtonText (QMessageBox::Ok,tr("确 定")); 	//将按钮显示改成"确 定"
+        box.exec();
+    }
+    else
+    {
+        if (strlen(ui->dateEdit->text().toLatin1().data()) > 0)
+        {
+            sscanf(ui->dateEdit->text().toLatin1().data(), "%4d-%02d-%02d", &year, &month, &day);
+        }
+        if (strlen(ui->timeEdit->text().toLatin1().data()) > 0)
+        {
+            sscanf(ui->timeEdit->text().toLatin1().data(), "%2d:%02d:%02d", &hour, &minute, &second);
+        }
+#if 0
+//        snprintf(acTimeStr, sizeof(acTimeStr), "rtc.exe -s \"%4d-%02d-%02d %02d:%02d:%02d\"", year, month, day, hour, minute, second);
+//        system(acTimeStr);
+//        system("rtc.exe -i");
+#endif
+        /*系统校时记录日志*/
+        memset(&tLogInfo, 0, sizeof(T_LOG_INFO));
+        tLogInfo.iLogType = 0;
+        snprintf(tLogInfo.acLogDesc, sizeof(tLogInfo.acLogDesc), "set local time %4d-%02d-%02d %02d:%02d:%02d", year, month, day, hour, minute, second);
+        LOG_WriteLog(&tLogInfo);
+
+        if (year >= 1970 && (month >= 1 && month <= 12) && (day >= 1 && day <= 31) &&
+            (hour >= 0 && hour <= 23) && (minute >= 0 && minute <= 59) && (second >= 0 && second <= 59))
+        {
+            memset(&tTimeInfo, 0, sizeof(T_TIME_INFO));
+            yr = year;
+            tTimeInfo.year = htons(yr);
+            tTimeInfo.mon = month;
+            tTimeInfo.day = day;
+            tTimeInfo.hour = hour;
+            tTimeInfo.min = minute;
+            tTimeInfo.sec = second;
+            memset(&tTrainConfigInfo, 0, sizeof(T_TRAIN_CONFIG));
+            STATE_GetCurrentTrainConfigInfo(&tTrainConfigInfo);
+            //printf("%d-%d-%d %d:%d:%d\n",timeInfo.year, (int)timeInfo.mon, (int)timeInfo.day, (int)timeInfo.hour, (int)timeInfo.min, (int)timeInfo.sec);
+            for (i = 0; i < tTrainConfigInfo.iNvrServerCount; i++)
+            {
+                iRet = PMSG_SendPmsgData(m_Phandle[i], CLI_SERV_MSG_TYPE_CHECK_TIME, (char *)&tTimeInfo, sizeof(T_TIME_INFO));    //发送校时命令
+                if (iRet < 0)
+                {
+//                    DebugPrint(DEBUG_UI_ERROR_PRINT, "PMSG_SendPmsgData CLI_SERV_MSG_TYPE_CHECK_TIME error!iRet=%d\n",iRet);
+                }
+                else
+                {
+                    memset(&tLogInfo, 0, sizeof(T_LOG_INFO));
+                    tLogInfo.iLogType = 0;
+                    snprintf(tLogInfo.acLogDesc, sizeof(tLogInfo.acLogDesc), "notify server %d Time Check OK, %4d-%02d-%02d %02d:%02d:%02d!", 100+tTrainConfigInfo.tNvrServerInfo[i].iCarriageNO, year, month, day, hour, minute, second);
+                    LOG_WriteLog(&tLogInfo);
+
+                    QMessageBox box(QMessageBox::Information,QString::fromUtf8("注意"),QString::fromUtf8("校时成功!"));
+                    box.setStandardButtons (QMessageBox::Ok);
+                    box.setButtonText (QMessageBox::Ok,QString::fromUtf8("确 定"));
+                    box.exec();
+                }
+            }
+        }
+
+    }
 
 
 }
@@ -666,6 +745,16 @@ void devUpdateWidget::alarmClearSlot()     //报警清除的响应函数，删�
     g_iVNum = 0;
 }
 
+void devUpdateWidget::lineEditpresetReturnTimeChange(const QString &)
+{
+    m_presetReturnTimeText = ui->presetReturnTimeSetLineEdit->text();
+    STATE_SetPresetReturnTime(m_presetReturnTimeText.toInt());
+}
+void devUpdateWidget::lineEditpollingTimeChange(const QString &)
+{
+     m_pollingtTimeText =  ui->pollingTimeSetLineEdit->text();
+     STATE_SetPollingTime(m_pollingtTimeText.toInt());
+}
 
 void devUpdateWidget::pollingTimeChange(int iComboBoxId)
 {
@@ -703,6 +792,8 @@ void devUpdateWidget::pollingTimeChange(int iComboBoxId)
         iOldId = iComboBoxId;
     }
     m_pollingtTimeText = ui->pollingTimeSetLineEdit->text();
+    STATE_SetPollingTime(m_pollingtTimeText.toInt());
+
 }
 
 void devUpdateWidget::presetReturnTimeChange(int iComboBoxId)
@@ -741,4 +832,5 @@ void devUpdateWidget::presetReturnTimeChange(int iComboBoxId)
         iOldId = iComboBoxId;
     }
     m_presetReturnTimeText = ui->presetReturnTimeSetLineEdit->text();
+    STATE_SetPresetReturnTime(m_presetReturnTimeText.toInt());
 }
