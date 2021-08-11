@@ -16,7 +16,31 @@ int g_iDateEditNo = 0;      //要显示时间的不同控件的编号
 static int g_iRNum = 0;
 #define PVMSPAGETYPE  2    //此页面类型，2表示受电弓监控页面
 pthread_mutex_t g_sliderValueSetMutex;
+static qint64 totalplaytime;
 
+recordPlayWidget *g_recordPlayThis = NULL;
+#define FTP_SERVER_PORT  21   //FTP服务器默认通信端口
+static char *parseFileName(char *pcSrcStr);
+
+
+void PftpProc(PFTP_HANDLE PHandle, int iPos)     //回调函数处理接收到的进度条进度, iPos为进度百分比
+{
+    if (PHandle != g_recordPlayThis->m_tFtpHandle[g_recordPlayThis->m_iFtpServerIdex])
+    {
+        return;
+    }
+
+    g_recordPlayThis->triggerDownloadProcessBarDisplaySignal(1);   //显示进度条
+
+    g_recordPlayThis->triggerSetDownloadProcessBarValueSignal(iPos);
+
+    if ((100 == iPos) || (-1 == iPos) || (-2 == iPos) || (-3 == iPos))  //iPos=100,表示下载完毕。暂定iPos=-1表示被告知U盘已拔出, iPos=-2表示被告知U盘写入失败,iPos=-3表示被告知数据接收失败失败。 三种情况都隐藏进度条，并在信号处理函数中销毁FTP连接
+    {
+        g_recordPlayThis->triggerDownloadProcessBarDisplaySignal(0);
+    }
+
+    return ;
+}
 
 recordPlayWidget::recordPlayWidget(QWidget *parent) :
     QWidget(parent),
@@ -89,6 +113,9 @@ recordPlayWidget::recordPlayWidget(QWidget *parent) :
     m_recorQueryTimer = NULL;
     posTimer = NULL;
     m_iPlayFlag = 0;
+    m_iRecordIdex = -1;
+    m_iSliderValue = 0;
+    m_threadId = 0;
 
     setPlayButtonStyleSheet();
     getTrainConfig();
@@ -124,12 +151,22 @@ recordPlayWidget::recordPlayWidget(QWidget *parent) :
     connect(ui->minusStepPushButton, SIGNAL(clicked(bool)), this, SLOT(playMinusStepSlot()));   //拖动进度条信号响应
 
 
-
+    connect(ui->recordFileTableWidget, SIGNAL(itemClicked(QTableWidgetItem*)), this, SLOT(recordSelectionSlot(QTableWidgetItem*)));  //单击录像文件列表某行触发信号连接相应槽函数
+    connect(ui->recordFileTableWidget, SIGNAL(itemDoubleClicked(QTableWidgetItem*)), this, SLOT(recordPlaySlot(QTableWidgetItem*)));  //双击录像文件列表某行触发信号连接相应槽函数
     connect(ui->carSeletionComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(carNoChangeSlot()));  //车厢选择下拉框当前索引改变信号响应
 
 
     QObject::connect(player,SIGNAL(durationChanged(qint64)),this,SLOT(getduration(qint64)));
     QObject::connect(player,SIGNAL(positionChanged(qint64)),this,SLOT(positionchaged(qint64)));
+
+    connect(this, SIGNAL(setSliderValueSignal(int)), this, SLOT(setPlaySliderValueSlot(int)));
+    connect(this, SIGNAL(downloadProcessBarDisplaySignal(int)), this, SLOT(downloadProcessBarDisplaySlot(int)));
+    connect(this, SIGNAL(setDownloadProcessBarValueSignal(int)), this, SLOT(setDownloadProcessBarValueSlot(int)));
+    connect(this, SIGNAL(closeRecordPlaySignal()), this, SLOT(closeRecordPlaySlot()));
+
+    connect(this, SIGNAL(recordTableWidgetFillSignal()), this, SLOT(recordTableWidgetFillSlot()));
+    connect(this, SIGNAL(setRangeLabelSignal()), this, SLOT(setRangeLabelSlot()));
+    connect(this, SIGNAL(recordSeletPlay(QTableWidgetItem *)), this, SLOT(recordPlaySlot(QTableWidgetItem*)));
 
 
 //    QObject::connect(m_playSlider,SIGNAL(QSlider::sliderMoved()),this,SLOT(setpostion()));
@@ -237,6 +274,196 @@ void recordPlayWidget::positionchaged(qint64 pos)
 {
     m_playSlider->setMaximum(totalplaytime);
     m_playSlider->setValue(pos/1000);
+}
+
+void recordPlayWidget::downloadProcessBarDisplaySlot(int iEnableFlag)   //是否显示文件下载进度条，iEnableFlag为1，显示，为0不显示
+{
+    if ((0 == iEnableFlag) && (0 == ui->fileDownloadProgressBar->isHidden()))
+    {
+        ui->fileDownloadProgressBar->hide();
+        ui->queryPushButton->setEnabled(true);
+        ui->downLoadPushButton->setEnabled(true);
+    }
+    else if ((1 == iEnableFlag) && (1 == ui->fileDownloadProgressBar->isHidden()))
+    {
+        ui->fileDownloadProgressBar->show();
+        ui->queryPushButton->setEnabled(false);
+        ui->downLoadPushButton->setEnabled(false);
+    }
+}
+void recordPlayWidget::setDownloadProcessBarValueSlot(int iValue)   //设置文件下载进度条的值
+{
+    if (-1 == iValue) //iValue=-1时,表示被告知U盘已拔出,销毁FTP连接并弹框提示
+        {
+            FTP_DestoryConnect(m_tFtpHandle[m_iFtpServerIdex]);
+
+//            DebugPrint(DEBUG_UI_ERROR_PRINT, "recordPlayWidget recordfile downLoad failed!USB device is out\n");
+            m_tFtpHandle[m_iFtpServerIdex] = 0;
+
+//            DebugPrint(DEBUG_UI_MESSAGE_PRINT, "recordfile downLoad failed!USB device is out\n");
+            QMessageBox box(QMessageBox::Warning,QString::fromUtf8("错误"),QString::fromUtf8("下载失败，U盘已被拔出!"));
+            box.setStandardButtons (QMessageBox::Ok);
+            box.setButtonText (QMessageBox::Ok,QString::fromUtf8("确 定"));
+            box.exec();
+            return;
+        }
+
+        if (-2 == iValue) //iValue=-2时,表示被告知U盘写入失败,销毁FTP连接并弹框提示
+        {
+            FTP_DestoryConnect(m_tFtpHandle[m_iFtpServerIdex]);
+
+//            DebugPrint(DEBUG_UI_ERROR_PRINT, "recordPlayWidget recordfile downLoad failed!USB device write error\n");
+            m_tFtpHandle[m_iFtpServerIdex] = 0;
+
+//            DebugPrint(DEBUG_UI_MESSAGE_PRINT, "recordfile downLoad failed!USB device write error\n");
+            QMessageBox box(QMessageBox::Warning,QString::fromUtf8("错误"),QString::fromUtf8("下载失败，U盘写入失败!"));
+            box.setStandardButtons (QMessageBox::Ok);
+            box.setButtonText (QMessageBox::Ok,QString::fromUtf8("确 定"));
+            box.exec();
+            return;
+        }
+
+        if (-3 == iValue) //iValue=-3时,表示被告知数据接收失败,销毁FTP连接并弹框提示
+        {
+            FTP_DestoryConnect2(m_tFtpHandle[m_iFtpServerIdex]);
+
+//            DebugPrint(DEBUG_UI_ERROR_PRINT, "recordPlayWidget recordfile downLoad failed!data recv\n");
+            m_tFtpHandle[m_iFtpServerIdex] = 0;
+
+//            DebugPrint(DEBUG_UI_MESSAGE_PRINT, "recordfile downLoad failed!data recv error\n");
+            QMessageBox box(QMessageBox::Warning,QString::fromUtf8("错误"),QString::fromUtf8("下载失败，数据接收失败!"));
+            box.setStandardButtons (QMessageBox::Ok);
+            box.setButtonText (QMessageBox::Ok,QString::fromUtf8("确 定"));
+            box.exec();
+            return;
+        }
+
+        ui->fileDownloadProgressBar->setValue(iValue);
+
+        if (100 == iValue)   //iValue=100,下载结束，销毁ftp连接
+        {
+            FTP_DestoryConnect(m_tFtpHandle[m_iFtpServerIdex]);
+//            DebugPrint(DEBUG_UI_NOMAL_PRINT, "recordPlayWidget recordfile downLoad end!Destory this ftp connect\n");
+            m_tFtpHandle[m_iFtpServerIdex] = 0;
+        }
+
+
+
+}
+
+void recordPlayWidget::closeRecordPlaySlot()
+{
+    closePlayWin();
+    setPlayButtonStyleSheet();
+}
+
+void recordPlayWidget::recordTableWidgetFillFunc()
+{
+    char *pcfileName = NULL;
+    char *pcToken = m_pcRecordFileBuf, *pcBufTmp = NULL;
+    char acFilePath[MAX_RECFILE_PATH_LEN] = {0};
+    int iParseIdex = 0;
+    QString item = "";
+
+    pcBufTmp = strstr(pcToken,".MP4");
+    while (pcBufTmp != NULL)
+    {
+        memset(acFilePath, 0, MAX_RECFILE_PATH_LEN);
+        memcpy(acFilePath, pcToken, pcBufTmp-pcToken);
+        strcat(acFilePath, ".MP4");
+        memcpy(m_acFilePath[iParseIdex], acFilePath, strlen(acFilePath));
+        iParseIdex++;
+        if (iParseIdex > MAX_RECORD_SEACH_NUM)
+        {
+            break;
+        }
+
+        ui->recordFileTableWidget->insertRow(iParseIdex-1);//添加新的一行
+
+        QTableWidgetItem *checkBox = new QTableWidgetItem();
+        checkBox->setCheckState(Qt::Unchecked);
+        ui->recordFileTableWidget->setItem(iParseIdex-1, 0, checkBox);
+
+        item = QString::number(iParseIdex);
+        ui->recordFileTableWidget->setItem(iParseIdex-1, 1, new QTableWidgetItem(item));
+        ui->recordFileTableWidget->item(iParseIdex-1, 1)->setTextAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
+
+        pcfileName = parseFileName(acFilePath);
+        if (pcfileName != NULL)
+        {
+            item = QString(QLatin1String(pcfileName));
+        }
+        ui->recordFileTableWidget->setItem(iParseIdex-1, 2, new QTableWidgetItem(item));
+        ui->recordFileTableWidget->item(iParseIdex-1, 2)->setTextAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
+
+        if (pcfileName != NULL && strstr(pcfileName, "_tmp") != NULL)
+        {
+            ui->recordFileTableWidget->item(iParseIdex-1, 1)->setForeground(Qt::red);
+            ui->recordFileTableWidget->item(iParseIdex-1, 2)->setForeground(Qt::red);
+        }
+
+        pcToken = pcBufTmp + strlen(".MP4");
+        pcBufTmp = strstr(pcToken,".MP4");
+    }
+
+    ui->queryPushButton->setEnabled(true);   //填充完恢复查询按钮可按
+    ui->carSeletionComboBox->setEnabled(true);
+    ui->cameraSelectionComboBox->setEnabled(true);
+    if (m_recordTabelWidgetFillTimer != NULL)
+    {
+        if (m_recordTabelWidgetFillTimer->isActive())   //判断定时器是否正在运行，是则停止运行
+        {
+            m_recordTabelWidgetFillTimer->stop();
+        }
+        delete m_recordTabelWidgetFillTimer;
+        m_recordTabelWidgetFillTimer = NULL;
+    }
+}
+
+void recordPlayWidget::recordTableWidgetFillSlot()
+{
+    if (NULL == m_recordTabelWidgetFillTimer)
+    {
+        m_recordTabelWidgetFillTimer = new QTimer(this);
+    }
+    m_recordTabelWidgetFillTimer->start(1000);   //收到第一包后等待1秒，确保录像文件消息包能全部接收完再一起填充文件列表处理
+    connect(m_recordTabelWidgetFillTimer,SIGNAL(timeout()), this, SLOT(recordTableWidgetFillFunc()));
+}
+
+void recordPlayWidget::setRangeLabelSlot()
+{
+    char acStr[32] = {0};
+    int iMin = 0, iSec = 0;
+
+    iMin = m_iPlayRange / 60;
+    iSec = m_iPlayRange % 60;
+
+    snprintf(acStr, sizeof(acStr), "%02d", iMin);
+    ui->rangeMinLabel->setText(QString(QLatin1String(acStr)));
+
+    memset(acStr, 0, sizeof(acStr));
+    snprintf(acStr, sizeof(acStr), "%02d", iSec);
+    ui->rangeSecLabel->setText(QString(QLatin1String(acStr)));
+}
+
+void recordPlayWidget::setPlaySliderValueSlot(int iValue)    //实时刷新播放进度条的当前值
+{
+    char acStr[32] = {0};
+    int iMin = 0, iSec = 0;
+
+    iMin = iValue / 60;
+    iSec = iValue % 60;
+
+    snprintf(acStr, sizeof(acStr), "%02d", iMin);
+    ui->playMinLabel->setText(QString(QLatin1String(acStr)));
+
+    memset(acStr, 0, sizeof(acStr));
+    snprintf(acStr, sizeof(acStr), "%02d", iSec);
+    ui->playSecLabel->setText(QString(QLatin1String(acStr)));
+
+    m_playSlider->setValue(iValue);
+
+
 }
 void recordPlayWidget::playSliderMoveSlot(int iPosTime)
 {
@@ -371,7 +598,7 @@ void recordPlayWidget::recordQuerySlot()
     }
 
 }
-void recordPlayWidget::recordDownloadSlot()
+void recordPlayWidget::recordQueryEndSlot()
 {
     static int iRecordNum = 0;
 
@@ -418,6 +645,141 @@ void recordPlayWidget::recordDownloadSlot()
         }
     }
 
+
+
+}
+void recordPlayWidget::recordDownloadSlot()
+{
+    int iRet = 0, idex = 0, row = 0;
+    QString filename = "";
+    QString fileSavePath = "/mnt/usb/u/";
+    char acSaveFileName[128] = {0};
+    char acIpAddr[32] = {0};
+    T_TRAIN_CONFIG tTrainConfigInfo;
+    char acUserType[16] = {0};
+
+//    DebugPrint(DEBUG_UI_OPTION_PRINT, "recordPlayWidget record download PushButton pressed!\n");
+
+    STATE_GetCurrentUserType(acUserType, sizeof(acUserType));
+
+    if (!strcmp(acUserType, "operator"))   //操作员不能下载
+    {
+//        DebugPrint(DEBUG_UI_MESSAGE_PRINT, "recordPlayWidget this user type has no right to download record file!\n");
+        QMessageBox box(QMessageBox::Warning,QString::fromUtf8("错误"),QString::fromUtf8("该用户没有下载权限!"));
+        box.setStandardButtons (QMessageBox::Ok);
+        box.setButtonText (QMessageBox::Ok,QString::fromUtf8("确 定"));
+        box.exec();
+        return;
+    }
+
+    if (ui->recordFileTableWidget->rowCount() > 0)
+    {
+        for (row = 0; row < ui->recordFileTableWidget->rowCount(); row++)    //先判断一次是否没有录像文件被选中，没有则弹框提示
+        {
+            if (ui->recordFileTableWidget->item(row, 0)->checkState() == Qt::Checked)
+            {
+                break;
+            }
+        }
+        if (row == ui->recordFileTableWidget->rowCount())
+        {
+//            DebugPrint(DEBUG_UI_MESSAGE_PRINT, "recordPlayWidget not select record file to download!\n");
+            QMessageBox msgBox(QMessageBox::Question,QString(tr("注意")),QString(tr("请选择您要下载的录像文件")));
+            msgBox.setStandardButtons(QMessageBox::Yes);
+            msgBox.button(QMessageBox::Yes)->setText("确 定");
+            msgBox.exec();
+            return;
+        }
+
+        if (access("/mnt/usb/u/", F_OK) < 0)
+        {
+//            DebugPrint(DEBUG_UI_MESSAGE_PRINT, "recordPlayWidget not get USB device!\n");
+            QMessageBox msgBox(QMessageBox::Warning,QString(tr("注意")),QString(tr("未检测到U盘,请插入!")));
+            msgBox.setStandardButtons(QMessageBox::Yes);
+            msgBox.button(QMessageBox::Yes)->setText("确 定");
+            msgBox.exec();
+            return;
+        }
+        else
+        {
+            if (0 == STATE_FindUsbDev())   //这里处理一个特殊情况:U盘拔掉是umount失败，/mnt/usb/u/路径还存在，但是实际U盘是没有再插上的
+            {
+//                DebugPrint(DEBUG_UI_MESSAGE_PRINT, "recordPlayWidget not get USB device!\n");
+                QMessageBox msgBox(QMessageBox::Warning,QString(tr("注意")),QString(tr("未检测到U盘,请插入!")));
+                msgBox.setStandardButtons(QMessageBox::Yes);
+                msgBox.button(QMessageBox::Yes)->setText("确 定");
+                msgBox.exec();
+                return;
+            }
+        }
+
+        iRet = STATE_ParseUsbLicense(fileSavePath.toLatin1().data());
+        if (iRet < 0)
+        {
+//            DebugPrint(DEBUG_UI_MESSAGE_PRINT, "recordPlayWidget download check License error!\n");
+            QMessageBox box(QMessageBox::Warning,QString::fromUtf8("错误"),QString::fromUtf8("授权失败!"));
+            box.setStandardButtons (QMessageBox::Ok);
+            box.setButtonText (QMessageBox::Ok,QString::fromUtf8("确 定"));
+            box.exec();
+            return;
+        }
+
+        idex = ui->carSeletionComboBox->currentIndex();
+
+        if (idex < 0)
+        {
+            return;
+        }
+        m_iFtpServerIdex = idex;
+
+        memset(&tTrainConfigInfo, 0, sizeof(T_TRAIN_CONFIG));
+        STATE_GetCurrentTrainConfigInfo(&tTrainConfigInfo);
+        snprintf(acIpAddr, sizeof(acIpAddr), "192.168.%d.81", 100+tTrainConfigInfo.tNvrServerInfo[idex].iCarriageNO);
+        m_tFtpHandle[idex] = FTP_CreateConnect(acIpAddr, FTP_SERVER_PORT, PftpProc);
+        if (0 == m_tFtpHandle[idex])
+        {
+//            DebugPrint(DEBUG_UI_ERROR_PRINT, "[%s] connect to ftp server:%s error!\n", __FUNCTION__, acIpAddr);
+            return;
+        }
+
+        for (row = 0; row < ui->recordFileTableWidget->rowCount(); row++)
+        {
+            if (ui->recordFileTableWidget->item(row, 0)->checkState() == Qt::Checked)
+            {
+                if (parseFileName(m_acFilePath[row]) != NULL)
+                {
+                    snprintf(acSaveFileName, sizeof(acSaveFileName), "%s/%s", "/mnt/usb/u/", parseFileName(m_acFilePath[row]));
+                }
+
+//                DebugPrint(DEBUG_UI_NOMAL_PRINT, "[%s] add download file:%s!\n", __FUNCTION__, m_acFilePath[row]);
+                iRet = FTP_AddDownLoadFile(m_tFtpHandle[idex], m_acFilePath[row], acSaveFileName);
+                if (iRet < 0)
+                {
+                    FTP_DestoryConnect(m_tFtpHandle[m_iFtpServerIdex]);
+                    m_tFtpHandle[m_iFtpServerIdex] = 0;
+//                    DebugPrint(DEBUG_UI_MESSAGE_PRINT, "recordPlayWidget not get USB device!\n");
+                    QMessageBox msgBox(QMessageBox::Warning,QString(tr("提示")),QString(tr("文件下载失败")));
+                    msgBox.setStandardButtons(QMessageBox::Yes);
+                    msgBox.button(QMessageBox::Yes)->setText("确 定");
+                    msgBox.exec();
+                    return;
+                }
+            }
+        }
+
+        iRet = FTP_FileDownLoad(m_tFtpHandle[idex]);
+        if (iRet < 0)
+        {
+            FTP_DestoryConnect(m_tFtpHandle[m_iFtpServerIdex]);
+            m_tFtpHandle[m_iFtpServerIdex] = 0;
+//            DebugPrint(DEBUG_UI_MESSAGE_PRINT, "recordPlayWidget record file download failed!\n");
+            QMessageBox msgBox(QMessageBox::Warning,QString(tr("提示")),QString(tr("文件下载失败")));
+            msgBox.setStandardButtons(QMessageBox::Yes);
+            msgBox.button(QMessageBox::Yes)->setText("确 定");
+            msgBox.exec();
+            return;
+        }
+    }
 
 }
 
@@ -554,9 +916,39 @@ void recordPlayWidget::closePlayWin()
     ui->rangeSecLabel->setText("00");
     ui->playSpeedLineEdit->setText("1.00x");
 
+    if (m_iRecordIdex >= 0 && ui->recordFileTableWidget->item(m_iRecordIdex, 2) != NULL && 0 == ui->recordFileTableWidget->item(m_iRecordIdex, 2)->text().contains("tmp"))
+    {
+        ui->recordFileTableWidget->item(m_iRecordIdex, 1)->setForeground(Qt::black);
+        ui->recordFileTableWidget->item(m_iRecordIdex, 2)->setForeground(Qt::black);
+    }
+    m_iRecordIdex = -1;
     m_iPlayFlag = 0;
 
 }
+
+void recordPlayWidget::triggerSetSliderValueSignal(int iValue)
+{
+    emit setSliderValueSignal(iValue);
+}
+
+void recordPlayWidget::triggerSetRangeLabelSignal()
+{
+    emit setRangeLabelSignal();
+}
+void recordPlayWidget::triggerCloseRecordPlaySignal()
+{
+    emit closeRecordPlaySignal();
+}
+
+void recordPlayWidget::triggerDownloadProcessBarDisplaySignal(int iEnableFlag)	//触发是否显示文件下载进度条的信号，iEnableFlag为1，显示，为0不显示
+{
+    emit downloadProcessBarDisplaySignal(iEnableFlag);
+}
+void recordPlayWidget::triggerSetDownloadProcessBarValueSignal(int iValue)	//触发设置文件下载进度条的值的信号
+{
+    emit setDownloadProcessBarValueSignal(iValue);
+}
+
 void recordPlayWidget::recordPlayFastForwardSlot()
 {
     QString playSpeedStr;
@@ -729,6 +1121,47 @@ void recordPlayWidget::carNoChangeSlot()   //车厢号切换信号响应槽函�
 
 }
 
+void recordPlayWidget::recordSelectionSlot(QTableWidgetItem *item)
+{
+    int i = 0;
+    for (i = 0; i < ui->recordFileTableWidget->rowCount(); i++)
+    {
+        if (0 == ui->recordFileTableWidget->item(i, 2)->text().contains("tmp") && i != m_iRecordIdex)
+        {
+            if (i == item->row())
+            {
+                ui->recordFileTableWidget->item(i, 1)->setTextColor(Qt::green);
+                ui->recordFileTableWidget->item(i, 2)->setForeground(Qt::green);
+            }
+            else
+            {
+                ui->recordFileTableWidget->item(i, 1)->setTextColor(Qt::black);
+                ui->recordFileTableWidget->item(i, 2)->setForeground(Qt::black);
+            }
+        }
+    }
+
+}
+
+void recordPlayWidget::recordPlaySlot(QTableWidgetItem *item)    //录像文件双击信号响应槽函数，播放录像视频
+{
+    int iRow = 0, iDex = 0;
+//    DebugPrint(DEBUG_UI_OPTION_PRINT, "recordPlayWidget record play pressed!\n");
+
+    setPlayButtonStyleSheet();
+
+//    if (m_cmpHandle != NULL)    //如果播放窗口已经有打开了码流播放，关闭码流播放
+    {
+        closePlayWin();
+        setPlayButtonStyleSheet();
+    }
+    emit setRecordPlayFlagSignal(1);  //触发设置回放标志信号
+    iRow = item->row();
+    iDex = ui->carSeletionComboBox->currentIndex();
+    recordPlayCtrl(iRow, iDex);
+}
+
+
 void recordPlayWidget:: mousePressEvent(QMouseEvent *event)
 {
     int x =event->x();
@@ -806,6 +1239,119 @@ void recordPlayWidget::recordQueryCtrl(char *pcMsgData, int iMsgDataLen)
 
 }
 
+
+void *slideValueSetThread(void *param)    //播放进度条刷新线程
+{
+    int iDuration = 0, iTryGetPlayRangeNum = 5;
+      recordPlayWidget *recordPlaypage = (recordPlayWidget *)param;
+      if (NULL == recordPlaypage)
+      {
+          return NULL;
+      }
+
+      //pthread_detach(pthread_self());
+
+      while (1 == recordPlaypage->m_iThreadRunFlag)
+      {
+          if (0 == recordPlaypage->m_iPlayRange)
+          {
+              while (1 == recordPlaypage->m_iThreadRunFlag && iTryGetPlayRangeNum > 0)     //尝试5次获取播放时长，每次间隔1000MS
+              {
+//                  iDuration = CMP_GetPlayRange(recordPlaypage->m_cmpHandle);
+                 iDuration = totalplaytime;
+                  if (iDuration > 0)
+                  {
+                      break;
+                  }
+                  iTryGetPlayRangeNum--;
+                  usleep(1000*1000);
+              }
+              if (iDuration > 0)
+              {
+                  recordPlaypage->m_iPlayRange = iDuration;
+//                  DebugPrint(DEBUG_UI_NOMAL_PRINT, "[%s-%d] m_iPlayRange=%d!\n",__FUNCTION__, __LINE__, recordPlaypage->m_iPlayRange);
+              }
+              else
+              {
+                  recordPlaypage->m_iPlayRange = 600;
+//                  DebugPrint(DEBUG_UI_NOMAL_PRINT, "[%s-%d] m_iPlayRange=%d!\n",__FUNCTION__, __LINE__, recordPlaypage->m_iPlayRange);
+              }
+              recordPlaypage->m_playSlider->setRange(0, recordPlaypage->m_iPlayRange);
+              recordPlaypage->triggerSetRangeLabelSignal();
+          }
+
+          if ((recordPlaypage->m_iPlayRange > 0) && (recordPlaypage->m_iPlayFlag != 0))   //只有获取到了进度条范围值,并且不处于暂停状态才会刷新进度条，否则不做刷新处理
+          {
+              pthread_mutex_lock(&g_sliderValueSetMutex);
+//              recordPlaypage->m_iSliderValue = CMP_GetCurrentPlayTime(recordPlaypage->m_cmpHandle);
+              //DebugPrint(DEBUG_UI_NOMAL_PRINT, "recordPlayWidget record play time=%d\n",recordPlaypage->m_iSliderValue );
+              recordPlaypage->triggerSetSliderValueSignal(recordPlaypage->m_iSliderValue);
+              pthread_mutex_unlock(&g_sliderValueSetMutex);
+              if (recordPlaypage->m_iSliderValue >= recordPlaypage->m_iPlayRange)   //进度到100%，表示该段录像回放完毕，关闭播放窗口
+              {
+//                  DebugPrint(DEBUG_UI_NOMAL_PRINT, "recordPlayWidget record play end!close play window\n");
+                  recordPlaypage->triggerCloseRecordPlaySignal();
+              }
+          }
+          usleep(500*1000);
+      }
+      return NULL;
+
+
+
+
+}
+void recordPlayWidget::recordPlayCtrl(int iRow, int iDex)
+{
+    int iRet = 0;
+    char acRtspAddr[128] = {0};
+    QString playSpeedStr = "";
+    T_TRAIN_CONFIG tTrainConfigInfo;
+    T_LOG_INFO tLogInfo;
+
+    /*每次播放开始时播放时长清0，设置播放进度条范围值为0，使播放进度条复位*/
+    m_iPlayRange = 0;
+    m_playSlider->setRange(0, m_iPlayRange);
+    m_iSliderValue = 0;
+
+    memset(&tTrainConfigInfo, 0, sizeof(T_TRAIN_CONFIG));
+    STATE_GetCurrentTrainConfigInfo(&tTrainConfigInfo);
+
+
+    m_iPlayFlag = 1;
+    m_dPlaySpeed = 1.00;
+    playSpeedStr = "1.00x";
+    ui->playSpeedLineEdit->setText(playSpeedStr);
+    setPlayButtonStyleSheet();
+
+    m_iRecordIdex = iRow;
+    if (0 == ui->recordFileTableWidget->item(m_iRecordIdex, 2)->text().contains("tmp"))
+    {
+        ui->recordFileTableWidget->item(m_iRecordIdex, 1)->setTextColor(Qt::blue);
+        ui->recordFileTableWidget->item(m_iRecordIdex, 2)->setForeground(Qt::blue);
+    }
+
+    usleep(200*1000);
+    if (0 == m_threadId)    //保证播放进度条刷新线程只创建一次
+    {
+        m_iThreadRunFlag = 1;
+//        DebugPrint(DEBUG_UI_NOMAL_PRINT, "[%s] create slideValueSet thread begin!\n",__FUNCTION__);
+        pthread_create(&m_threadId, NULL, slideValueSetThread, (void *)this);    //创建线程
+
+        if (0 == m_threadId)
+        {
+//            DebugPrint(DEBUG_UI_ERROR_PRINT, "[%s] create slideValueSet thread error\n", __FUNCTION__);
+        }
+//        DebugPrint(DEBUG_UI_NOMAL_PRINT, "[%s] create slideValueSet thread end!\n",__FUNCTION__);
+    }
+
+
+
+
+
+
+}
+
 int recordPlayWidget::pmsgCtrl(PMSG_HANDLE pHandle, unsigned char ucMsgCmd, char *pcMsgData, int iMsgDataLen)    //与服务器通信消息处理
 {
     char *pcToken = NULL;
@@ -851,3 +1397,26 @@ int recordPlayWidget::pmsgCtrl(PMSG_HANDLE pHandle, unsigned char ucMsgCmd, char
 
     return 0;
 }
+
+static char *parseFileName(char *pcSrcStr)     //根据录像文件路径全名解析得到单纯的录像文件名
+{
+    char *pcTmp = NULL;
+
+    if (NULL == pcSrcStr)
+    {
+        return NULL;
+    }
+
+    pcTmp = strrchr(pcSrcStr, '/');
+    if (NULL == pcTmp)
+    {
+        return NULL;
+    }
+
+    if (NULL == (pcTmp+1))
+    {
+        return NULL;
+    }
+    return pcTmp+1;
+}
+

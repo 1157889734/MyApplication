@@ -123,6 +123,7 @@ public:
     pthread_t m_threadId;    //线程ID
     int m_iThreadRunFlag;   //线程运行标识
     int m_iPisGetFlag;   //从PIS接收过消息的标志
+    int m_iOldRecordPlayFlag;
 
     PMSG_HANDLE m_PisServerPhandle;    //pis服务器PMSG通信句柄
 
@@ -136,12 +137,22 @@ public:
     pthread_mutex_t tMutex;
 
     void startVideoPolling();
+    void enableVideoPlay(int iFlag);  //设置显示全局使能标识
+
     void videoChannelCtrl();
     void getChStreamState(int iCh);
     void closePlayWin();
 
     void triggerCmpOptionCtrlSinal(int iType, int iCh);
-    void mediaInit();
+    void mediaInit(int iCh);
+    void noPollingChOption();
+
+    void triggerVideoPollingSignal();
+    void triggerFullScreenSignal();
+    void triggerPresetReturnSignal(int iCameraNO);
+    void triggerGetDevStateSignal();
+    void triggerSetTimeSignal();
+    void triggerRecordPlayCtrlSignal();
 
 signals:
     void alarmPushButoonClickSignal();
@@ -157,8 +168,8 @@ signals:
     void presetReturnSignal(int iCameraNO);
     void cmpOptionCtrlSignal(int iType, int iCh);
 
-
-
+    void getDevStateSignal();
+    void setTimeSignal();
 
 
 public slots:
@@ -182,9 +193,9 @@ public slots:
     void alarmHappenSlot();
     void alarmClearSlot();
     void setRecordPlayFlag(int iFlag);
-
-
     void videoPollingSignalCtrl();
+
+
     void setFullScreenSignalCtrl();
     void presetReturnSignalCtrl(int iCameraNO);
     void recordPlayCtrlSlot();
@@ -210,6 +221,7 @@ private:
     QMediaPlaylist *list;
     QVideoWidget *videoViewer;
     QPlayer *vidoplayer;
+    QList<QMediaPlaylist*> *multiPlayList;
 
 };
 
