@@ -138,7 +138,6 @@ private:
     QMediaPlayer *player;
     QMediaPlaylist *list;
     QVideoWidget *videoViewer;
-    QPlayer *vidoplayer;
 
     QStringList mVideoList;
     QString mVideoNmae;

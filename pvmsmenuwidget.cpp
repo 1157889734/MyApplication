@@ -131,19 +131,39 @@ pvmsMenuWidget::~pvmsMenuWidget()
 
 void pvmsMenuWidget::recvRs485Ctrl(char *pcData, int iDataLen)
 {
-//    if (m_devManagePage != NULL)
-//    {
-//        m_devManagePage->rs485Ctrl(pcData, iDataLen);
-//    }
+    if (m_devManagePage != NULL)
+    {
+        m_devManagePage->rs485Ctrl(pcData, iDataLen);
+    }
 
 }
 
 void pvmsMenuWidget::rs485TimerFunc()
 {
-//    int iRet = 0;
-//    T_RS485_PACKET tPkt;
+#if 1
+    int iRet = 0;
+     T_RS485_PACKET tPkt;
 
-//    recvRs485Ctrl(tPkt.pcData, tPkt.iDataLen);
+     iRet = RS485_GetDataFromRs485Queue(m_pRs485Handle, &tPkt);
+     if (iRet < 0)
+     {
+//         DebugPrint(DEBUG_RS485_DATA_PRINT, "get rs485 data error\n");
+//         qDebug()<<"get rs485 data error"<<__FUNCTION__<<__LINE__<<endl;
+         return;
+     }
+
+     if (NULL == tPkt.pcData || 0 == tPkt.iDataLen)
+     {
+         return;
+     }
+
+     recvRs485Ctrl(tPkt.pcData, tPkt.iDataLen);
+     if (tPkt.pcData)
+     {
+         free(tPkt.pcData);
+         tPkt.pcData = NULL;
+     }
+#endif
 
 }
 void pvmsMenuWidget::pmsgTimerFunc()
@@ -163,9 +183,12 @@ void pvmsMenuWidget::pmsgTimerFunc()
         if (iRet < 0)
         {
 //            DebugPrint(DEBUG_PMSG_ERROR_PRINT, "get server 192.168.%d.81 pmsg data error\n", 100+tTrainConfigInfo.tNvrServerInfo[i].iCarriageNO);
+//            qDebug()<<"get server 192.168.%d.81 pmsg data error"<<100+tTrainConfigInfo.tNvrServerInfo[i].iCarriageNO<<endl;
             continue;
         }
 //        DebugPrint(DEBUG_PMSG_NORMAL_PRINT, "pmsgTimerFunc get pmsg message 0x%x, msgDataLen=%d\n",(int)tPkt.ucMsgCmd, tPkt.iMsgDataLen);
+//        qDebug()<<"pmsgTimerFunc get pmsg message 0x%x, msgDataLen="<<tPkt.ucMsgCmd<<tPkt.iMsgDataLen<<endl;
+
         recvPmsgCtrl(tPkt.PHandle, tPkt.ucMsgCmd, tPkt.pcMsgData, tPkt.iMsgDataLen);
         if (tPkt.pcMsgData)
         {
@@ -181,7 +204,7 @@ void pvmsMenuWidget::recvPmsgCtrl(PMSG_HANDLE pHandle, unsigned char ucMsgCmd, c
 {
     int iAlarmType = 0, iDevPos = 0, iShadeAlarmEnableFlag = 0, i = 0;
     T_TRAIN_CONFIG tTrainConfigInfo;
-
+//    qDebug()<<"**************recvPmsgCtrl------"<<ucMsgCmd<<endl;
     switch(ucMsgCmd)    //不同的应答消息类型分发给不同的页面处理
     {
         case SERV_CLI_MSG_TYPE_SET_PTZ_RESP:
@@ -379,6 +402,8 @@ void pvmsMenuWidget::showPageSlot()
     m_devUpdatePage->hide();
 
     m_pvmsMonitorPage->startVideoPolling();   //启动视频轮询
+    m_pvmsMonitorPage->enableVideoPlay(1);   //运行受电弓监控页面解码的显示
+
 
     if (NULL == m_alarmPage)
     {
@@ -450,6 +475,7 @@ void pvmsMenuWidget::menuButtonClick()
         m_pvmsMonitorPage->m_playWin->show();
 
         m_pvmsMonitorPage->showMaximized();
+        m_pvmsMonitorPage->enableVideoPlay(1);   //运行受电弓监控页面解码的显示
 
 
         ui->pvmsMonitorMenuPushButton->setChecked(true);
@@ -463,6 +489,7 @@ void pvmsMenuWidget::menuButtonClick()
     {
         m_pvmsMonitorPage->hide();
         m_pvmsMonitorPage->m_playWin->hide();
+        m_pvmsMonitorPage->enableVideoPlay(0);   //禁止受电弓监控页面解码显示
         m_inteAnalyPage->hide();
         m_devManagePage->hide();
         m_devUpdatePage->hide();
@@ -481,6 +508,7 @@ void pvmsMenuWidget::menuButtonClick()
     {
         m_pvmsMonitorPage->hide();
         m_pvmsMonitorPage->m_playWin->hide();
+        m_pvmsMonitorPage->enableVideoPlay(0);   //禁止受电弓监控页面解码显示
         m_recordPlayPage->hide();
         m_recordPlayPage->closePlayWin();   //关闭录像回放界面的播放窗口
         m_devManagePage->hide();
@@ -499,6 +527,7 @@ void pvmsMenuWidget::menuButtonClick()
     {
         m_pvmsMonitorPage->hide();
         m_pvmsMonitorPage->m_playWin->hide();
+        m_pvmsMonitorPage->enableVideoPlay(0);   //禁止受电弓监控页面解码显示
         m_recordPlayPage->hide();
         m_recordPlayPage->closePlayWin();   //关闭录像回放界面的播放窗口
         m_inteAnalyPage->hide();
@@ -516,6 +545,7 @@ void pvmsMenuWidget::menuButtonClick()
     {
         m_pvmsMonitorPage->hide();
         m_pvmsMonitorPage->m_playWin->hide();
+        m_pvmsMonitorPage->enableVideoPlay(0);   //禁止受电弓监控页面解码显示
         m_recordPlayPage->hide();
         m_recordPlayPage->closePlayWin();   //关闭录像回放界面的播放窗口
         m_inteAnalyPage->hide();

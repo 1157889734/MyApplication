@@ -27,6 +27,7 @@ public:
 
     void recvRs485Ctrl(char *pcData, int iDataLen);
     void recvPmsgCtrl(PMSG_HANDLE pHandle, unsigned char ucMsgCmd, char *pcMsgData, int iMsgDataLen);
+    PRS485_HANDLE m_pRs485Handle;
 
 
 public slots:

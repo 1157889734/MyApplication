@@ -42,12 +42,12 @@ devManageWidget::devManageWidget(QWidget *parent) :
     ui->devStatusTableWidget->setSelectionMode(QAbstractItemView::SingleSelection); //设置只能选择一行，不能多行选中
     ui->devStatusTableWidget->setAlternatingRowColors(true);                        //设置隔一行变一颜色，即：一灰一白
     ui->devStatusTableWidget->horizontalHeader()->resizeSection(0,46); //设置表头第一列的宽度为46px
-    ui->devStatusTableWidget->horizontalHeader()->resizeSection(1,130);
-    ui->devStatusTableWidget->horizontalHeader()->resizeSection(2,130);
-    ui->devStatusTableWidget->horizontalHeader()->resizeSection(3,130);
-    ui->devStatusTableWidget->horizontalHeader()->resizeSection(4,100);
-    ui->devStatusTableWidget->horizontalHeader()->resizeSection(5,100);
-    ui->devStatusTableWidget->horizontalHeader()->resizeSection(6,100);
+    ui->devStatusTableWidget->horizontalHeader()->resizeSection(1,150);
+    ui->devStatusTableWidget->horizontalHeader()->resizeSection(2,150);
+    ui->devStatusTableWidget->horizontalHeader()->resizeSection(3,150);
+    ui->devStatusTableWidget->horizontalHeader()->resizeSection(4,150);
+    ui->devStatusTableWidget->horizontalHeader()->resizeSection(5,150);
+    ui->devStatusTableWidget->horizontalHeader()->resizeSection(6,150);
     //ui->devStatusTableWidget->horizontalHeader()->resizeSection(7,61);
 
     ui->alarmPushButton->setFocusPolicy(Qt::NoFocus);
@@ -90,8 +90,27 @@ devManageWidget::~devManageWidget()
 int devManageWidget::rs485Ctrl(char *pcData, int iDataLen)
 {
 
+    unsigned char ucMsgHead = 0;
+    unsigned char ucMsgCmd = 0;
+    int iMsgDataLen = 0;
+
+    if (NULL == pcData|| 0 == iDataLen)
+    {
+        return -1;
+    }
+
+    ucMsgHead = (unsigned char)pcData[0];
+    ucMsgCmd = (unsigned char)pcData[1];
+    iMsgDataLen = pcData[2] << 8 | pcData[3];
+
+    if (0XFF != ucMsgHead || 0x04 != ucMsgCmd || (iMsgDataLen+5) != iDataLen)    //数据准确性检测
+    {
+        return -1;
+    }
+
     pisMsgCtrl(pcData+4);
 
+    return 0;
 
 }
 

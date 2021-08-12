@@ -87,13 +87,13 @@ recordPlayWidget::recordPlayWidget(QWidget *parent) :
     m_tableWidgetStyle = QStyleFactory::create("windows");
     ui->recordFileTableWidget->setStyle(m_tableWidgetStyle);   //设置tablewidget显示风格为windows风格，否则里面的checkbox选中默认显示叉而不是勾
     ui->recordFileTableWidget->setFocusPolicy(Qt::NoFocus);
-    ui->recordFileTableWidget->horizontalHeader()->setSectionsClickable(false); ////设置表头不可点击
+    ui->recordFileTableWidget->horizontalHeader()->setSectionsClickable(false); //设置表头不可点击
     ui->recordFileTableWidget->horizontalHeader()->setStretchLastSection(true); //设置充满表宽度
     ui->recordFileTableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers); //设置不可编辑
     ui->recordFileTableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);  //设置整行选中方式
     ui->recordFileTableWidget->setSelectionMode(QAbstractItemView::NoSelection); //设置只能选择一行，不能多行选中
     ui->recordFileTableWidget->setAlternatingRowColors(true);                        //设置隔一行变一颜色，即：一灰一白
-    ui->recordFileTableWidget->horizontalHeader()->resizeSection(0,46); ////设置表头第一列的宽度为46
+    ui->recordFileTableWidget->horizontalHeader()->resizeSection(0,46); //设置表头第一列的宽度为46
     ui->recordFileTableWidget->horizontalHeader()->resizeSection(1,46);
     ui->recordFileTableWidget->horizontalHeader()->resizeSection(2,219);
 
@@ -205,23 +205,23 @@ void recordPlayWidget::mediaInit()
 
     QFile file("/userdata/apink.mp4");
 
-    QUrl url("rtsp://admin:admin123@168.168.102.20");
+//    QUrl url("rtsp://admin:admin123@168.168.102.20");
+//rtsp://192.168.104.200:554/8
+     QUrl url("rtsp://192.168.104.200:554/8");
 
     player = new QMediaPlayer();
 //    player->setPlaylist(list);
-//    player->setMedia(url);
-    if(file.exists())
-    {
-        player->setMedia(QUrl::fromLocalFile(file.fileName()));
-    }
+    player->setMedia(url);
+//    if(file.exists())
+//    {
+//        player->setMedia(QUrl::fromLocalFile(file.fileName()));
+//    }
 
     videoViewer = new QVideoWidget(m_playWin);
     videoViewer->setGeometry(0, 7, 698, 580);
     player->setVideoOutput(videoViewer);
 
 //    player->play();
-
-
 }
 
 void recordPlayWidget::playSliderPressSlot(int iPosTime)
@@ -830,6 +830,8 @@ void recordPlayWidget::getTrainConfig()    	//获取车型配置文件，初始�
                 ui->cameraSelectionComboBox->addItem(item);
             }
         }
+
+
     }
 }
 

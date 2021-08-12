@@ -220,7 +220,6 @@ private:
     QMediaPlayer *player;
     QMediaPlaylist *list;
     QVideoWidget *videoViewer;
-    QPlayer *vidoplayer;
     QList<QMediaPlaylist*> *multiPlayList;
 
 };
