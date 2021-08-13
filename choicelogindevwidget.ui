@@ -52,7 +52,7 @@
      <string notr="true">background-color: rgb(32, 74, 135);</string>
     </property>
     <property name="text">
-     <string>车厢监控</string>
+     <string>受电弓监控</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pvmsPushButton">
@@ -73,7 +73,7 @@
      <string notr="true">background-color: rgb(32, 74, 135);</string>
     </property>
     <property name="text">
-     <string>受电弓监控</string>
+     <string>车厢监控</string>
     </property>
    </widget>
   </widget>

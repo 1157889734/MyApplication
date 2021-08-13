@@ -57,7 +57,9 @@ int main(int argc, char *argv[])
         memset(acNvrServerIp, 0, sizeof(acNvrServerIp));
         snprintf(acNvrServerIp, sizeof(acNvrServerIp), "192.168.%d.81", 100+tTrainConfigInfo.tNvrServerInfo[i].iCarriageNO);
         iRet = PMSG_CreateConnect(acNvrServerIp, 10100);
-        qDebug()<<"********PMSG_CreateConnect--:"<<iRet<<endl;
+//        qDebug()<<"********PMSG_CreateConnect--:"<<iRet<<endl;
+        qDebug()<<"********PMSG_CreateConnect--acNvrServerIp:"<<acNvrServerIp;
+        printf("********PMSG_CreateConnect--%d\n",iRet);
         if (0 == iRet)
         {
 //            DebugPrint(DEBUG_UI_ERROR_PRINT, "create connection to server:%s error!\n",acNvrServerIp);
@@ -138,7 +140,7 @@ int main(int argc, char *argv[])
         }
     }
     a.setWindowIcon(QIcon(":/res/info.png"));   //设置窗口图标，这里主要是messagebox窗体会显示，而避免出现QT图标
-    qDebug() << "drivers------------------------"<< QSqlDatabase::drivers();
+//    qDebug() << "drivers------------------------"<< QSqlDatabase::drivers();
 
 
 //    QTextCodec *codec = QTextCodec::codecForName("System");
@@ -178,6 +180,16 @@ int main(int argc, char *argv[])
     splash.finish(g_choiceLoginDevPage);
 
     a.exec();
+
+    RS485_DestroyConnect(pRs485Handle);
+
+    for (i = 0; i < tTrainConfigInfo.iNvrServerCount; i++)
+    {
+        pmsgHandle = STATE_GetNvrServerPmsgHandle(i);
+        PMSG_DestroyConnect(pmsgHandle);
+    }
+    PMSG_DestroyConnect(STATE_GetPisPmsgHandle());
+
 
     usleep(1*1000*1000);
 

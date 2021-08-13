@@ -1540,7 +1540,7 @@ void pvmsMonitorWidget::cmpOptionCtrlSlot(int iType, int iCh)
 
         player->play();
 #endif
-        mediaInit(iCh);
+//        mediaInit(iCh);
         m_tCameraInfo[iCh].iCmpOpenFlag = 1;
 
 

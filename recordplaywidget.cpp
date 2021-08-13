@@ -116,6 +116,8 @@ recordPlayWidget::recordPlayWidget(QWidget *parent) :
     m_iRecordIdex = -1;
     m_iSliderValue = 0;
     m_threadId = 0;
+    m_pcRecordFileBuf = (char *)malloc(MAX_RECORD_SEACH_NUM*MAX_RECFILE_PATH_LEN);
+
 
     setPlayButtonStyleSheet();
     getTrainConfig();
@@ -187,6 +189,10 @@ recordPlayWidget::~recordPlayWidget()
     m_playSlider = NULL;
     delete m_playWin;
     m_playWin = NULL;
+
+
+    free(m_pcRecordFileBuf);
+    m_pcRecordFileBuf = NULL;
 
     delete ui;
 }
@@ -519,7 +525,7 @@ void recordPlayWidget::recordQuerySlot()
     {
         memset(m_acFilePath[i], 0, MAX_RECFILE_PATH_LEN);
     }
-//        memset(m_pcRecordFileBuf, 0, MAX_RECORD_SEACH_NUM*MAX_RECFILE_PATH_LEN);
+    memset(m_pcRecordFileBuf, 0, MAX_RECORD_SEACH_NUM*MAX_RECFILE_PATH_LEN);
     m_iTotalLen = 0;
 
     row = ui->recordFileTableWidget->rowCount();//获取录像文件列表总行数
@@ -817,6 +823,7 @@ void recordPlayWidget::getTrainConfig()    	//获取车型配置文件，初始�
         item += tr("号车厢");
         ui->carSeletionComboBox->addItem(item);
         m_Phandle[i] = STATE_GetNvrServerPmsgHandle(i);
+        qDebug()<<"DEBUG_UI_NOMAL_PRINT  tTrainConfigInfo.tNvrServerInfo[i].iCarriageNO::="<<i<<":="<<tTrainConfigInfo.tNvrServerInfo[i].iCarriageNO;
         if (0 == i)
         {
 //            DebugPrint(DEBUG_UI_NOMAL_PRINT, "[%s] the first server has camera num=%d\n",__FUNCTION__,tTrainConfigInfo.tNvrServerInfo[i].iPvmsCameraNum);
@@ -828,6 +835,8 @@ void recordPlayWidget::getTrainConfig()    	//获取车型配置文件，初始�
                 item = QString::number(8+j);
                 item += tr("号摄像机");
                 ui->cameraSelectionComboBox->addItem(item);
+                qDebug()<<"DEBUG_UI_NOMAL_PRINT tTrainConfigInfo.tNvrServerInfo[i].iPvmsCameraNum ="<<i<<"=:"<<tTrainConfigInfo.tNvrServerInfo[i].iPvmsCameraNum<<__FUNCTION__<<__LINE__<<endl;
+
             }
         }
 
@@ -1112,7 +1121,7 @@ void recordPlayWidget::carNoChangeSlot()   //车厢号切换信号响应槽函�
     ui->cameraSelectionComboBox->setCurrentIndex(-1);
     ui->cameraSelectionComboBox->clear();
 
-
+    qDebug()<<"*****---carNoChangeSlot--=:"<<idex<<tTrainConfigInfo.tNvrServerInfo[idex].iPvmsCameraNum<<__FUNCTION__<<__LINE__<<endl;
     for (i = 0; i < tTrainConfigInfo.tNvrServerInfo[idex].iPvmsCameraNum; i++)        //根据不同车厢位置的NVR服务器的摄像机数量个数跟新摄像机选择下拉框
     {
         item = "";
@@ -1160,6 +1169,7 @@ void recordPlayWidget::recordPlaySlot(QTableWidgetItem *item)    //录像文件�
     emit setRecordPlayFlagSignal(1);  //触发设置回放标志信号
     iRow = item->row();
     iDex = ui->carSeletionComboBox->currentIndex();
+
     recordPlayCtrl(iRow, iDex);
 }
 
@@ -1235,7 +1245,6 @@ void recordPlayWidget::recordQueryCtrl(char *pcMsgData, int iMsgDataLen)
     {
         return;
     }
-
     memcpy(m_pcRecordFileBuf+m_iTotalLen, pcMsgData, iMsgDataLen);
     m_iTotalLen += iMsgDataLen;
 
@@ -1389,7 +1398,6 @@ int recordPlayWidget::pmsgCtrl(PMSG_HANDLE pHandle, unsigned char ucMsgCmd, char
             {
                 break;
             }
-
             recordQueryCtrl(pcToken, iMsgDataLen);    //触发录像查询处理信号，在UI主线程中处理，而不在这里直接处理
             break;
         }
