@@ -53,13 +53,14 @@ public:
     void closePlayWin();
     void recordQueryCtrl(char *pcMsgData, int iMsgDataLen);
     void recordPlayCtrl(int iRow, int iDex);
-    void mediaInit();
+//    void mediaInit();
     void triggerSetSliderValueSignal(int iValue);   //触发设置播放进度条值的信号
     void triggerSetRangeLabelSignal();
     void triggerCloseRecordPlaySignal();
     void triggerDownloadProcessBarDisplaySignal(int iEnableFlag);   //触发是否显示文件下载进度条的信号，iEnableFlag为1，显示，为0不显示
     void triggerSetDownloadProcessBarValueSignal(int iValue);   //触发设置文件下载进度条的值的信号
-
+    void createMeadia();
+    int  openMedia(const char *pcRtspFile);
 
 
 

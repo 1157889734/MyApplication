@@ -30,7 +30,7 @@ public:
 public slots:
 
     void trainNumberChange(QString TrainNumberStr);
-
+    void getDevStateSignalCtrl();
     void alarmPushButoonClickSlot();
     void alarmHappenSlot();
     void alarmHappenCtrlSlot();
@@ -42,6 +42,7 @@ public slots:
 signals:
     void alarmPushButoonClickSignal();
     void systimeSetSignal();
+    void serverOffLine(int iDex);
 
 private:
     Ui::devManageWidget *ui;

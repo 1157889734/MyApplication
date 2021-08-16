@@ -37,11 +37,23 @@ public slots:
     void closeAlarmWidget();
     void alarmHappenSlot();
     void alarmClearSlot();
+    void serverOffLineSlot(int iDex);
+
+    void hideAlarmWidgetSlot();
+    void showAlarmWidgetSlot();
+
+    void blackScreenCtrlSlot();
+    void blackScreenExitCtrlSlot();
+
 signals:
     void registOutSignal(int iType);     //注销信号，iType:表示执行注销的页面类型，这里应该为2，表示受电弓监控页面,
     void reflushAlarmPageSignal(int iAlarmType, int iCarriageNO, int iDevPos);
     void alarmHappenSignal();
     void alarmClearSignal();
+
+    void blackScreenSignal();
+    void blackScreenExitSignal();
+
 private:
     Ui::pvmsMenuWidget *ui;
     pvmsMonitorWidget *m_pvmsMonitorPage;

@@ -50,10 +50,13 @@ public slots:
 
     void setTrainType();
 
+    void setTimeSignalCtrl();
+
 
 signals:
     void alarmPushButoonClickSignal();
     void registOutSignal(int iType);     //注销信号，iType:表示执行注销的页面类型，这里应该为2，表示受电弓监控页面,
+    void systimeSetSignal();
 
 private:
     Ui::devUpdateWidget *ui;
@@ -72,7 +75,7 @@ private:
     QString m_brightNessText;
     QString m_saturationText;
     QString m_contrastText;
-//    userManage *usermanagePage;
+    userManage *usermanagePage;
 
 };
 

@@ -554,6 +554,7 @@ void *monitorThread(void *param)     //实时监控线程，对通道轮询、�
     if ((tGetDevStateCurTime - tGetDevStateOldTime) >= GET_DEVSTATE_MONITOR_TIME)
     {
 //        DebugPrint(DEBUG_UI_NOMAL_PRINT, "pvmsMonitorWidget monitor thread get device state timeOut!\n");
+//        qDebug()<<" DEBUG_UI_NOMAL_PRINT pvmsMonitorWidget monitor thread get device state timeOut--"<<__FUNCTION__<<__LINE__<<endl;
         pvmsMonitorPage->triggerGetDevStateSignal();
         tGetDevStateOldTime = tGetDevStateCurTime;
     }
@@ -1512,6 +1513,7 @@ void pvmsMonitorWidget::recordPlayCtrlSlot()
 void pvmsMonitorWidget::cmpOptionCtrlSlot(int iType, int iCh)
 {
     int iRet = 0, i = 0;
+    char rtspStr[30];
 //    CMPHandle cmpHandle = NULL;
 
     if (iCh > (MAX_SERVER_NUM*MAX_CAMERA_OFSERVER - 1))
@@ -1541,6 +1543,9 @@ void pvmsMonitorWidget::cmpOptionCtrlSlot(int iType, int iCh)
         player->play();
 #endif
 //        mediaInit(iCh);
+        sprintf(rtspStr,"rtsp://%s",m_tCameraInfo[iCh].acCameraRtspUrl);
+//        printf("************cmpOptionCtrlSlot----%s---%d\n",rtspStr,iCh);
+//        openMedia(rtspStr);
         m_tCameraInfo[iCh].iCmpOpenFlag = 1;
 
 
@@ -1848,7 +1853,7 @@ bool pvmsMonitorWidget::eventFilter(QObject *target, QEvent *event)    //事件�
 //                        m_presetPasswdConfirmPage->p_ipmethod->p_inputwidget->show();
 //                    }
 //                }
-//                emit showAlarmWidgetSignal();
+                emit showAlarmWidgetSignal();
             }
     }
 
@@ -2168,6 +2173,90 @@ void pvmsMonitorWidget::pvmsDownEndSlot4()
         delete m_tCameraInfo[3].pvmsDownMonitorTimer ;
         m_tCameraInfo[3].pvmsDownMonitorTimer  = NULL;
     }
+}
+
+int pvmsMonitorWidget::openMedia(const char *pcRtspFile)
+{
+    const QString str = QString::fromUtf8(pcRtspFile);
+    QUrl url("rtsp://192.168.104.200:554/8");
+    printf("*******---openMedia--\n");
+    qDebug()<<"***********---str--"<<str;
+    player->setMedia(url);
+
+    videoViewer = new QVideoWidget(m_playWin);
+    videoViewer->setGeometry(6, 110, 782, 656);
+
+    player->setVideoOutput(videoViewer);
+
+    player->play();
+
+    return 0;
+
+
+
+}
+
+void pvmsMonitorWidget::systimeSetSlot()
+{
+    m_iSystimeChangeFlag = 1;
+}
+
+void pvmsMonitorWidget::blackScreenCtrlSlot()     //黑屏触发信号处理，如果处于全屏时则退出全屏，m_iBlackScreenFlag标志置1，全屏监控暂时无效
+{
+    T_CMP_PACKET tPkt;
+
+    if ((1 == m_iFullScreenFlag) && (m_playWin != NULL))
+    {
+        struct sysinfo s_info;
+        memset(&s_info,0,sizeof(s_info));
+        sysinfo(&s_info);
+        m_lastActionTime = s_info.uptime;  //更新最后一次操作计时
+        m_playWin->move(6, 110);
+        m_playWin->resize(782, 656);
+        m_iFullScreenFlag = 0;
+
+        tPkt.iMsgCmd = CMP_CMD_CHG_ALL_VIDEOWIN;
+        tPkt.iCh = 0;
+        PutNodeToCmpQueue(m_ptQueue, &tPkt);
+
+        if (m_channelStateLabel != NULL)
+        {
+            m_channelStateLabel->setGeometry(320, 385, 121, 50);
+        }
+        if (m_channelNoLabel != NULL)
+        {
+            m_channelNoLabel->setGeometry(20, 690, 65, 50);
+        }
+        if (m_presetPasswdConfirmPage != NULL)
+        {
+            m_presetPasswdConfirmPage->show();
+//            if ((m_presetPasswdConfirmPage->p_ipmethod != NULL) && (m_presetPasswdConfirmPage->p_ipmethod->p_inputwidget != NULL))
+//            {
+//                m_presetPasswdConfirmPage->p_ipmethod->p_inputwidget->show();
+//            }
+        }
+
+        emit showAlarmWidgetSignal();
+    }
+    m_iBlackScreenFlag = 1;
+}
+
+void pvmsMonitorWidget::blackScreenExitCtrlSlot()  //黑屏退出触发信号处理，m_iBlackScreenFlag标志置0，全屏监控恢复
+{
+    struct sysinfo s_info;
+    sysinfo(&s_info);
+    m_lastActionTime = s_info.uptime;  //更新最后一次操作计时
+    m_iBlackScreenFlag = 0;
+}
+
+
+void pvmsMonitorWidget::createMeadia()
+{
+
+
+
+
+
 }
 
 void pvmsMonitorWidget::pvmsUpdownCtrl(char *pcMsgData)

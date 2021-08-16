@@ -42,7 +42,20 @@ pvmsMenuWidget::pvmsMenuWidget(QWidget *parent) :
     ui->devUpdateMenuPushButton->setFocusPolicy(Qt::NoFocus);
 //    ui->loginOutPushButton->setFocusPolicy(Qt::NoFocus);
 
+
+    connect(m_pvmsMonitorPage, SIGNAL(getDevStateSignal()), m_devManagePage, SLOT(getDevStateSignalCtrl()));
+    connect(m_devManagePage, SIGNAL(serverOffLine(int)), this, SLOT(serverOffLineSlot(int)));
     connect(m_recordPlayPage, SIGNAL(setRecordPlayFlagSignal(int)), m_pvmsMonitorPage, SLOT(setRecordPlayFlag(int)));
+    connect(m_pvmsMonitorPage, SIGNAL(setTimeSignal()), m_devUpdatePage, SLOT(setTimeSignalCtrl()));
+    connect(m_devUpdatePage, SIGNAL(systimeSetSignal()), m_pvmsMonitorPage, SLOT(systimeSetSlot()));
+    connect(m_devManagePage, SIGNAL(systimeSetSignal()), m_pvmsMonitorPage, SLOT(systimeSetSlot()));
+    connect(m_pvmsMonitorPage, SIGNAL(hideAlarmWidgetSignal()), this, SLOT(hideAlarmWidgetSlot()));
+    connect(m_pvmsMonitorPage, SIGNAL(showAlarmWidgetSignal()), this, SLOT(showAlarmWidgetSlot()));
+    connect(this, SIGNAL(blackScreenSignal()), m_pvmsMonitorPage, SLOT(blackScreenCtrlSlot()));
+    connect(this, SIGNAL(blackScreenExitSignal()), m_pvmsMonitorPage, SLOT(blackScreenExitCtrlSlot()));
+
+
+
 
 
 //    connect(ui->loginOutPushButton, SIGNAL(clicked()), this, SLOT(registOutButtonClick()));
@@ -187,7 +200,7 @@ void pvmsMenuWidget::pmsgTimerFunc()
             continue;
         }
 //        DebugPrint(DEBUG_PMSG_NORMAL_PRINT, "pmsgTimerFunc get pmsg message 0x%x, msgDataLen=%d\n",(int)tPkt.ucMsgCmd, tPkt.iMsgDataLen);
-        qDebug()<<"pmsgTimerFunc get pmsg message 0x%x, msgDataLen="<<tPkt.ucMsgCmd<<tPkt.iMsgDataLen<<endl;
+//        qDebug()<<"pmsgTimerFunc get pmsg message 0x%x, msgDataLen="<<tPkt.ucMsgCmd<<tPkt.iMsgDataLen<<endl;
 
         recvPmsgCtrl(tPkt.PHandle, tPkt.ucMsgCmd, tPkt.pcMsgData, tPkt.iMsgDataLen);
         if (tPkt.pcMsgData)
@@ -456,6 +469,49 @@ void pvmsMenuWidget::registOutButtonClick()
     this->hide();
     emit registOutSignal(PVMSPAGETYPE);    //触发注销信号，带上当前设备类型
 }
+
+void pvmsMenuWidget::serverOffLineSlot(int iDex)   //服务器离线后将服务器检测硬盘错误标志及不检测计数清0，使得再次连上服务器后头3分钟依然不处理硬盘报警
+{
+//    DebugPrint(DEBUG_UI_NOMAL_PRINT, "pvmsMenuWidget server %d OffLine\n", iDex);
+
+    T_TRAIN_CONFIG tTrainConfigInfo;
+
+    m_iCheckDiskErrFlag[iDex] = 0;
+    m_iNoCheckDiskErrNum[iDex] = 0;
+
+    memset(&tTrainConfigInfo, 0, sizeof(T_TRAIN_CONFIG));
+    STATE_GetCurrentTrainConfigInfo(&tTrainConfigInfo);
+
+    emit reflushAlarmPageSignal(ALARM_SERVER_OFFLINE, tTrainConfigInfo.tNvrServerInfo[iDex].iCarriageNO, 0);   //触发服务器离线报警信息，清除所有与服务器相关的报警及其附属相机相关的报警
+}
+
+void pvmsMenuWidget::hideAlarmWidgetSlot()
+{
+    if (m_alarmPage != NULL)
+    {
+        m_alarmPage->hide();
+    }
+}
+
+void pvmsMenuWidget::showAlarmWidgetSlot()
+{
+    if ((m_alarmPage != NULL) && (1 == m_iAlarmPageOpenFlag))
+    {
+        m_alarmPage->show();
+    }
+}
+
+void pvmsMenuWidget::blackScreenCtrlSlot()   //黑屏触发，触发黑屏信号通知m_pvmsMonitorPage子界面
+{
+    emit blackScreenSignal();
+}
+
+void pvmsMenuWidget::blackScreenExitCtrlSlot()  //黑屏退出，触发黑屏退出信号通知m_pvmsMonitorPage子界面
+{
+    this->update();
+    emit blackScreenExitSignal();
+}
+
 
 void pvmsMenuWidget::menuButtonClick()
 {

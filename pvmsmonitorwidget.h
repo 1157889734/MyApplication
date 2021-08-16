@@ -16,6 +16,7 @@
 #include "qplayer.h"
 
 
+
 namespace Ui {
 class pvmsMonitorWidget;
 }
@@ -100,6 +101,8 @@ public:
     time_t m_lastActionTime;    //界面最后一次操作时间
     int pmsgCtrl(PMSG_HANDLE pHandle, unsigned char ucMsgCmd, char *pcMsgData, int iMsgDataLen);   //与服务器通信消息处理
     void pvmsUpdownCtrl(char *pcMsgData);
+    void createMeadia();
+    int  openMedia(const char *pcRtspFile);
 
 
     QLabel *m_channelStateLabel;
@@ -124,6 +127,8 @@ public:
     int m_iThreadRunFlag;   //线程运行标识
     int m_iPisGetFlag;   //从PIS接收过消息的标志
     int m_iOldRecordPlayFlag;
+
+    int m_iSystimeChangeFlag;   //系统时间改变标志
 
     PMSG_HANDLE m_PisServerPhandle;    //pis服务器PMSG通信句柄
 
@@ -164,6 +169,7 @@ signals:
     void recordPlayCtrlSignal();
     void setFullScreenSignal();
     void hideAlarmWidgetSignal();
+    void showAlarmWidgetSignal();
     void videoPollingSignal();
     void presetReturnSignal(int iCameraNO);
     void cmpOptionCtrlSignal(int iType, int iCh);
@@ -208,6 +214,12 @@ public slots:
     void pvmsDownEndSlot2();
     void pvmsDownEndSlot3();
     void pvmsDownEndSlot4();
+
+    void systimeSetSlot();
+    void blackScreenCtrlSlot();
+    void blackScreenExitCtrlSlot();
+
+
 private:
     Ui::pvmsMonitorWidget *ui;
     QTimer *m_alarmHappenTimer;

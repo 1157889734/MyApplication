@@ -523,6 +523,84 @@ void devManageWidget::trainNumberChange(QString TrainNumberStr)
         box.exec();
     }
 }
+void devManageWidget::getDevStateSignalCtrl()
+{
+    int iRet = 0, i = 0, j = 0;
+    T_TRAIN_CONFIG tTrainConfigInfo;
+    T_LOG_INFO tLogInfo;
+
+//    DebugPrint(DEBUG_UI_NOMAL_PRINT, "[%s] getDevState\n", __FUNCTION__);
+    memset(&tTrainConfigInfo, 0, sizeof(T_TRAIN_CONFIG));
+    STATE_GetCurrentTrainConfigInfo(&tTrainConfigInfo);
+    for (i = 0; i < tTrainConfigInfo.iNvrServerCount; i++)
+    {
+        if (m_aiServerIdex[i] >= 1)
+        {
+            if (E_SERV_STATUS_CONNECT == PMSG_GetConnectStatus(m_NvrServerPhandle[i]))    //获取到服务器状态为在线
+            {
+//                DebugPrint(DEBUG_UI_NOMAL_PRINT, "[%s] server %d status is online\n", __FUNCTION__, i+1);
+                ui->devStatusTableWidget->setItem(m_aiServerIdex[i]-1, 5, new QTableWidgetItem(tr("在线")));
+                ui->devStatusTableWidget->item(m_aiServerIdex[i]-1, 5)->setTextAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
+                iRet = PMSG_SendPmsgData(m_NvrServerPhandle[i], CLI_SERV_MSG_TYPE_GET_NVR_STATUS, NULL, 0);
+                if (iRet < 0)
+                {
+//                    DebugPrint(DEBUG_UI_ERROR_PRINT, "[%s] PMSG_SendPmsgData CLI_SERV_MSG_TYPE_GET_NVR_STATUS error!iRet=%d,server=%d\n", __FUNCTION__, iRet,i+1);
+                }
+
+                iRet = PMSG_SendPmsgData(m_NvrServerPhandle[i], CLI_SERV_MSG_TYPE_GET_IPC_STATUS, NULL, 0);
+                if (iRet < 0)
+                {
+//                    DebugPrint(DEBUG_UI_ERROR_PRINT, "[%s] PMSG_SendPmsgData CLI_SERV_MSG_TYPE_GET_IPC_STATUS error!iRet=%d,server=%d\n", __FUNCTION__, iRet,i+1);
+                }
+
+                m_aiNvrOnlineFlag[i] = 1;
+            }
+            else
+            {
+//                DebugPrint(DEBUG_UI_NOMAL_PRINT, "[%s] server %d status is offline\n", __FUNCTION__, i+1);
+                ui->devStatusTableWidget->setItem(m_aiServerIdex[i]-1, 5, new QTableWidgetItem(tr("离线")));
+                ui->devStatusTableWidget->item(m_aiServerIdex[i]-1, 5)->setTextAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
+                ui->devStatusTableWidget->setItem(m_aiServerIdex[i]-1, 4, new QTableWidgetItem(""));
+                ui->devStatusTableWidget->setItem(m_aiServerIdex[i]-1, 6, new QTableWidgetItem(""));
+                ui->devStatusTableWidget->setItem(m_aiServerIdex[i]-1, 7, new QTableWidgetItem(""));
+                for (j = 0; j < ui->devStorageTableWidget->rowCount(); j++)  //设备存储列表里找到同一个服务器的那一行，把后三列显示硬盘总容量、使用量和状态清空
+                {
+                    if (0 == QString::compare(ui->devStatusTableWidget->item(m_aiServerIdex[i]-1, 3)->text(), ui->devStorageTableWidget->item(j, 3)->text()))
+                    {
+                        ui->devStorageTableWidget->setItem(j, 4, new QTableWidgetItem(""));
+                        ui->devStorageTableWidget->setItem(j, 5, new QTableWidgetItem(""));
+                        ui->devStorageTableWidget->setItem(j, 6, new QTableWidgetItem(""));
+                        break;
+                    }
+                }
+                for (j = 1; j <= tTrainConfigInfo.tNvrServerInfo[i].iPvmsCameraNum; j++)
+                {
+                    ui->devStatusTableWidget->setItem(m_aiServerIdex[i]-1+j, 5, new QTableWidgetItem(tr("离线")));
+                    ui->devStatusTableWidget->item(m_aiServerIdex[i]-1+j, 5)->setTextAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
+                    ui->devStatusTableWidget->setItem(m_aiServerIdex[i]-1+j, 4, new QTableWidgetItem(""));
+                    ui->devStatusTableWidget->setItem(m_aiServerIdex[i]-1+j, 6, new QTableWidgetItem(""));
+                    ui->devStatusTableWidget->setItem(m_aiServerIdex[i]-1+j, 7, new QTableWidgetItem(""));
+                    if (1 == m_aiCameraOnlineFlag[i][j-1])
+                    {
+                        memset(&tLogInfo, 0, sizeof(T_LOG_INFO));
+                        tLogInfo.iLogType = 0;
+                        snprintf(tLogInfo.acLogDesc, sizeof(tLogInfo.acLogDesc), "camera %d.%d offline", 100+tTrainConfigInfo.tNvrServerInfo[i].iCarriageNO, 200+j-1);
+                        LOG_WriteLog(&tLogInfo);   //相机离线记录日志
+                        m_aiCameraOnlineFlag[i][j-1] = 0;
+                    }
+
+                }
+                if (1 == m_aiNvrOnlineFlag[i])
+                {
+                    m_iCheckDiskErrFlag[i] = 0;  //服务器离线后将服务器检测硬盘错误标志及不检测计数清0，使得再次连上服务器后头3分钟依然不处理硬盘报警
+                    m_iNoCheckDiskErrNum[i] = 0;
+                    m_aiNvrOnlineFlag[i] = 0;
+                    emit serverOffLine(i);
+                }
+            }
+        }
+    }
+}
 
 void devManageWidget::trainNumberSetSlot_fuction()
 {

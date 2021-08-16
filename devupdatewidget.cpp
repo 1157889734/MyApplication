@@ -204,6 +204,9 @@ void devUpdateWidget::systimeSlot()
         snprintf(tLogInfo.acLogDesc, sizeof(tLogInfo.acLogDesc), "set local time %4d-%02d-%02d %02d:%02d:%02d", year, month, day, hour, minute, second);
         LOG_WriteLog(&tLogInfo);
 
+        emit systimeSetSignal();
+
+
         if (year >= 1970 && (month >= 1 && month <= 12) && (day >= 1 && day <= 31) &&
             (hour >= 0 && hour <= 23) && (minute >= 0 && minute <= 59) && (second >= 0 && second <= 59))
         {
@@ -356,7 +359,17 @@ void devUpdateWidget::setPresetReturnTimeRadioButton()     //获取预置点返�
         ui->presetReturnTimeSetLineEdit->setReadOnly(false);
     }
 }
+void devUpdateWidget::setTimeSignalCtrl()
+{
+    char acTimeStr[128] = {0};
+    QDateTime current_date_time ;
 
+    current_date_time = QDateTime::currentDateTime();
+    snprintf(acTimeStr, sizeof(acTimeStr), "%4d-%02d-%02d %02d:%02d:%02d", current_date_time.date().year(), current_date_time.date().month(), current_date_time.date().day(), current_date_time.time().hour(), current_date_time.time().minute(), current_date_time.time().second());
+//    ui->sysTimeAdjustLabel->setText(QString(QLatin1String(acTimeStr)));
+
+    return;
+}
 
 void devUpdateWidget::setTrainType()
 {
@@ -448,7 +461,7 @@ void devUpdateWidget::setCameraImageParamSlot()
 void devUpdateWidget::userManageSlot()  //点击用户管理按钮响应函数，弹出用户管理界面
 {
 //    DebugPrint(DEBUG_UI_OPTION_PRINT, "devUpdateWidget userManage set button pressed!\n");
-#if 0
+#if 1
     if (usermanagePage == NULL)
     {
         usermanagePage = new userManage(this);

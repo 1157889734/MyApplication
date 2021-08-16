@@ -121,7 +121,9 @@ recordPlayWidget::recordPlayWidget(QWidget *parent) :
 
     setPlayButtonStyleSheet();
     getTrainConfig();
-    mediaInit();
+//    mediaInit();
+    createMeadia();
+
 
 
 //    Mouseflag = true;
@@ -158,8 +160,8 @@ recordPlayWidget::recordPlayWidget(QWidget *parent) :
     connect(ui->carSeletionComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(carNoChangeSlot()));  //车厢选择下拉框当前索引改变信号响应
 
 
-    QObject::connect(player,SIGNAL(durationChanged(qint64)),this,SLOT(getduration(qint64)));
-    QObject::connect(player,SIGNAL(positionChanged(qint64)),this,SLOT(positionchaged(qint64)));
+//    QObject::connect(player,SIGNAL(durationChanged(qint64)),this,SLOT(getduration(qint64)));
+//    QObject::connect(player,SIGNAL(positionChanged(qint64)),this,SLOT(positionchaged(qint64)));
 
     connect(this, SIGNAL(setSliderValueSignal(int)), this, SLOT(setPlaySliderValueSlot(int)));
     connect(this, SIGNAL(downloadProcessBarDisplaySignal(int)), this, SLOT(downloadProcessBarDisplaySlot(int)));
@@ -196,15 +198,54 @@ recordPlayWidget::~recordPlayWidget()
 
     delete ui;
 }
-
-void recordPlayWidget::mediaInit()
+void recordPlayWidget::createMeadia()
 {
     /*新建一个播放窗体*/
-
     m_playWin = new QWidget(this);
     m_playWin->setGeometry(320, 7, 698, 580);
     m_playWin->show();
     m_playWin->setStyleSheet("QWidget{background-color: rgb(0, 0, 0);}");
+    player = new QMediaPlayer();
+
+
+}
+int recordPlayWidget::openMedia(const char *pcRtspFile)
+{
+    const QString str = QString::fromUtf8(pcRtspFile);
+    QUrl url(str);
+
+//    QFile file(str);
+    printf("*******---openMedia--\n");
+    qDebug()<<"***********---str--"<<str;
+    player->setMedia(url);
+//    if(file.exists())
+//    {
+//        player->setMedia(QUrl::fromLocalFile(file.fileName()));
+//        qDebug()<<"***********-11111--str--"<<str;
+
+//    }
+//    else
+//    {
+//        qDebug()<<"***********-22222222--str--"<<str;
+
+//        return -1;
+//    }
+
+    videoViewer = new QVideoWidget(m_playWin);
+    videoViewer->setGeometry(320, 7, 698, 580);
+    player->setVideoOutput(videoViewer);
+
+    player->play();
+
+    return 0;
+}
+
+#if 0
+
+void recordPlayWidget::mediaInit()
+{
+
+
 
 //    list = new QMediaPlaylist;
 //    list->addMedia(QUrl("/oem/SampleVideo_1280x720_5mb.mp4"));
@@ -229,6 +270,8 @@ void recordPlayWidget::mediaInit()
 
 //    player->play();
 }
+
+#endif
 
 void recordPlayWidget::playSliderPressSlot(int iPosTime)
 {
@@ -1162,11 +1205,13 @@ void recordPlayWidget::recordPlaySlot(QTableWidgetItem *item)    //录像文件�
     setPlayButtonStyleSheet();
 
 //    if (m_cmpHandle != NULL)    //如果播放窗口已经有打开了码流播放，关闭码流播放
+    if(player->state() == QMediaPlayer::PlayingState)
     {
         closePlayWin();
         setPlayButtonStyleSheet();
     }
     emit setRecordPlayFlagSignal(1);  //触发设置回放标志信号
+
     iRow = item->row();
     iDex = ui->carSeletionComboBox->currentIndex();
 
@@ -1260,7 +1305,7 @@ void *slideValueSetThread(void *param)    //播放进度条刷新线程
           return NULL;
       }
 
-      //pthread_detach(pthread_self());
+      pthread_detach(pthread_self());
 
       while (1 == recordPlaypage->m_iThreadRunFlag)
       {
@@ -1335,6 +1380,19 @@ void recordPlayWidget::recordPlayCtrl(int iRow, int iDex)
     ui->playSpeedLineEdit->setText(playSpeedStr);
     setPlayButtonStyleSheet();
 
+    snprintf(acRtspAddr, sizeof(acRtspAddr), "rtsp://192.168.%d.81:554/%s",tTrainConfigInfo.tNvrServerInfo[iDex].iCarriageNO+100, m_acFilePath[iRow]);
+    printf("************----recordPlayCtrl---%s\n",acRtspAddr);
+//    iRet = openMedia(acRtspAddr);
+    if(iRet < 0)
+    {
+        QMessageBox box(QMessageBox::Warning,QString::fromUtf8("错误"),QString::fromUtf8("录像播放失败!"));
+        box.setStandardButtons (QMessageBox::Ok);
+        box.setButtonText (QMessageBox::Ok,QString::fromUtf8("确 定"));
+        box.exec();
+        return;
+
+    }
+
     m_iRecordIdex = iRow;
     if (0 == ui->recordFileTableWidget->item(m_iRecordIdex, 2)->text().contains("tmp"))
     {
@@ -1356,10 +1414,10 @@ void recordPlayWidget::recordPlayCtrl(int iRow, int iDex)
 //        DebugPrint(DEBUG_UI_NOMAL_PRINT, "[%s] create slideValueSet thread end!\n",__FUNCTION__);
     }
 
-
-
-
-
+    memset(&tLogInfo, 0, sizeof(T_LOG_INFO));
+    tLogInfo.iLogType = 0;
+    snprintf(tLogInfo.acLogDesc, sizeof(tLogInfo.acLogDesc), "play %s of nvr server %d", m_acFilePath[iRow], tTrainConfigInfo.tNvrServerInfo[iDex].iCarriageNO+100);
+    LOG_WriteLog(&tLogInfo);
 
 }
 

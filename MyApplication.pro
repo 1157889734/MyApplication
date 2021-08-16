@@ -42,10 +42,10 @@ SOURCES += \
     pmsgcli.c \
     presetpasswdconfirm.cpp \
     myslider.cpp \
-    qplayer.cpp \
-#    useredit.cpp \
-#    useradd.cpp \
-#    usermanage.cpp
+#    qplayer.cpp \
+    useredit.cpp \
+    useradd.cpp \
+    usermanage.cpp \
     ftpApi.c \
     rs485serv.c
 
@@ -70,10 +70,10 @@ HEADERS += \
     types.h \
     presetpasswdconfirm.h \
     myslider.h \
-    qplayer.h \
-#    useredit.h \
-#    useradd.h \
-#    usermanage.h
+#    qplayer.h \
+    useredit.h \
+    useradd.h \
+    usermanage.h \
     ftpApi.h \
     rs485serv.h
 

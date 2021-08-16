@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
         pmsgHandle = STATE_GetNvrServerPmsgHandle(i);
 //        qDebug()<<"*******************---111111:"<<tPvmsInfo.i8PvmsVideoNum<<tPvmsInfo.i8PvmsCarriageNo<<endl;
 
-        printf("*******************---111111=%d--=%d\n",tPvmsInfo.i8PvmsVideoNum,tPvmsInfo.i8PvmsCarriageNo);
+//        printf("*******************---111111=%d--=%d\n",tPvmsInfo.i8PvmsVideoNum,tPvmsInfo.i8PvmsCarriageNo);
         iRet = PMSG_SendPmsgData(pmsgHandle, CLI_SERV_MSG_TYPE_SET_PVMS_INFO, (char *)&tPvmsInfo, sizeof(T_PVMS_INFO));
         if (iRet < 0)
         {
@@ -165,6 +165,12 @@ int main(int argc, char *argv[])
     g_pvmsMenuPage->hide();
 
     g_pvmsMenuPage->m_pRs485Handle = pRs485Handle;
+
+
+    MyApplication app;
+
+    QObject::connect(&app, SIGNAL(blackScreenSignal()), g_pvmsMenuPage, SLOT(blackScreenCtrlSlot()));
+    QObject::connect(&app, SIGNAL(blackScreenExitSignal()), g_pvmsMenuPage, SLOT(blackScreenExitCtrlSlot()));
 
     QObject::connect(g_choiceLoginDevPage, SIGNAL(confirmDevTypeSignal(int)), g_loginPage, SLOT(showPageSlot(int)));    //选择登录设备页面的确认设备类型信号连接登录页面的页面显示槽
 

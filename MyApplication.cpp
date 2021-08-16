@@ -4,7 +4,7 @@
 #include "debug.h"
 #include "log.h"
 #include <QMouseEvent>
-
+#include <QDebug>
 #define BLACKSCREN_MONITOR_TIME 5*60    //黑屏监控时间5分钟
 #define MOUSE_MONITOR_TIME 10    //鼠标监控时间10秒
 
@@ -37,6 +37,7 @@ void *blackScreenMonitorThread(void *param)
         {
 //            DebugPrint(DEBUG_UI_NOMAL_PRINT, "black screen monitor time out,trigger black screen signal!\n");
             iBlackScreenFlag = STATE_GetBlackScreenFlag();
+//            qDebug()<<"********************blackScreenMonitorThread***---:"<<iBlackScreenFlag<<__FUNCTION__<<__LINE__<<endl;
             if (1 == iBlackScreenFlag)   //根据配置文件的配置决定是否触发黑屏信号
             {
                 myApplication->triggerBlackScreenSignal();   //5分钟界面没操作，触发黑屏信号
@@ -45,6 +46,7 @@ void *blackScreenMonitorThread(void *param)
         }
         else if (g_iMonitorNum >= MOUSE_MONITOR_TIME)
         {
+//            qDebug()<<"********************triggerMouseHideSignal***---:"<<iBlackScreenFlag<<__FUNCTION__<<__LINE__<<endl;
             myApplication->triggerMouseHideSignal();    //10秒界面没操作，隐藏鼠标
         }
 
@@ -80,10 +82,20 @@ MyApplication::MyApplication(QWidget *parent)
 MyApplication::~MyApplication()
 {
 
+    if (m_threadId != 0)
+    {
+        m_iThreadRunFlag = 0;
+        pthread_join(m_threadId, NULL);
+        m_threadId = 0;
+    }
+    delete m_blackScreenWidget;
+    m_blackScreenWidget = NULL;
+
 }
 
 void MyApplication::triggerBlackScreenSignal()
 {
+
     if ((0 == m_iAlarmFlag) && (1 == m_blackScreenWidget->isHidden()))   //只有在没有报警触发的前提下才会黑屏，有报警不会黑屏
     {
         emit blackScreenSignal();
@@ -92,6 +104,7 @@ void MyApplication::triggerBlackScreenSignal()
 
 void MyApplication::triggerMouseHideSignal()
 {
+
     if (0 == m_iMouseHideFlag)
     {
         emit mouseHideSignal();

@@ -14,6 +14,7 @@ class MyApplication : public QWidget
 
 public:
     MyApplication(QWidget *parent = 0);
+
     ~MyApplication();
 
     pthread_t m_threadId;
