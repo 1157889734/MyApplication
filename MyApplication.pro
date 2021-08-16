@@ -47,7 +47,8 @@ SOURCES += \
     useradd.cpp \
     usermanage.cpp \
     ftpApi.c \
-    rs485serv.c
+    rs485serv.c \
+    usergroupmanage.cpp
 
 HEADERS += \
     MyApplication.h \
@@ -75,7 +76,8 @@ HEADERS += \
     useradd.h \
     usermanage.h \
     ftpApi.h \
-    rs485serv.h
+    rs485serv.h \
+    usergroupmanage.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -98,5 +100,6 @@ FORMS += \
     presetpasswdconfirm.ui \
     useredit.ui \
     useradd.ui \
-    usermanage.ui
+    usermanage.ui \
+    usergroupmanage.ui
 

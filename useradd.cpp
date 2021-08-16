@@ -24,10 +24,9 @@ userAdd::userAdd(QWidget *parent) :
     this->setWindowModality(Qt::WindowModal);
 
 
-
-    ui->userNameLineEdit->installEventFilter(this);
-    ui->passwdLineEdit->installEventFilter(this);
-    ui->userNoteLineEdit->installEventFilter(this);
+//    ui->userNameLineEdit->installEventFilter(this);
+//    ui->passwdLineEdit->installEventFilter(this);
+//    ui->userNoteLineEdit->installEventFilter(this);
 
     connect(ui->closePushButton, SIGNAL(clicked(bool)), this, SLOT(closeWidgetSlot()));
     connect(ui->confirmPushButton, SIGNAL(clicked(bool)), this, SLOT(confirmSlot()));

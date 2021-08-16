@@ -34,6 +34,8 @@ public slots:
 
 private:
     Ui::loginWidget *ui;
+    int m_iLoginType;
+
 };
 
 #endif // LOGINWIDGET_H

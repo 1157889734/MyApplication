@@ -11,6 +11,7 @@
 #include <qdebug.h>
 #include <QtPlugin>
 #include <stdio.h>
+#include <QtGui/qinputmethod.h>
 
 userEdit::userEdit(QWidget *parent) :
     QWidget(parent),
@@ -21,8 +22,8 @@ userEdit::userEdit(QWidget *parent) :
     this->setWindowFlags(Qt::FramelessWindowHint | Qt::Dialog);
     this->setWindowModality(Qt::WindowModal);
 
-    ui->passwdLineEdit->installEventFilter(this);
-    ui->userNoteLineEdit->installEventFilter(this);
+//    ui->passwdLineEdit->installEventFilter(this);
+//    ui->userNoteLineEdit->installEventFilter(this);
 
     connect(ui->closePushButton, SIGNAL(clicked(bool)), this, SLOT(closeWidgetSlot()));
     connect(ui->confirmPushButton, SIGNAL(clicked(bool)), this, SLOT(confirmSlot()));

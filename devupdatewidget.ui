@@ -1152,7 +1152,7 @@ border-style: solid;</string>
     <string>浏览</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="configFileImportPushButton_2">
+  <widget class="QPushButton" name="configFileIOutPushButton">
    <property name="geometry">
     <rect>
      <x>320</x>
@@ -1424,10 +1424,10 @@ border-style: solid;</string>
     <string>确定</string>
    </property>
   </widget>
+  <zorder>label_10</zorder>
   <zorder>label_13</zorder>
   <zorder>label_3</zorder>
   <zorder>label_2</zorder>
-  <zorder>label_10</zorder>
   <zorder>pollingTimeSetRadioButton</zorder>
   <zorder>cameraLabel</zorder>
   <zorder>devConfigLabel</zorder>
@@ -1475,7 +1475,7 @@ border-style: solid;</string>
   <zorder>configFileDisplayLineEdit_2</zorder>
   <zorder>configFilelookPushButton</zorder>
   <zorder>configFilelookPushButton_2</zorder>
-  <zorder>configFileImportPushButton_2</zorder>
+  <zorder>configFileIOutPushButton</zorder>
   <zorder>label_17</zorder>
   <zorder>permissonManagePushButton</zorder>
   <zorder>label_16</zorder>

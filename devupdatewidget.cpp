@@ -57,11 +57,14 @@ devUpdateWidget::devUpdateWidget(QWidget *parent) :
     m_alarmHappenTimer = NULL;
 
 
-//    usermanagePage = new userManage(this);
-//    usermanagePage->setGeometry(245, 189, usermanagePage->width(), usermanagePage->height());
-//    usermanagePage->hide();
+    usermanagePage = new userManage(this);
+    usermanagePage->setGeometry(245, 189, usermanagePage->width(), usermanagePage->height());
+    usermanagePage->hide();
+    connect(this->usermanagePage, SIGNAL(SendEscape()), this, SLOT(closeUserManageWidget()));
 
-//    connect(ui->permissonManagePushButton, SIGNAL(clicked(bool)), this, SLOT(userManageSlot()));
+
+
+    connect(ui->permissonManagePushButton, SIGNAL(clicked(bool)), this, SLOT(userManageSlot()));
 
 
     connect(ui->configFilelookPushButton,   SIGNAL(clicked(bool)),   this, SLOT(configFileSelectionSlot()));
@@ -69,6 +72,10 @@ devUpdateWidget::devUpdateWidget(QWidget *parent) :
     connect(ui->configFilelookPushButton_2, SIGNAL(clicked(bool)), this, SLOT(configUpdateFileSLOT()));
 
     connect(ui->configFileImportPushButton, SIGNAL(clicked(bool)), this, SLOT(configFileImportSlot()));
+
+
+    connect(ui->configFileIOutPushButton, SIGNAL(clicked(bool)), this, SLOT(configFileImportSlot()));
+
 
     connect(ui->updateBeginPushButton, SIGNAL(clicked(bool)), this, SLOT(devUpdateSlot()));
 
@@ -458,6 +465,20 @@ void devUpdateWidget::setCameraImageParamSlot()
     }
 }
 
+void devUpdateWidget::closeUserManageWidget()
+{
+    if(NULL==this->usermanagePage)
+    {
+        return;
+    }
+    else
+    {
+        delete this->usermanagePage;
+    }
+    this->usermanagePage=NULL;
+}
+
+
 void devUpdateWidget::userManageSlot()  //点击用户管理按钮响应函数，弹出用户管理界面
 {
 //    DebugPrint(DEBUG_UI_OPTION_PRINT, "devUpdateWidget userManage set button pressed!\n");
@@ -539,6 +560,7 @@ void devUpdateWidget::configFileSelectionSlot()
 
 
 }
+
 
 void devUpdateWidget::configUpdateFileSLOT()
 {
@@ -639,6 +661,38 @@ void devUpdateWidget::devRebootSlot()
 
 
 }
+
+void devUpdateWidget::configFileOutSLot()
+{
+    int iRet = 0;
+    char *pcfileName = NULL;
+    char acUserType[64] = {0};
+
+//    DebugPrint(DEBUG_UI_OPTION_PRINT, "devUpdateWidget configFileImport button pressed!\n");
+
+    STATE_GetCurrentUserType(acUserType, sizeof(acUserType));
+    if (!strcmp(acUserType, "operator"))	 //操作员无权校时
+    {
+//        DebugPrint(DEBUG_UI_MESSAGE_PRINT, "devUpdateWidget this user type has no right to import config file!\n");
+        QMessageBox box(QMessageBox::Warning,tr("提示"),tr("无权限设置!"));	  //新建消息提示框，提示错误信息
+        box.setStandardButtons (QMessageBox::Ok);	//设置提示框只有一个标准按钮
+        box.setButtonText (QMessageBox::Ok,tr("确 定")); 	//将按钮显示改成"确 定"
+        box.exec();
+    }
+    else
+    {
+
+
+
+
+
+    }
+
+
+
+
+}
+
 void devUpdateWidget::configFileImportSlot()
 {
 

@@ -31,6 +31,7 @@ public slots:
     void configFileSelectionSlot();
     void configUpdateFileSLOT();
     void configFileImportSlot();
+    void configFileOutSLot();
     void devUpdateSlot();
     void devRebootSlot();
     void alarmPushButoonClickSlot();
@@ -45,6 +46,7 @@ public slots:
     void monitorSysTime();
     void systimeSlot();
     void registOutButtonClick();
+    void closeUserManageWidget();
 
     void setCameraImageParamSlot();
 

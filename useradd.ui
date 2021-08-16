@@ -40,7 +40,7 @@
    </property>
    <property name="styleSheet">
     <string notr="true">background-color: rgb(255, 255, 255);
-color: rgb(217, 221, 223);</string>
+color: rgb(0, 0, 0);</string>
    </property>
    <property name="text">
     <string/>
@@ -109,7 +109,7 @@ color: rgb(255, 255, 255);</string>
    </property>
    <property name="styleSheet">
     <string notr="true">background-color: rgb(255, 255, 255);
-color: rgb(217, 221, 223);</string>
+color: rgb(0, 0, 0);</string>
    </property>
    <property name="text">
     <string/>
@@ -222,7 +222,7 @@ border-style: solid;</string>
    </property>
    <property name="styleSheet">
     <string notr="true">background-color: rgb(255, 255, 255);
-color: rgb(217, 221, 223);</string>
+color: rgb(0, 0, 0);</string>
    </property>
    <property name="text">
     <string/>
