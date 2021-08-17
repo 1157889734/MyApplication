@@ -160,8 +160,8 @@ recordPlayWidget::recordPlayWidget(QWidget *parent) :
     connect(ui->carSeletionComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(carNoChangeSlot()));  //车厢选择下拉框当前索引改变信号响应
 
 
-//    QObject::connect(player,SIGNAL(durationChanged(qint64)),this,SLOT(getduration(qint64)));
-//    QObject::connect(player,SIGNAL(positionChanged(qint64)),this,SLOT(positionchaged(qint64)));
+    QObject::connect(&player,SIGNAL(durationChanged(qint64)),this,SLOT(getduration(qint64)));
+    QObject::connect(&player,SIGNAL(positionChanged(qint64)),this,SLOT(positionchaged(qint64)));
 
     connect(this, SIGNAL(setSliderValueSignal(int)), this, SLOT(setPlaySliderValueSlot(int)));
     connect(this, SIGNAL(downloadProcessBarDisplaySignal(int)), this, SLOT(downloadProcessBarDisplaySlot(int)));
@@ -201,11 +201,13 @@ recordPlayWidget::~recordPlayWidget()
 void recordPlayWidget::createMeadia()
 {
     /*新建一个播放窗体*/
-    m_playWin = new QWidget(this);
+    m_playWin = new QVideoWidget(this);
     m_playWin->setGeometry(320, 7, 698, 580);
     m_playWin->show();
     m_playWin->setStyleSheet("QWidget{background-color: rgb(0, 0, 0);}");
-    player = new QMediaPlayer();
+
+    player.setVideoOutput(m_playWin);
+
 
 
 }
@@ -213,65 +215,11 @@ int recordPlayWidget::openMedia(const char *pcRtspFile)
 {
     const QString str = QString::fromUtf8(pcRtspFile);
     QUrl url(str);
-
-//    QFile file(str);
-    printf("*******---openMedia--\n");
     qDebug()<<"***********---str--"<<str;
-    player->setMedia(url);
-//    if(file.exists())
-//    {
-//        player->setMedia(QUrl::fromLocalFile(file.fileName()));
-//        qDebug()<<"***********-11111--str--"<<str;
-
-//    }
-//    else
-//    {
-//        qDebug()<<"***********-22222222--str--"<<str;
-
-//        return -1;
-//    }
-
-    videoViewer = new QVideoWidget(m_playWin);
-    videoViewer->setGeometry(320, 7, 698, 580);
-    player->setVideoOutput(videoViewer);
-
-    player->play();
-
+    player.setMedia(url);
+    player.play();
     return 0;
 }
-
-#if 0
-
-void recordPlayWidget::mediaInit()
-{
-
-
-
-//    list = new QMediaPlaylist;
-//    list->addMedia(QUrl("/oem/SampleVideo_1280x720_5mb.mp4"));
-
-    QFile file("/userdata/apink.mp4");
-
-//    QUrl url("rtsp://admin:admin123@168.168.102.20");
-//rtsp://192.168.104.200:554/8
-     QUrl url("rtsp://192.168.104.200:554/8");
-
-    player = new QMediaPlayer();
-//    player->setPlaylist(list);
-    player->setMedia(url);
-//    if(file.exists())
-//    {
-//        player->setMedia(QUrl::fromLocalFile(file.fileName()));
-//    }
-
-    videoViewer = new QVideoWidget(m_playWin);
-    videoViewer->setGeometry(0, 7, 698, 580);
-    player->setVideoOutput(videoViewer);
-
-//    player->play();
-}
-
-#endif
 
 void recordPlayWidget::playSliderPressSlot(int iPosTime)
 {
@@ -293,7 +241,7 @@ void recordPlayWidget::playSliderPressSlot(int iPosTime)
     {
         iPosTime = 1;
     }
-    if(player->state()== QMediaPlayer::StoppedState)
+    if(player.state()== QMediaPlayer::StoppedState)
     {
         return;
     }
@@ -307,14 +255,14 @@ void recordPlayWidget::playSliderPressSlot(int iPosTime)
 
 //    player->setPosition(iPosTime*player->duration()/ 1000);
 
-     player->setPosition(iPosTime);
+     player.setPosition(iPosTime);
     pthread_mutex_unlock(&g_sliderValueSetMutex);
 
 
 }
 void recordPlayWidget::getduration(qint64 playtime)
 {
-    playtime =player->duration();
+    playtime =player.duration();
     totalplaytime = playtime /= 1000;
 
 }
@@ -534,7 +482,7 @@ void recordPlayWidget::playSliderMoveSlot(int iPosTime)
     {
         iPosTime = 1;
     }
-    if(player->state()== QMediaPlayer::StoppedState)
+    if(player.state()== QMediaPlayer::StoppedState)
     {
         return;
     }
@@ -547,7 +495,7 @@ void recordPlayWidget::playSliderMoveSlot(int iPosTime)
     //m_iSliderValue = iPosTime;
     m_playSlider->setValue(iPosTime);
 
-    player->setPosition(iPosTime);
+    player.setPosition(iPosTime);
 
     pthread_mutex_unlock(&g_sliderValueSetMutex);
 
@@ -898,23 +846,23 @@ void recordPlayWidget::recordPlayStartSlot()
     {
         m_iPlayFlag = 1;
         m_dPlaySpeed = 1.00;
-        switch(player->state()) {
+        switch(player.state()) {
         case QMediaPlayer::PlayingState:
-            player->pause();
+            player.pause();
             break;
         default:
-            player->play();
+            player.play();
             break;
         }
-        player->setPlaybackRate(m_dPlaySpeed);
+        player.setPlaybackRate(m_dPlaySpeed);
         ui->playSpeedLineEdit->setText(playSpeedStr);
     }
     else
     {
-        player->pause();
+        player.pause();
         m_iPlayFlag = 0;
     }
-    videoTime =  player->duration();
+    videoTime =  player.duration();
     setPlayButtonStyleSheet();
 
     int h,m,s;
@@ -947,10 +895,10 @@ void recordPlayWidget::recordPlayStopSlot()
     closePlayWin();
     setPlayButtonStyleSheet();
 
-    if(player->state()!= QMediaPlayer::StoppedState)
+    if(player.state()!= QMediaPlayer::StoppedState)
     {
         m_iPlayFlag = 0;
-        player->stop();
+        player.stop();
     }
 
 
@@ -961,7 +909,7 @@ void recordPlayWidget::closePlayWin()
     m_playSlider->setRange(0, 0);
     m_playSlider->setValue(0);
 
-    player->stop();
+    player.stop();
     emit setRecordPlayFlagSignal(0);
 
     ui->playMinLabel->setText("00");
@@ -1007,7 +955,7 @@ void recordPlayWidget::recordPlayFastForwardSlot()
 {
     QString playSpeedStr;
 
-    if(player->state()!= QMediaPlayer::PlayingState)
+    if(player.state()!= QMediaPlayer::PlayingState)
     {
         return;
     }
@@ -1028,7 +976,7 @@ void recordPlayWidget::recordPlayFastForwardSlot()
         playSpeedStr += "x";
     }
     ui->playSpeedLineEdit->setText(playSpeedStr);
-    player->setPlaybackRate(m_dPlaySpeed);
+    player.setPlaybackRate(m_dPlaySpeed);
     setPlayButtonStyleSheet();
 
 
@@ -1036,7 +984,7 @@ void recordPlayWidget::recordPlayFastForwardSlot()
 void recordPlayWidget::recordPlaySlowForwardSlot()
 {
     QString playSpeedStr;
-    if(player->state()!= QMediaPlayer::PlayingState)
+    if(player.state()!= QMediaPlayer::PlayingState)
     {
         return;
     }
@@ -1057,13 +1005,41 @@ void recordPlayWidget::recordPlaySlowForwardSlot()
         playSpeedStr += "x";
     }
     ui->playSpeedLineEdit->setText(playSpeedStr);
-    player->setPlaybackRate(m_dPlaySpeed);
+    player.setPlaybackRate(m_dPlaySpeed);
     setPlayButtonStyleSheet();
 }
 
 void recordPlayWidget::recordPlayLastOneSlot()
 {
+    int iRow = 0, iDex = 0;
 
+//    DebugPrint(DEBUG_UI_OPTION_PRINT, "recordPlayWidget lastOne play PushButton pressed!\n");
+
+    setPlayButtonStyleSheet();
+
+    if (ui->recordFileTableWidget->rowCount() <= 0 /*|| NULL == m_cmpHandle*/)
+    {
+        return;
+    }
+
+    iDex = ui->carSeletionComboBox->currentIndex();
+    if (iDex < 0)
+    {
+        return;
+    }
+
+    iRow = m_iRecordIdex - 1;
+    if (iRow < 0)
+    {
+        return;
+    }
+
+    closePlayWin();   //先关闭之前的
+    setPlayButtonStyleSheet();
+
+    emit setRecordPlayFlagSignal(1);
+
+    recordPlayCtrl(iRow, iDex);
 
 
 
@@ -1072,7 +1048,35 @@ void recordPlayWidget::recordPlayLastOneSlot()
 void recordPlayWidget::recordPlayNextOneSlot()
 {
 
+    int iDex = 0, iRow = 0;
 
+//    DebugPrint(DEBUG_UI_OPTION_PRINT, "recordPlayWidget nextOne play PushButton pressed!\n");
+
+    setPlayButtonStyleSheet();
+
+    if (ui->recordFileTableWidget->rowCount() <= 0 /*|| NULL == m_cmpHandle*/)
+    {
+        return;
+    }
+
+    iDex = ui->carSeletionComboBox->currentIndex();
+    if (iDex < 0)
+    {
+        return;
+    }
+
+    iRow = m_iRecordIdex + 1;
+    if (iRow > (ui->recordFileTableWidget->rowCount() - 1))
+    {
+        return;
+    }
+
+    closePlayWin();  //先关闭之前的
+    setPlayButtonStyleSheet();
+
+    emit setRecordPlayFlagSignal(1);
+
+    recordPlayCtrl(iRow, iDex);
 
 
 }
@@ -1080,7 +1084,7 @@ void recordPlayWidget::playPlusStepSlot()
 {
     qint64 iPosTime = 0;
     QString playSpeedStr;
-    if(player->state()!= QMediaPlayer::PlayingState)
+    if(player.state()!= QMediaPlayer::PlayingState)
     {
         return;
     }
@@ -1090,12 +1094,12 @@ void recordPlayWidget::playPlusStepSlot()
     ui->playSpeedLineEdit->setText(playSpeedStr);
     setPlayButtonStyleSheet();
 
-    iPosTime = player->position() + 60;
+    iPosTime = player.position() + 60;
     if (iPosTime > 0)
     {
         pthread_mutex_lock(&g_sliderValueSetMutex);
         m_playSlider->setValue(iPosTime);
-        player->setPosition(iPosTime);
+        player.setPosition(iPosTime);
         pthread_mutex_unlock(&g_sliderValueSetMutex);
 
     }
@@ -1104,7 +1108,7 @@ void recordPlayWidget::playPlusStepSlot()
         iPosTime = 1;
         pthread_mutex_lock(&g_sliderValueSetMutex);
         m_playSlider->setValue(iPosTime);
-        player->setPosition(iPosTime);
+        player.setPosition(iPosTime);
         pthread_mutex_unlock(&g_sliderValueSetMutex);
 
     }
@@ -1115,7 +1119,7 @@ void recordPlayWidget::playMinusStepSlot()
 {
     qint64 iPosTime = 0;
     QString playSpeedStr;
-    if(player->state()!= QMediaPlayer::PlayingState)
+    if(player.state()!= QMediaPlayer::PlayingState)
     {
         return;
     }
@@ -1125,13 +1129,13 @@ void recordPlayWidget::playMinusStepSlot()
     ui->playSpeedLineEdit->setText(playSpeedStr);
     setPlayButtonStyleSheet();
 
-    iPosTime = player->position() - 60;
+    iPosTime = player.position() - 60;
     qDebug()<<"111playMinusStepSlot"<<iPosTime;
     if (iPosTime > 0)
     {
         pthread_mutex_lock(&g_sliderValueSetMutex);
         m_playSlider->setValue(iPosTime);
-        player->setPosition(iPosTime);
+        player.setPosition(iPosTime);
         pthread_mutex_unlock(&g_sliderValueSetMutex);
 
     }
@@ -1140,7 +1144,7 @@ void recordPlayWidget::playMinusStepSlot()
         iPosTime = 1;
         pthread_mutex_lock(&g_sliderValueSetMutex);
         m_playSlider->setValue(iPosTime);
-        player->setPosition(iPosTime);
+        player.setPosition(iPosTime);
         pthread_mutex_unlock(&g_sliderValueSetMutex);
 
     }
@@ -1205,7 +1209,7 @@ void recordPlayWidget::recordPlaySlot(QTableWidgetItem *item)    //录像文件�
     setPlayButtonStyleSheet();
 
 //    if (m_cmpHandle != NULL)    //如果播放窗口已经有打开了码流播放，关闭码流播放
-    if(player->state() == QMediaPlayer::PlayingState)
+    if(player.state() == QMediaPlayer::PlayingState)
     {
         closePlayWin();
         setPlayButtonStyleSheet();
@@ -1382,7 +1386,7 @@ void recordPlayWidget::recordPlayCtrl(int iRow, int iDex)
 
     snprintf(acRtspAddr, sizeof(acRtspAddr), "rtsp://192.168.%d.81:554/%s",tTrainConfigInfo.tNvrServerInfo[iDex].iCarriageNO+100, m_acFilePath[iRow]);
     printf("************----recordPlayCtrl---%s\n",acRtspAddr);
-//    iRet = openMedia(acRtspAddr);
+    iRet = openMedia(acRtspAddr);
     if(iRet < 0)
     {
         QMessageBox box(QMessageBox::Warning,QString::fromUtf8("错误"),QString::fromUtf8("录像播放失败!"));

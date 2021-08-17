@@ -1,17 +1,3 @@
-//#include "usermanage.h"
-//#include "ui_usermanage.h"
-
-//userManage::userManage(QWidget *parent) :
-//    QWidget(parent),
-//    ui(new Ui::userManage)
-//{
-//    ui->setupUi(this);
-//}
-
-//userManage::~userManage()
-//{
-//    delete ui;
-//}
 
 #include "usermanage.h"
 #include "ui_usermanage.h"
