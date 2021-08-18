@@ -41,8 +41,8 @@ public:
     QMouseEvent *e;
     int m_iPlayFlag;   //播放标志，0-暂停状态，未播放，1-在播放
     double m_dPlaySpeed;   //播放速度
-    qint64 videoTime;
     int m_iPlayRange;    //录像文件总播放时长
+    int playingTime;
 
     int m_iSliderValue;     //进度条当前值
     pthread_t m_threadId;      //刷新进度条线程ID
@@ -61,6 +61,7 @@ public:
     void triggerSetDownloadProcessBarValueSignal(int iValue);   //触发设置文件下载进度条的值的信号
     void createMeadia();
     int  openMedia(const char *pcRtspFile);
+    void unMute();
 
 
 
@@ -103,6 +104,8 @@ public slots:
     void recordTableWidgetFillSlot();
     void recordTableWidgetFillFunc();
     void setRangeLabelSlot();
+
+    void setPosition(int position);
 
 
 signals:

@@ -103,6 +103,7 @@ public:
     void pvmsUpdownCtrl(char *pcMsgData);
     void createMeadia();
     int  openMedia(const char *pcRtspFile);
+    int  closeMedia(const char *pcRtspFile);
 
 
     QLabel *m_channelStateLabel;
@@ -132,7 +133,7 @@ public:
 
     PMSG_HANDLE m_PisServerPhandle;    //pis服务器PMSG通信句柄
 
-    QWidget *m_playWin;    //播放窗体
+    QVideoWidget *m_playWin;    //播放窗体
     int m_iMousePosX;
     int m_iMousePosY;
 
@@ -149,7 +150,6 @@ public:
     void closePlayWin();
 
     void triggerCmpOptionCtrlSinal(int iType, int iCh);
-    void mediaInit(int iCh);
     void noPollingChOption();
 
     void triggerVideoPollingSignal();
@@ -229,7 +229,7 @@ private:
     QTimer *m_fillLightSwitchTimer;
     QTimer *m_cameraSwitchTimer;
 
-    QMediaPlayer *player;
+    QMediaPlayer player;
     QMediaPlaylist *list;
     QVideoWidget *videoViewer;
     QList<QMediaPlaylist*> *multiPlayList;

@@ -363,45 +363,6 @@ pvmsMonitorWidget::pvmsMonitorWidget(QWidget *parent) :
 }
 
 
-void pvmsMonitorWidget::mediaInit(int iCh)
-{
-#if 1
-    /*新建一个播放窗体*/
-
-
-
-//    list = new QMediaPlaylist;
-//    list->addMedia(QUrl("/oem/SampleVideo_1280x720_5mb.mp4"));
-
-//    QFile file("/userdata/apink.mp4");
-
-//    QUrl url("rtsp://admin:admin123@168.168.102.71");
-//    const char* url = m_tCameraInfo[iCh].acCameraRtspUrl;
-//    QMediaPlaylist *list = new QMediaPlaylist(this);
-//    list->addMedia(QUrl::fromLocalFile(m_tCameraInfo[iCh].acCameraRtspUrl));
-
-    QString str = QString(QLatin1String(m_tCameraInfo[iCh].acCameraRtspUrl));
-    str = "rtsp://" + str;
-    qDebug()<<"*************11111111111111:"<<str<<endl;
-    QUrl url("rtsp://192.168.104.200:554/8");
-
-    player = new QMediaPlayer();
-//    player->setPlaylist(list);
-    player->setMedia(url);
-//    if(file.exists())
-//    {
-//        player->setMedia(QUrl::fromLocalFile(file.fileName()));
-//    }
-
-    videoViewer = new QVideoWidget(m_playWin);
-//    videoViewer->setGeometry(0, 7, 698, 580);
-    player->setVideoOutput(videoViewer);
-
-    player->play();
-#endif
-
-}
-
 void *monitorThread(void *param)     //实时监控线程，对通道轮询、全屏、预置点返回、设备状态等进行循环监控
 {
     int i = 0, iRet = 0;
@@ -599,7 +560,7 @@ void pvmsMonitorWidget::startVideoPolling()    //开启视频轮询的处理
     m_lastActionTime = s_info.uptime;
 
     m_iFullScreenFlag = 1;
-    m_playWin = new QWidget(this->parentWidget());    //新建一个与目前窗体同属一个父窗体的播放子窗体，方便实现全屏
+    m_playWin = new QVideoWidget(this->parentWidget());   //新建一个与目前窗体同属一个父窗体的播放子窗体，方便实现全屏
 //    m_playWin->setGeometry(0, 0, 1024, 768);      //设置窗体在父窗体中的位置，默认一开始为全屏
     m_playWin->setGeometry(6, 110, 782, 656);
     m_playWin->show();  //默认显示
@@ -607,6 +568,8 @@ void pvmsMonitorWidget::startVideoPolling()    //开启视频轮询的处理
     m_playWin->setStyleSheet("#m_playWin{background-color: rgb(0, 0, 0);}");     //设置播放窗口背景色为黑色
     m_playWin->installEventFilter(this);     //播放窗体注册进事件过滤器
     m_playWin->setMouseTracking(true);
+    player.setVideoOutput(m_playWin);
+
 
     m_channelStateLabel = new QLabel(this->parentWidget());
     m_channelStateLabel->setGeometry(452, 360, 130, 50);
@@ -646,7 +609,7 @@ void pvmsMonitorWidget::startVideoPolling()    //开启视频轮询的处理
 
 
 //            DebugPrint(DEBUG_UI_NOMAL_PRINT, "[%s] camer %d rtspUrl=%s\n",__FUNCTION__,m_iCameraNum, m_tCameraInfo[m_iCameraNum].acCameraRtspUrl);
-            printf("##############i=%d, rtspurl:%s\n",m_iCameraNum,m_tCameraInfo[m_iCameraNum].acCameraRtspUrl);
+//            printf("##############i=%d, rtspurl:%s\n",m_iCameraNum,m_tCameraInfo[m_iCameraNum].acCameraRtspUrl);
             tPkt.iMsgCmd = CMP_CMD_CREATE_CH;
             tPkt.iCh = m_iCameraNum;
             PutNodeToCmpQueue(m_ptQueue, &tPkt);
@@ -1272,6 +1235,7 @@ void pvmsMonitorWidget::getChStreamState(int iCh)
     }
     pthread_mutex_lock(&g_tCmpCtrlMutex);
 //    m_tCameraInfo[iCh].iStreamState = CMP_GetStreamState(m_tCameraInfo[iCh].cmpHandle);     ????????
+//     m_tCameraInfo[iCh].iStreamState ;
     pthread_mutex_unlock(&g_tCmpCtrlMutex);
 }
 
@@ -1338,7 +1302,6 @@ void pvmsMonitorWidget::videoPollingSignalCtrl()
         m_iPtzMoveType = E_STOP_MOVE;
     }
 
-    #if 1
     /*设置对应预置点按钮为按下样式*/
     for (i = 1; i <= 8; i++)
     {
@@ -1375,7 +1338,6 @@ void pvmsMonitorWidget::videoPollingSignalCtrl()
     {
         emit fillLightSwitchButtonTextCtrlSignal(1);  //触发让补光灯开关按钮显示文本的信号
     }
-    #endif
 
     if (m_presetPasswdConfirmPage != NULL)    //摄像头切换了，如果弹出了预置点密码确认界面，则关闭，避免出现跨云台设置预置点的问题
     {
@@ -1394,7 +1356,6 @@ void pvmsMonitorWidget::videoPollingSignalCtrl()
 void pvmsMonitorWidget::setFullScreenSignalCtrl()
 {
     T_CMP_PACKET tPkt;
-#if 1
 //    DebugPrint(DEBUG_UI_NOMAL_PRINT, "[%s] fullScreen Ctrl!\n", __FUNCTION__);
     if ((this->isHidden() != 1)  && (m_iAlarmNotCtrlFlag != 1) && (m_iBlackScreenFlag != 1))    //当前未显示，不做全屏监视处理,有报警信息未处理也不做全屏监视处理,处于黑屏状态也不做全屏监视处理
     {
@@ -1421,7 +1382,6 @@ void pvmsMonitorWidget::setFullScreenSignalCtrl()
 //        QWSServer::sendKeyEvent(0x01000003, Qt::Key_Escape, Qt::NoModifier, true, false);    //发送一个模拟键盘ESC键，让全屏下messagebox自动关闭
         m_iFullScreenFlag = 1;
     }
-#endif
 
 }
 
@@ -1522,37 +1482,19 @@ void pvmsMonitorWidget::cmpOptionCtrlSlot(int iType, int iCh)
     }
     if (CMP_CMD_CREATE_CH == iType)
     {
- #if 0
-        /*新建一个播放窗体*/
-    qDebug()<<"******************"<<iCh<<"1111"<<m_tCameraInfo[iCh].acCameraRtspUrl;
 
-    //    list = new QMediaPlaylist;
-    //    list->addMedia(QUrl("/oem/SampleVideo_1280x720_5mb.mp4"));
-
-//        QFile file("/userdata/apink.mp4");
-
-        QUrl url("rtsp://admin:admin123@168.168.102.77");
-        player = new QMediaPlayer();
-    //    player->setPlaylist(list);
-        player->setMedia(url);
-
-        videoViewer = new QVideoWidget(m_playWin);
-//        videoViewer->setGeometry(0, 7, 698, 580);
-        player->setVideoOutput(videoViewer);
-
-        player->play();
-#endif
-//        mediaInit(iCh);
         sprintf(rtspStr,"rtsp://%s",m_tCameraInfo[iCh].acCameraRtspUrl);
 //        printf("************cmpOptionCtrlSlot----%s---%d\n",rtspStr,iCh);
-//        openMedia(rtspStr);
+        openMedia(rtspStr);
         m_tCameraInfo[iCh].iCmpOpenFlag = 1;
 
 
     }
     else if (CMP_CMD_DESTORY_CH == iType)
     {
-
+        sprintf(rtspStr,"rtsp://%s",m_tCameraInfo[iCh].acCameraRtspUrl);
+        closeMedia(rtspStr);
+        m_tCameraInfo[iCh].iCmpOpenFlag = 0;
 
     }
 
@@ -1570,7 +1512,7 @@ void pvmsMonitorWidget::chLabelDisplayCtrlSlot()   //通道状态和通道号标
         tPkt.iCh = m_iCameraPlayNo;
         PutNodeToCmpQueue(m_ptQueue, &tPkt);
         */
-//        getChStreamState(m_iCameraPlayNo);  ?????????
+        getChStreamState(m_iCameraPlayNo);
 
         if (1 == m_tCameraInfo[m_iCameraPlayNo].iStreamState)
         {
@@ -1644,8 +1586,6 @@ void pvmsMonitorWidget::videoChannelCtrl()
 {
     int i = 0, iLastCamaraNo = 0, iNextCamaraNo = 0;
     T_CMP_PACKET tPkt;
-
-//    DebugPrint(DEBUG_UI_NOMAL_PRINT, "[%s] videoChannel Ctrl!,m_iCameraPlayNo=%d,recordPlay Flag=%d\n", __FUNCTION__, m_iCameraPlayNo,m_iRecordPlayFlag);
 
     /*根据是否在回放来决定打开那些相机的流。如果在回放，则只打开当前相机的流。如果没有在回放，则打开当前以及上一个和下一个三个相机的流*/
     iLastCamaraNo = m_iCameraPlayNo-1;
@@ -1729,10 +1669,7 @@ void pvmsMonitorWidget::closePlayWin()
     {
         delete m_playWin;
         m_playWin = NULL;
-//        DebugPrint(DEBUG_UI_NOMAL_PRINT, "[%s] delete playWin!\n", __FUNCTION__);
     }
-
-
 
 }
 
@@ -2178,20 +2115,22 @@ void pvmsMonitorWidget::pvmsDownEndSlot4()
 int pvmsMonitorWidget::openMedia(const char *pcRtspFile)
 {
     const QString str = QString::fromUtf8(pcRtspFile);
-    QUrl url("rtsp://192.168.104.200:554/8");
-    printf("*******---openMedia--\n");
-    qDebug()<<"***********---str--"<<str;
-    player->setMedia(url);
-
-    videoViewer = new QVideoWidget(m_playWin);
-    videoViewer->setGeometry(6, 110, 782, 656);
-
-    player->setVideoOutput(videoViewer);
-
-    player->play();
+    QUrl url(str);
+    player.setMedia(url);
+    player.play();
 
     return 0;
 
+}
+
+int pvmsMonitorWidget::closeMedia(const char *pcRtspFile)
+{
+    const QString str = QString::fromUtf8(pcRtspFile);
+    QUrl url(str);
+    player.setMedia(url);
+    player.stop();
+
+    return 0;
 
 
 }
@@ -2230,10 +2169,6 @@ void pvmsMonitorWidget::blackScreenCtrlSlot()     //黑屏触发信号处理，�
         if (m_presetPasswdConfirmPage != NULL)
         {
             m_presetPasswdConfirmPage->show();
-//            if ((m_presetPasswdConfirmPage->p_ipmethod != NULL) && (m_presetPasswdConfirmPage->p_ipmethod->p_inputwidget != NULL))
-//            {
-//                m_presetPasswdConfirmPage->p_ipmethod->p_inputwidget->show();
-//            }
         }
 
         emit showAlarmWidgetSignal();
